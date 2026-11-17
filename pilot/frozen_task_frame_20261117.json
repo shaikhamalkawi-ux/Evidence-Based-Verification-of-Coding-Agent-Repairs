@@ -1,0 +1,73 @@
+{
+  "frame_type": "INFRASTRUCTURE_FEASIBILITY_ONLY_NOT_EFFICACY",
+  "dataset_id": "SWE-bench-Live/SWE-bench-Live",
+  "split": "lite",
+  "dataset_revision_sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "selection_salt": "EVCAR-FEASIBILITY-TEN-2026-11-17",
+  "selection_rule": "sort SHA256(salt|instance_id), pick first 10 with distinct repo; exclude published calibration ID",
+  "eligible_metadata_records": 299,
+  "n_requested": 10,
+  "n_selected": 10,
+  "future_oracle_seen_by_selector": false,
+  "selected": [
+    {
+      "instance_id": "kedro-org__kedro-4406",
+      "repo": "kedro-org/kedro",
+      "selection_sha256": "001538a6cb086f39e18ad031e95eee676802429d2aff69279f5f531ce07dfd3c"
+    },
+    {
+      "instance_id": "pdm-project__pdm-3419",
+      "repo": "pdm-project/pdm",
+      "selection_sha256": "00c257949331930b2a1fe1d9380fb0d6842932d5eb845f55f11ce2be19a5ffe5"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-28933",
+      "repo": "matplotlib/matplotlib",
+      "selection_sha256": "01913472a33e14af6f43d8ab53095a58517865b6cf9bb447784787f2fd08cf3e"
+    },
+    {
+      "instance_id": "python-babel__babel-1163",
+      "repo": "python-babel/babel",
+      "selection_sha256": "020831733aec9dbbcc20579900fae38f1ac63fbccfc917293ed6c904e93497f9"
+    },
+    {
+      "instance_id": "pytorch__torchtune-2139",
+      "repo": "pytorch/torchtune",
+      "selection_sha256": "028f67a80f5247b09a9e0848b74e394cbb68f51751043bdf17bbb0c6826abc42"
+    },
+    {
+      "instance_id": "stanfordnlp__dspy-1609",
+      "repo": "stanfordnlp/dspy",
+      "selection_sha256": "02fa56f6491bdd6ee2fcb4ae1a1eff97d712cfd8fddd1064feccff8775c89729"
+    },
+    {
+      "instance_id": "privacyidea__privacyidea-4251",
+      "repo": "privacyidea/privacyidea",
+      "selection_sha256": "03c483d5145143bd7e3a85250b76cac8b097afcb5b27d2cf317c32b937d4cba2"
+    },
+    {
+      "instance_id": "joke2k__faker-2155",
+      "repo": "joke2k/faker",
+      "selection_sha256": "041334c6fa307607a14a31fdc57288f9deb9dae30c2f7c67925d1b57caea1b29"
+    },
+    {
+      "instance_id": "reflex-dev__reflex-4510",
+      "repo": "reflex-dev/reflex",
+      "selection_sha256": "042571b27fe4242ff7394645d6325013f54419e14a651ddc19c063a9476a8a7b"
+    },
+    {
+      "instance_id": "aws-cloudformation__cfn-lint-3779",
+      "repo": "aws-cloudformation/cfn-lint",
+      "selection_sha256": "052ef43cda461658ac1bd9255a01ea622484d2b4bad8cd0e55b443a22de23687"
+    }
+  ],
+  "claim_boundary": "Selection only; patch generation, predecision seal and hidden oracle still NOT EXECUTED",
+  "source_metadata_sha256": "08edbaaac027bba8183075f6bdfe80b574b094493328b3caa2df7d31368f5d49",
+  "source_execution": {
+    "github_actions_run_id": 44156082711,
+    "github_artifact_id": 14360653242,
+    "selection_code_commit": "17040ba7e6a102efe34ce43574b52a43acc34408",
+    "frame_generated_at_utc": "2026-11-17T19:13:04Z"
+  },
+  "decision_status": "NO_AGENT_PATCH_OR_ORACLE_ACQUIRED"
+}
