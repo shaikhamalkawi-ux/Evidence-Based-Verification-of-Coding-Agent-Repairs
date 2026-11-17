@@ -1,0 +1,28 @@
+{
+  "study": "KEDRO_ORACLE_P2P_ENVIRONMENT_OR_PATCH_ATTRIBUTION_CONTROL",
+  "date": "2026-11-17",
+  "status": "PREREGISTERED_AFTER_DISCLOSURE_OF_FIRST_AI_ORACLE",
+  "original_ai_oracle_run": 44159300952,
+  "instance_id": "kedro-org__kedro-4406",
+  "dataset_sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "base_commit": "a565d6607d1d16933dbb1ea42cfb9de39ef80980",
+  "harness_commit": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "namespace": "starryzhang",
+  "comparator": "Comment-only baseline patch on the identical base commit; no functional code changes",
+  "diagnostic_questions": [
+    "Do the same 25 PASS_TO_PASS test IDs fail even in a comment-only patch?",
+    "If so, classify them as baseline/environment-associated rather than AI-introduced regressions",
+    "If no, classify the official AI candidate as additional test regression signal (not necessarily causal without stronger control)"
+  ],
+  "admissible_claims": [
+    "A comparison of named test failure sets for two patches on the same pinned benchmark task",
+    "Binary official label of the no-op comparator from executed suite"
+  ],
+  "forbidden_claims": [
+    "Blinded prospective efficacy",
+    "Agent post-feedback recovery",
+    "Causal regression attribution from unpaired runs",
+    "Model performance across task distribution"
+  ],
+  "disposition": "DIAGNOSTIC_ONLY_NO_MR30_CHANGE"
+}
