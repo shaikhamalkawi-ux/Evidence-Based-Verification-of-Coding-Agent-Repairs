@@ -1,0 +1,380 @@
+{
+  "source": "ohcnetwork/care_fe#16856",
+  "read_only": true,
+  "freeze_commit": "0dfca364481605b12c2699296a9f948cb790b095",
+  "records": {
+    "pr": {
+      "state": "open",
+      "merged_at": null,
+      "author": "Copilot",
+      "head_sha": "667edfecdc7a41524a28107f28242e2660b29a82",
+      "base_sha": "f30bb8647215adecdfcc80926334348f69712be3",
+      "created_at": "2026-09-21T19:27:37Z",
+      "commits": 10,
+      "comments": 15,
+      "review_comments": 12
+    },
+    "commits": [
+      {
+        "sha": "2b7a045663847f7a5fb6e86948d8c71c0a3bc710",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-21T19:27:35Z",
+        "subject": "Initial plan"
+      },
+      {
+        "sha": "3c70c8226c37a0adf8558bebc334402f3b84ebba",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-21T19:37:08Z",
+        "subject": "Replace remaining Day.js usage with date-fns and add date regression coverage"
+      },
+      {
+        "sha": "793853a0f7e03111067a74ba38348f297ee111e0",
+        "author": "yash-learner",
+        "commit_author": "Yaswanth Kumar Bethu",
+        "at": "2026-09-28T07:51:31Z",
+        "subject": "Merge branch 'develop' into copilot/consolidate-date-libraries"
+      },
+      {
+        "sha": "18b1aa37dce496d2e3a572c76be69aa309e0ce40",
+        "author": "yash-learner",
+        "commit_author": "yash-learner",
+        "at": "2026-09-28T12:29:52Z",
+        "subject": "Use the common formatDate method across all the files instead of importing format and parseISO"
+      },
+      {
+        "sha": "09a9282f9235bef1060d47ccd4e6d6f7ee87a284",
+        "author": "yash-learner",
+        "commit_author": "yash-learner",
+        "at": "2026-09-28T12:32:48Z",
+        "subject": "Merge branch 'copilot/consolidate-date-libraries' of https://github.com/ohcnetwork/care_fe into copilot/consolidate-date-libraries"
+      },
+      {
+        "sha": "90b65c02dad91d3f5eb9aeefa060bae476d22b7c",
+        "author": "yash-learner",
+        "commit_author": "yash-learner",
+        "at": "2026-09-28T22:21:15Z",
+        "subject": "Fix PrescriptionQueue date filter"
+      },
+      {
+        "sha": "43f9bdbadc4f21034e7d34a87a39336e559ff18f",
+        "author": "yash-learner",
+        "commit_author": "yash-learner",
+        "at": "2026-09-29T20:20:10Z",
+        "subject": "Refactor date handling across components"
+      },
+      {
+        "sha": "44775dae759c543e6c4008d638987e15ca94e2a4",
+        "author": "yash-learner",
+        "commit_author": "Yaswanth Kumar Bethu",
+        "at": "2026-10-07T12:58:34Z",
+        "subject": "Refactor appointment scheduling to use clinic timezone consistently (#16934)"
+      },
+      {
+        "sha": "830d64f043e0001473c86fa6a6f3fefac0bd64a2",
+        "author": "yash-learner",
+        "commit_author": "Yaswanth Kumar Bethu",
+        "at": "2026-10-07T12:59:45Z",
+        "subject": "Merge branch 'develop' into copilot/consolidate-date-libraries"
+      },
+      {
+        "sha": "667edfecdc7a41524a28107f28242e2660b29a82",
+        "author": "yash-learner",
+        "commit_author": "yash-learner",
+        "at": "2026-10-07T14:00:17Z",
+        "subject": "Address some review comments"
+      }
+    ],
+    "comments": [
+      {
+        "type": "",
+        "user": "coderabbitai[bot]",
+        "created_at": "2026-09-21T19:27:44Z",
+        "body": "<!-- This is an auto-generated comment: summarize by coderabbit.ai -->\n<!-- This is an auto-generated comment: skip review by coderabbit.ai -->\n\n> [!IMPORTANT]\n> ## Review skipped\n> \n> This PR was authored by a bot without an assigned CodeRabbit review seat. Ask an organization administrator to assign a seat to the bot. See the [seat-assignment guide](https://docs.coderabbit.ai/management/seat-assignment). After the seat is assigned, request a review again.\n> \n> <details>\n> <summary>⚙️ Run configuration</summary>\n> \n> - **Configuration used**: Repository UI\n> - **Review profile**: ASSERTIVE\n> - **Plan**: Advanced\n> - **Run ID**: `df909b5c-fdb8-4292-914b-56d087acfc53`\n> \n> </details>\n> \n> You can disable this status message by setting the `reviews.review_status` to `false` in the CodeRabbit configuration file.\n\n<!-- end of auto-generated comment: skip review by coderabbit.ai -->\n\n<!-- autopilot:start -->\n- [ ] <!-- {\"checkboxId\":\"2708ad07-9f24-4260-9c11-7dc76a49f2e3\"} --> <strong title=",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-5766249435"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-21T19:27:45Z",
+        "body": "Copilot wasn't able to review any files in this pull request.\n\n\n\n\n\n---\n\n💡 <a href=\"/ohcnetwork/care_fe/new/develop?filename=.github/skills/code-review/SKILL.md\" class=\"Link--inTextBlock\" target=\"_blank\" rel=\"noopener noreferrer\">Add a `code-review` agent skill</a> or configure MCP servers for context-aware, tailored reviews. <a href=\"https://docs.github.com/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=webui#mcp-servers-and-agent-skills\" class=\"Link--inTextBlock\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more in the docs.</a>",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5270906770"
+      },
+      {
+        "type": "",
+        "user": "cloudflare-workers-and-pages[bot]",
+        "created_at": "2026-09-21T19:38:44Z",
+        "body": "## Deploying care-preview with &nbsp;<a href=\"https://pages.dev\"><img alt=\"Cloudflare Pages\" src=\"https://user-images.githubusercontent.com/23264/106598434-9e719e00-654f-11eb-9e59-6167043cfa01.png\" width=\"16\"></a> &nbsp;Cloudflare Pages\n\n<table><tr><td><strong>Latest commit:</strong> </td><td>\n<code>667edfe</code>\n</td></tr>\n<tr><td><strong>Status:</strong></td><td>&nbsp;✅&nbsp; Deploy successful!</td></tr>\n<tr><td><strong>Preview URL:</strong></td><td>\n<a href='https://92c1be09.care-preview-a7w.pages.dev'>https://92c1be09.care-preview-a7w.pages.dev</a>\n</td></tr>\n<tr><td><strong>Branch Preview URL:</strong></td><td>\n<a href='https://copilot-consolidate-date-lib.care-preview-a7w.pages.dev'>https://copilot-consolidate-date-lib.care-preview-a7w.pages.dev</a>\n</td></tr>\n</table>\n\n[View logs](https://dash.cloudflare.com/?to=/db6d08276fae8cc36808cc6d13f71ca6/pages/view/care-preview/92c1be09-5519-4742-9482-b3fba5669376)\n",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-5766395653"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-21T19:45:23Z",
+        "body": "This test relies on the runner's ambient timezone, so on UTC CI the named spring/fall dates are ordinary 24-hour days and the test does not exercise either DST transition. Set an explicit DST-observing timezone and restore it afterward so `dateTimeQueryString(..., true)` is actually protected against a 23/25-hour-day regression.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4065777038"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-21T19:45:23Z",
+        "body": "If `parseISO` rejects an ISO-shaped value such as `2024-02-30`, the native fallback normalizes it to March 1. `dateQueryString` and `dateTimeQueryString` then emit a valid filter for malformed input instead of rejecting it, contrary to the invalid-query handling in `src/Utils/utils.ts:20-26`. Keep invalid ISO-shaped strings invalid, while retaining the fallback only for non-ISO compatibility inputs such as `Date.toString()` output.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4065777083"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-21T19:45:23Z",
+        "body": "`formatDistanceToNow` changes the user-visible relative-time contract rather than only replacing Day.js. For example, a sub-minute timestamp changes from `a few seconds ago` to `less than a minute ago`, and minute/hour thresholds and wording also differ. Both `relativeDate` and `relativeTime` inherit this behavior, while the new test now codifies the date-fns wording. Either add a compatibility formatter that preserves the previous thresholds and phrases, or confirm and test the intended UI wording change across the affected call sites.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4065777112"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-21T19:45:24Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🔵 Needs a closer look\n\nThis broad, correctness-sensitive migration still has pending validation and unresolved date-behavior changes.\n\n**Review effort:** Balanced  \n**Findings:** 3 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (3)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://gith",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5271080287"
+      },
+      {
+        "type": "",
+        "user": "bodhish",
+        "created_at": "2026-09-26T15:25:38Z",
+        "body": "@yash-learner status here?\r\n",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-5847455763"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-28T07:52:04Z",
+        "body": "<!-- react-doctor:summary -->\n\n**React Doctor** found **4 new issues** in 3 files · 4 warnings · score 61 / 100 (Needs work) · 1 fixed · vs `develop`\n\n<details><summary>4 warnings</summary>\n\n**`src/pages/Appointments/AppointmentDetail.tsx`**\n- ⚠️ [L826](https://github.com/ohcnetwork/care_fe/blob/667edfecdc7a41524a28107f28242e2660b29a82/src/pages/Appointments/AppointmentDetail.tsx#L826) Event logic handled in an effect `no-event-handler`\n- ⚠️ [L831](https://github.com/ohcnetwork/care_fe/blob/667edfecdc7a41524a28107f28242e2660b29a82/src/pages/Appointments/AppointmentDetail.tsx#L831) State adjusted after a prop changes `no-adjust-state-on-prop-change`\n\n**`src/pages/Appointments/BookAppointment/AppointmentDateSelection.tsx`**\n- ⚠️ [L45](https://github.com/ohcnetwork/care_fe/blob/667edfecdc7a41524a28107f28242e2660b29a82/src/pages/Appointments/BookAppointment/AppointmentDateSelection.tsx#L45) Prop mirrored into state via effect `no-mirror-prop-effect`\n\n**`src/pages/Facility/queues/QueuesInde",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-5865753808"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-28T07:55:17Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🔵 Needs a closer look\n\nThe timezone-sensitive migration spans scheduling, authentication, billing, patient ages, and clinical displays, warranting final human QA despite strong characterization coverage.\n\n**Review effort:** Balanced  \n**Findings:** 3 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (3)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.s",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5335500139"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-28T08:05:36Z",
+        "body": "## 🎭 Playwright Test Results\n\n**Status:** ✅ Passed\n**Test Shards:** 3\n\n| Metric | Count |\n|--------|-------|\n| Total Tests | 391 |\n| ✅ Passed | 391 |\n| ❌ Failed | 0 |\n| ⏭️ Skipped | 0 |\n\n📊 Detailed results are available in the [playwright-final-report](https://github.com/ohcnetwork/care_fe/actions/runs/37633172388) artifact.\n\n<sub>Run: [#11734](https://github.com/ohcnetwork/care_fe/actions/runs/37633172388)</sub>",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-5865936777"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-28T12:37:28Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🔵 Needs a closer look\n\nThe broad migration changes date parsing and timezone-sensitive behavior across clinical, scheduling, billing, and authentication workflows.\n\n**Review effort:** Balanced  \n**Findings:** 3 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (3)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5338704245"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-28T12:57:15Z",
+        "body": "`new Date(value)` as the fallback silently rescues ISO-shaped strings that `parseISO` correctly rejected: `parseDate(\"2024-02-30\")` returns **March 1**, and `dateQueryString`/`dateTimeQueryString` then emit a confident-looking filter for input that was never a real date. Under Day.js these came back invalid and the callers returned `\"\"`.\n\nThe fallback only exists for non-ISO shapes like `Date.toString()` output (your own test at `date.test.ts` covers exactly that). Gate it so ISO-shaped strings stay invalid:\n\n```ts\nconst ISO_SHAPED = /^\\d{4}-\\d{2}-\\d{2}/;\nconst date = parseISO(value);\nif (isValid(date)) return date;\nreturn ISO_SHAPED.test(value) ? new Date(NaN) : new Date(value);\n```\n\n(Copilot raised this too — flagging it because it's the one behavior change here that produces a wrong value rather than wrong wording.)",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4122392351"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-28T12:57:15Z",
+        "body": "\n\n> Generated by [CARE PR Reviewer](https://github.com/ohcnetwork/care_fe/actions/runs/36422548511) for #16856 · opus50 · 484 AIC · ⊞ 18.4K\n\n<!-- gh-aw-agentic-workflow: CARE PR Reviewer, engine: copilot, model: claude-opus-5, id: 36422548511, workflow_id: care-review, run: https://github.com/ohcnetwork/care_fe/actions/runs/36422548511 -->\n\n<!-- gh-aw-workflow-call-id: ohcnetwork/care_fe/care-review -->",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5338937761"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-28T12:57:16Z",
+        "body": "This switches the encounter start/end away from the old `@/common/utils` `formatDateTime`, whose default suppressed the time component at local midnight (`obj.isSame(obj.startOf(\"day\"))` → `MMM DD, YYYY`). Pinning the pattern makes that unconditional, so an encounter recorded at midnight now reads `Jan 05, 2024, 12:00 AM` where it used to read `Jan 05, 2024`.\n\n`@/Utils/date`'s `formatDateTime` already takes `datePattern`/`dateTimePattern` as its 3rd/4th args precisely for this — and nothing in the PR uses them outside the test. Preserving the old behavior here is:\n\n```ts\nformatDateTime(encounter.period.start, undefined, \"MMM dd, yyyy\", \"MMM dd, yyyy, hh:mm a\")\n```\n\nSame applies to `period.end` just below. If showing midnight is intentional, it's worth calling out in the description — it's the only user-visible default change in an otherwise mechanical migration.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4122392357"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-28T22:28:10Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🔵 Needs a closer look\n\nEncounter cards no longer preserve date-only rendering for timestamps at local midnight.\n\n**Review effort:** Balanced  \n**Findings:** 3 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (3)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/st",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5345368441"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-28T22:31:45Z",
+        "body": "## CARE Review — PrescriptionQueue date filter now parses date-only params as local dates\n\nRe-review of the delta since my last pass (`09a9282` → `90b65c0`). One commit, two files.\n\n**The new commit is correct.** `PrescriptionQueue` was round-tripping `?created_date_after=2026-09-29` through `new Date(...)`, which parses a date-only string as **UTC** midnight — so east-of-UTC users saw the calendar chip on the following day and, in `dateTimeQueryString`, the filter boundary shifted a day. Routing both the calendar value (`parseLocalDate`) and the query boundary (passing the string straight into `dateTimeQueryString`, which now parses date-only as a local calendar date) fixes both halves, and it matches how `InvoicesData.tsx` already does it. The added `date.test.ts` case pins the local-day boundary for both `from` and `to`. Nothing new to raise here.\n\n*Out of scope note:* the same `dateTimeQueryString(new Date(qParams....))` pattern this commit removed still exists on `develop` in `ToR",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5345393450"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-29T20:31:15Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🔵 Needs a closer look\n\nThe scheduling future-time helper accepts past dates, and local-date coverage does not force a timezone that exposes UTC parsing regressions.\n\n**Review effort:** Balanced  \n**Findings:** 3 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (3)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-schem",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5358065717"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-09-30T07:38:46Z",
+        "body": "I think its fine to show the midnight time as well, because anyway we are showing time for every other time right, isn't it ? ",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4142037235"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-09-30T07:38:46Z",
+        "body": "",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5363022742"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-10-07T13:04:39Z",
+        "body": "These appointment labels are still formatted in the viewer's browser timezone. A patient outside the configured clinic timezone can therefore see a different day/time here than on the booking and confirmation screens (especially around midnight). Format both values with the scheduling-timezone helpers, appending the timezone suffix once, as `PublicAppointments/Success.tsx` does.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4207216717"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-10-07T13:04:39Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🟡 Changes recommended\n\nThe patient portal still renders appointment timestamps in the viewer’s timezone instead of the configured clinic timezone.\n\n**Review effort:** Balanced  \n**Findings:** 4 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (4)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5442692465"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-10-07T13:15:47Z",
+        "body": "@coderabbitai review ",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6038742884"
+      },
+      {
+        "type": "",
+        "user": "coderabbitai[bot]",
+        "created_at": "2026-10-07T13:15:55Z",
+        "body": "<!-- This is an auto-generated reply by CodeRabbit -->\n<!-- CodeRabbit review command invocation: v2:0c89f309ca78dfd4cac8a9d8d1675682fd7b4de357113cc02a98c5baa1042a12 -->\n<details>\n<summary>⚠️ Action not completed</summary>\n\nReview skipped.\n\n> Note: CodeRabbit is an incremental review system and does not re-review already reviewed commits. This command is applicable only when automatic reviews are paused.\n\n</details>",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6038745335"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-10-07T13:28:51Z",
+        "body": "yes, new is intended ",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4207478149"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-10-07T13:28:51Z",
+        "body": "",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5443017035"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-10-07T13:35:28Z",
+        "body": "@coderabbitai review",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6039107489"
+      },
+      {
+        "type": "",
+        "user": "coderabbitai[bot]",
+        "created_at": "2026-10-07T13:35:37Z",
+        "body": "<!-- This is an auto-generated reply by CodeRabbit -->\n<!-- CodeRabbit review command invocation: v2:7a8586e019b89f77be5d51709d2011971c98ffc599bb7dc4c4e526ae67876f3f -->\n<details>\n<summary>⚠️ Action not completed</summary>\n\nReview skipped.\n\n> Note: CodeRabbit is an incremental review system and does not re-review already reviewed commits. This command is applicable only when automatic reviews are paused.\n\n</details>",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6039110022"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-10-07T14:10:27Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🔵 Needs a closer look\n\nThe broad, correctness-sensitive timezone migration warrants final human QA despite strong characterization coverage.\n\n**Review effort:** Balanced  \n**Findings:** 1 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (1)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5443587491"
+      },
+      {
+        "type": "",
+        "user": "chatgpt-codex-connector[bot]",
+        "created_at": "2026-10-08T08:22:27Z",
+        "body": "<!-- codex-pull-request-review-summary -->\n\n## Codex Review Summary\n\nThis comment shows the latest Codex review activity on this pull request.\n\n| Review | Status | Commit | Review trigger |\n| --- | --- | --- | --- |\n| 📝 **Code Review** | ✅ **Completed** <relative-time datetime=\"2026-10-08T08:35:24.205512Z\">2026-10-08T08:35:24.205512Z</relative-time> | `667edfe` | Manual request |\n\n\n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\" or \"@codex security review\".\n\nCodex reacts with 👀 while any review is running, comments if it has suggestions, and reacts with 👍 once all reviews finish with no findings.\n\n</details>",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6055812197"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-10-08T08:30:34Z",
+        "body": "@codex review",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6055936561"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-10-08T08:31:06Z",
+        "body": "@coderabbitai review",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6055944866"
+      },
+      {
+        "type": "",
+        "user": "coderabbitai[bot]",
+        "created_at": "2026-10-08T08:31:13Z",
+        "body": "<!-- This is an auto-generated reply by CodeRabbit -->\n<!-- CodeRabbit review command invocation: v2:61bfeb4d36e859f9d07b3784ef8919396e5c67c3a23f4b3d4472638b2dbd639d -->\n<details>\n<summary>⚠️ Action not completed</summary>\n\nReview skipped.\n\n> Note: CodeRabbit is an incremental review system and does not re-review already reviewed commits. This command is applicable only when automatic reviews are paused.\n\n</details>",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6055947042"
+      },
+      {
+        "type": "",
+        "user": "chatgpt-codex-connector[bot]",
+        "created_at": "2026-10-08T08:35:20Z",
+        "body": "\n### 💡 Codex Review\n\nHere are some automated review suggestions for this pull request.\n\n**Reviewed commit:** `667edfecdc`\n    \n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\".\n\nIf Codex has suggestions, it will comment; otherwise it will react with 👍.\n\n\n\n\nCodex can also answer questions or update the PR. Try commenting \"@codex address that feedback\".\n            \n</details>",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5453894825"
+      },
+      {
+        "type": "",
+        "user": "chatgpt-codex-connector[bot]",
+        "created_at": "2026-10-08T08:35:21Z",
+        "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Recompute clinic presets when selected**\n\nWhen the appointments page remains open across clinic midnight, `clinicToday` is still the day captured when these options were created, so selecting Today, Tomorrow, or Last Week produces ranges relative to the previous day. This persists even after a rerender because `useMultiFilterState` stores the initial filter object in state and does not replace its `getDateRange` callbacks; compute clinic today inside each callback instead of closing over `at` here.\n\nUseful? React with 👍 / 👎.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4216758406"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-08T08:47:47Z",
+        "body": "<!-- react-doctor:review -->\n**React Doctor** · `react-doctor/no-event-handler` _(warning)_\n\nFaking an event handler with state plus a useEffect costs an extra render & runs late.\n\n**Fix** → Run the side effect in the event handler that triggers it, instead of watching its state from a useEffect. See https://react.dev/learn/you-might-not-need-an-effect#sharing-logic-between-event-handlers\n\n[Docs](https://react.doctor/docs/rules/react-doctor/no-event-handler)",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4216870510"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-08T08:47:47Z",
+        "body": "<!-- react-doctor:review -->\n**React Doctor** · `react-doctor/no-adjust-state-on-prop-change` _(warning)_\n\nThis effect adjusts state after a prop changes, so users briefly see the stale value.\n\n**Fix** → Remove the adjustment effect by deriving values during render, resetting the component with a key, or updating related state in the event that changes the prop. Avoid tracking the previous prop in more state, which preserves the duplication. See https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes\n\n[Docs](https://react.doctor/docs/rules/react-doctor/no-adjust-state-on-prop-change)",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4216870516"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-08T08:47:47Z",
+        "body": "<!-- react-doctor:review -->\n**React Doctor** · `react-doctor/no-mirror-prop-effect` _(warning)_\n\nYour screen shows the old value first because useState \"selectedMonth\" copies prop \"selectedDate\" through this effect.\n\n**Fix** → Delete both the `useState` and the `useEffect` and read the prop directly while rendering. Copying a prop into state shows the old value on the first render before the effect catches up.\n\n[Docs](https://react.doctor/docs/rules/react-doctor/no-mirror-prop-effect)",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#discussion_r4216870522"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-08T08:47:47Z",
+        "body": "",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#pullrequestreview-5454036887"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-17T20:28:42Z",
+        "body": "Conflicts have been detected against the base branch. Please merge the base branch into your branch.\ncc: @copilot-swe-agent\n> _See: https://docs.ohc.network/docs/contributing#how-to-resolve-merge-conflicts_",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6240527650"
+      },
+      {
+        "type": "",
+        "user": "yash-learner",
+        "created_at": "2026-11-16T12:50:19Z",
+        "body": "@yash-learner  remember to move this to 3.1 base from develop",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16856#issuecomment-6916896327"
+      }
+    ]
+  },
+  "errors": []
+}
