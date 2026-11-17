@@ -1,0 +1,78 @@
+{
+  "source": "elastic/elasticsearch#158841",
+  "read_only": true,
+  "freeze_commit": "0dfca364481605b12c2699296a9f948cb790b095",
+  "records": {
+    "pr": {
+      "state": "closed",
+      "merged_at": null,
+      "author": "Copilot",
+      "head_sha": "ef2832a931e2b3cee3edb417e2f9622aff467ad9",
+      "base_sha": "fb70651e85da3b85fa2bd36ab387c8c1a9e0d7a7",
+      "created_at": "2026-09-09T11:56:56Z",
+      "commits": 3,
+      "comments": 5,
+      "review_comments": 0
+    },
+    "commits": [
+      {
+        "sha": "b29caa17cad847fed593414f7e9128eabe666c88",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-08T15:46:26Z",
+        "subject": "Apply remaining changes"
+      },
+      {
+        "sha": "af7447ab70d13c2c9967c3c8caa595e4bb690b2e",
+        "author": "MattAlp",
+        "commit_author": "Matt",
+        "at": "2026-09-09T11:57:25Z",
+        "subject": "Merge branch 'main' into copilot/checkstyle-unnecessary-qualified-types"
+      },
+      {
+        "sha": "ef2832a931e2b3cee3edb417e2f9622aff467ad9",
+        "commit_author": "elasticsearchmachine",
+        "at": "2026-09-09T12:06:23Z",
+        "subject": "[CI] Auto commit changes from spotless"
+      }
+    ],
+    "comments": [
+      {
+        "type": "",
+        "user": "elasticsearchmachine",
+        "created_at": "2026-09-09T11:57:19Z",
+        "body": "@copilot-swe-agent please enable the option \"Allow edits and access to secrets by maintainers\" on your PR. For more information, [see the documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/allowing-changes-to-a-pull-request-branch-created-from-a-fork).",
+        "url": "https://github.com/elastic/elasticsearch/pull/158841#issuecomment-5601441743"
+      },
+      {
+        "type": "",
+        "user": "elasticsearchmachine",
+        "created_at": "2026-09-09T12:48:21Z",
+        "body": "Pinging @elastic/es-core-infra (Team:Core/Infra)",
+        "url": "https://github.com/elastic/elasticsearch/pull/158841#issuecomment-5602085894"
+      },
+      {
+        "type": "",
+        "user": "joegallo",
+        "created_at": "2026-09-09T14:23:21Z",
+        "body": "> Checkstyle 14.1.0’s built-in `UnnecessaryFullyQualifiedType` does not inspect class literals.\r\n\r\nJust to make sure I understand: is this merely a statement of fact or is it an observation of a change? That is, for example, has it never been the case that the built-in `UnnecessaryFullyQualifiedType` checked this or is this a new true statement about the world (i.e. \"... but in 13.x-or-some-version it **did** do this type of checking\")?\r\n\r\nedit: I bring this up partially because we happen to be on [Checkstyle 13.11.0](https://github.com/elastic/elasticsearch/blob/2e2020419b4be86524ef3e436ec2347089cfd1f0/gradle/build.versions.toml#L17) right now, not 14.1.0.",
+        "url": "https://github.com/elastic/elasticsearch/pull/158841#issuecomment-5603464492"
+      },
+      {
+        "type": "",
+        "user": "MattAlp",
+        "created_at": "2026-09-24T15:39:14Z",
+        "body": "It has never done this checking. `UnnecessaryFullyQualifiedType` is a new built-in check in Checkstyle 14.1.0, so it does not exist in our current 13.11.0 version; I evaluated upgrading to use it. Testing 14.1.0 showed that the new check does not cover class literals, including the motivating `TopNExec.class` case. It also surfaced 1,108 existing violations in other type contexts. This PR therefore keeps Checkstyle at 13.11.0 and adds the narrowly scoped class-literal check. I’ll clarify the PR description—the current wording is misleading.",
+        "url": "https://github.com/elastic/elasticsearch/pull/158841#issuecomment-5817267563"
+      },
+      {
+        "type": "",
+        "user": "MattAlp",
+        "created_at": "2026-09-29T15:45:29Z",
+        "body": "Going to close this in favor of bumping spotless when it is bug-free",
+        "url": "https://github.com/elastic/elasticsearch/pull/158841#issuecomment-5893624724"
+      }
+    ]
+  },
+  "errors": []
+}
