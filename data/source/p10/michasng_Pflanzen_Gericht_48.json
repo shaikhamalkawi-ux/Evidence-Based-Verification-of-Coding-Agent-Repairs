@@ -1,0 +1,86 @@
+{
+  "source": "michasng/Pflanzen.Gericht#48",
+  "read_only": true,
+  "freeze_commit": "0dfca364481605b12c2699296a9f948cb790b095",
+  "records": {
+    "pr": {
+      "state": "closed",
+      "merged_at": "2026-09-09T00:47:17Z",
+      "author": "Copilot",
+      "head_sha": "64e4f8f584f6ac069e7722c5b4d323ae0df2d4c7",
+      "base_sha": "41bf06306e105161468efae5c1d6c7b9ffc60930",
+      "created_at": "2026-09-08T15:06:20Z",
+      "commits": 3,
+      "comments": 2,
+      "review_comments": 2
+    },
+    "commits": [
+      {
+        "sha": "f9bc5c569a9a0c73b6caf35369f7bc39498e7cc4",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-08T15:06:18Z",
+        "subject": "Initial plan"
+      },
+      {
+        "sha": "7674af00bed4856dbec9af8d07e9ecc7f504d41e",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-08T15:14:55Z",
+        "subject": "fix: Replace datalist suggestions with custom combobox component"
+      },
+      {
+        "sha": "64e4f8f584f6ac069e7722c5b4d323ae0df2d4c7",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-09T00:38:30Z",
+        "subject": "fix: Tighten combobox accessibility"
+      }
+    ],
+    "comments": [
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-09T00:31:32Z",
+        "body": "`aria-controls` always points at `listboxId`, but the listbox `<ul>` is only rendered when `isOpen && filteredSuggestions.length`. This can leave `aria-controls` referencing a non-existent element, and `aria-activedescendant` can also reference a non-existent option when `highlightedIndex` is out of range after filtering.",
+        "url": "https://github.com/michasng/Pflanzen.Gericht/pull/48#discussion_r3963522452"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-09T00:31:33Z",
+        "body": "The suggestion options are rendered as `<button>` elements, which are tabbable by default. In a combobox/listbox pattern, options generally should not be in the tab order (arrow keys + `aria-activedescendant` handle navigation), otherwise users can unexpectedly tab into every suggestion.",
+        "url": "https://github.com/michasng/Pflanzen.Gericht/pull/48#discussion_r3963522476"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-09T00:31:33Z",
+        "body": "### 🟡 Changes recommended\n\nThe new combobox has a couple of concrete accessibility issues (invalid `aria-controls` / `aria-activedescendant` references and tabbable list options) that should be fixed before approval.\n\n*Once you've addressed the issues Copilot identified, you can request another Copilot review.*\n\n<details>\n<summary>Pull request overview</summary>\n\nThis PR replaces native `<datalist>`-based suggestion inputs with a custom, headless-composable-driven combobox component to work around Chromium-based mobile browsers not showing datalist popups, restoring suggestion UX across the affected forms.\n\n**Changes:**\n- Added `useSuggestionFilter` composable for filtering + dropdown open/close + cyclic highlight navigation.\n- Added `SuggestionTextInput` component implementing a combobox/listbox UI with keyboard + mouse interactions.\n- Replaced `<input list> + <datalist>` usages in Catalog filters, Product form, and Price report form, and added unit tests for the new composable/compo",
+        "url": "https://github.com/michasng/Pflanzen.Gericht/pull/48#pullrequestreview-5148442306"
+      },
+      {
+        "type": "",
+        "user": "michasng",
+        "created_at": "2026-09-09T00:35:09Z",
+        "body": "@copilot Fix the code for all comments in [this review thread](https://github.com/michasng/Pflanzen.Gericht/pull/48#pullrequestreview-5148442306).\n\nWhen a review comment includes a suggested change, apply the suggestion exactly.\n\nDo not make changes beyond what is described in the linked review thread.",
+        "url": "https://github.com/michasng/Pflanzen.Gericht/pull/48#issuecomment-5593934426"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-09T00:39:01Z",
+        "body": "\n> @copilot Fix the code for all comments in [this review thread](https://github.com/michasng/Pflanzen.Gericht/pull/48#pullrequestreview-5148442306).\n> \n> When a review comment includes a suggested change, a...\n\nAddressed in 64e4f8f.",
+        "url": "https://github.com/michasng/Pflanzen.Gericht/pull/48#issuecomment-5593965507"
+      },
+      {
+        "type": "",
+        "user": "michasng",
+        "created_at": "2026-09-09T00:40:46Z",
+        "body": "",
+        "url": "https://github.com/michasng/Pflanzen.Gericht/pull/48#pullrequestreview-5148487535"
+      }
+    ]
+  },
+  "errors": []
+}
