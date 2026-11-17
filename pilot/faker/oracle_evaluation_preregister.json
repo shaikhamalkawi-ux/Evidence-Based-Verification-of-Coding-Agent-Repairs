@@ -1,0 +1,33 @@
+{
+  "project": "Evidence-Based Verification of Coding-Agent Repairs",
+  "phase": "initial Faker candidate SOURCE-LOCKED postseal oracle, not postpushback",
+  "instance_id": "joke2k__faker-2155",
+  "episode_id": "joke2k__faker-2155__INITIAL_ATTEMPT_ONLY",
+  "candidate_base": "da39d8262b1b4a3d88c3bf934c047deca354b01e",
+  "candidate_exact_git_sha": "b9c8202d097f88fd43150681edbe14c085bbe1c3",
+  "candidate_patch_sha256": "1d99fd20d14ddc88ec5c2f170f4c9ed7c1a9a9952ac971b2ce6de971715dd6d7",
+  "visible_test_count": 8,
+  "visible_test_run_id": 44165675252,
+  "preoracle_seal_run_id": 44166087795,
+  "preoracle_seal_commit": "9141e7c3ec254721ef174597571ede3a1eaf7d17",
+  "preoracle_decisions_sha256": "ac8c287c9c346542e810c661704df78c14726c10ecc8137cf112fa44c89bd087",
+  "preoracle_decision_time_utc": "2026-11-17T20:08:29Z",
+  "policies": {
+    "self_report": "ACCEPT",
+    "local_pass": "ACCEPT",
+    "source_linked": "HOLD"
+  },
+  "dataset": "SWE-bench-Live/SWE-bench-Live",
+  "dataset_split": "lite",
+  "dataset_revision_sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "harness_repo": "microsoft/SWE-bench-Live",
+  "harness_ref": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "evaluation_flags": {
+    "namespace": "starryzhang",
+    "max_workers": 1,
+    "timeout_seconds": 900
+  },
+  "data_isolation": "hidden F2P/P2P/test_patch never read by candidate or local decision policies; official downstream evaluator only after sealed public commit",
+  "author_boundary": "ChatGPT GPT-6 proposed the code patch; author name in local git commit deliberately artificial, no independently authenticated agent actor. No real developer pushback in this initial candidate.",
+  "claim_boundary": "single initial agent proposal hidden-oracle test only, not experimental effect, not repair after user correction, not a comparative study of X1"
+}
