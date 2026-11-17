@@ -70,6 +70,33 @@ jobs:
           echo "harness_exit_code=${rc}"
           exit "${rc}"
 
+      - name: Assert nonempty scored tests on the exact reference task
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          import os
+          p=Path("logs/evaluation")/f"gold_infra_{os.environ['GITHUB_RUN_ID']}"/"gold"/"sympy__sympy-20590"
+          report=json.loads((p/"report.json").read_text())["sympy__sympy-20590"]
+          assert report.get("patch_successfully_applied") is True, report
+          assert report.get("resolved") is True, report
+          status=report["tests_status"]
+          f2p=status["FAIL_TO_PASS"]
+          p2p=status["PASS_TO_PASS"]
+          n_f2p=len(f2p["success"])+len(f2p["failure"])
+          n_p2p=len(p2p["success"])+len(p2p["failure"])
+          assert n_f2p>0 and len(f2p["failure"])==0, (n_f2p,f2p)
+          assert len(p2p["failure"])==0, p2p
+          assert (p/"test_output.txt").stat().st_size>0
+          print(json.dumps({"verified_reference_instance":"sympy__sympy-20590",
+            "f2p_total":n_f2p,"f2p_passed":len(f2p["success"]),
+            "p2p_total":n_p2p,"p2p_failed":len(p2p["failure"]),
+            "test_log_bytes":(p/"test_output.txt").stat().st_size,
+            "claim_boundary":"reference-gold infrastructure rehearsal only"},indent=2))
+          PY
+
       - name: Preserve provenance and execution logs regardless of outcome
         if: always()
         shell: bash
@@ -82,3 +109,12 @@ jobs:
             cp -a logs/evaluation infrastructure_logs/evaluation || true
           fi
           find infrastructure_logs -type f -print0 | sort -z | xargs -0 -r sha256sum > infrastructure_logs/file_sha256_manifest.txt || true
+
+      - name: Upload raw reference task execution records
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: reference-gold-oracle-rehearsal-${{ github.run_id }}
+          path: infrastructure_logs/
+          if-no-files-found: warn
+          retention-days: 30
