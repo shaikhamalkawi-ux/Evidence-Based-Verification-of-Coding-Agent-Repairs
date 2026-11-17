@@ -1,0 +1,43 @@
+{
+  "protocol_id": "evcar-infra-calibration-2026-11-17",
+  "purpose": "Verify official Docker oracle harness can execute one published gold-patch example on a GitHub-hosted runner. This is NOT an agent trial, blind evaluation, X1 policy result, or benchmark performance estimate.",
+  "registered_before_execution": true,
+  "calibration_only": true,
+  "benchmark": "SWE-bench-Live/SWE-bench-Live",
+  "dataset_split": "lite",
+  "harness_repository": "microsoft/SWE-bench-Live",
+  "harness_branch": "python-only",
+  "harness_commit": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "instance_ids": [
+    "amoffat__sh-744"
+  ],
+  "patch_source": "gold",
+  "docker_namespace": "starryzhang",
+  "max_workers": 1,
+  "per_instance_timeout_seconds": 900,
+  "workflow_timeout_minutes": 40,
+  "run_id": "evcar-gold-calibration-20261117",
+  "runner": "ubuntu-24.04",
+  "runner_disk_limit_gb": 14,
+  "constraints": [
+    "No model-driven coding agent is invoked",
+    "The reference patch is known and is used ONLY to diagnose the executable harness",
+    "No hidden oracle results are used for any prespecified X1 acceptance decision",
+    "Publish complete errors and do not impute failures or successes when the oracle does not run",
+    "Calibration task cannot be included as a held-out X1 experiment",
+    "Record exact upstream commit, dependency versions, Docker image digest, runnable test receipts, raw test output and GitHub run identity when available"
+  ],
+  "primary_feasibility_endpoints": [
+    "official evaluator returns report.json for the exact instance",
+    "test_output.txt includes START and END test markers",
+    "FAIL_TO_PASS and PASS_TO_PASS are parsed from executed tests",
+    "Docker image provenance and log artifacts are retained"
+  ],
+  "claims_prohibited": [
+    "coding agent repaired task",
+    "X1 outperformed any baseline",
+    "false accept rates",
+    "generalized recovery prevalence"
+  ],
+  "notes": "Reruns should be labeled repeats of this calibration, never independent cases."
+}
