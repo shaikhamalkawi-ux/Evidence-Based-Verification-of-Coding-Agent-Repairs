@@ -1,0 +1,107 @@
+{
+  "source": "nc-sapiex/aegis-2#85",
+  "read_only": true,
+  "freeze_commit": "0dfca364481605b12c2699296a9f948cb790b095",
+  "records": {
+    "pr": {
+      "state": "closed",
+      "merged_at": "2026-09-13T13:34:08Z",
+      "author": "Copilot",
+      "head_sha": "783aaa61cd12682e662135c6760914208d3dc289",
+      "base_sha": "ecbe7fe4807cb713ef9089b1496ea00bb0f2feb5",
+      "created_at": "2026-09-13T08:07:16Z",
+      "commits": 5,
+      "comments": 3,
+      "review_comments": 2
+    },
+    "commits": [
+      {
+        "sha": "4f09217bbb43782094fca2e9ea8dace83bffdcf2",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-13T08:07:14Z",
+        "subject": "Initial plan"
+      },
+      {
+        "sha": "73e9ba676eb93a6a73e2133260700a375e77be1d",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-13T08:11:17Z",
+        "subject": "fix: drive engagement header transitions from state machine"
+      },
+      {
+        "sha": "848caf201e72726082866079556dd88493b5c9c0",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-13T08:12:48Z",
+        "subject": "fix: derive header actions from available transitions"
+      },
+      {
+        "sha": "d52ba4f9c81779f6cfc23d1d33dbc1e369c4af58",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-13T08:14:12Z",
+        "subject": "fix: keep header transitions permission-gated"
+      },
+      {
+        "sha": "783aaa61cd12682e662135c6760914208d3dc289",
+        "author": "nc-sapiex",
+        "commit_author": "Sapiex Technologies",
+        "at": "2026-09-13T13:27:13Z",
+        "subject": "fix(types): narrow engagement transition target to exclude PLANNED"
+      }
+    ],
+    "comments": [
+      {
+        "type": "",
+        "user": "nc-sapiex",
+        "created_at": "2026-09-13T08:28:14Z",
+        "body": "## Code Review Summary — Standards + Spec\n\n**Verdict: NEEDS CHANGES** (1 hard, 4 notes, 0 spec failures)\n\n**PR:** #85 — Drive engagement header actions from legal state-machine transitions\n**Author:** @copilot-swe-agent\n**Issue:** #81\n**State:** still a **draft**; no CI checks reported on `copilot/fix-illegal-transition-buttons`\n\nAxes are separate (Standards vs Spec). Not a merge recommendation across them.\n\n---\n\n## Standards\n\n**Hard (1)**\n\n- **`src/components/audit-execution/engagement-header.tsx:86`** — `pnpm exec tsc --noEmit` fails (CLAUDE.md: CI runs exactly this). `handleTransition` types `targetStatus` as `EngagementStatus`, which includes `PLANNED`, but `transitionEngagementStatus` only accepts the action's target union (`TEAM_ASSIGNED | OPENING_MEETING | IN_PROGRESS | EXIT_MEETING | REPORT_DRAFT | COMPLETED | CANCELLED`). Error: `Type '\"PLANNED\"' is not assignable to …`. Runtime is probably fine (the machine never offers `PLANNED` as a target), but this branch will not pass ty",
+        "url": "https://github.com/nc-sapiex/aegis-2/pull/85#issuecomment-5652215802"
+      },
+      {
+        "type": "",
+        "user": "nc-sapiex",
+        "created_at": "2026-09-13T10:38:13Z",
+        "body": "@claude Please resolve HARD-1 from the independent review.\n\n`src/components/audit-execution/engagement-header.tsx` — `handleTransition` types `targetStatus` as `EngagementStatus` (includes `PLANNED`). `transitionEngagementStatus` only accepts the action target union (`TEAM_ASSIGNED | OPENING_MEETING | IN_PROGRESS | EXIT_MEETING | REPORT_DRAFT | COMPLETED | CANCELLED`). `pnpm exec tsc --noEmit` fails.\n\nNarrow the argument to the action input type (or `AvailableEngagementTransition[\"to\"]` excluding source-only statuses). Then mark the PR ready for review. Do not merge — NC merges.\n",
+        "url": "https://github.com/nc-sapiex/aegis-2/pull/85#issuecomment-5652755196"
+      },
+      {
+        "type": "",
+        "user": "nc-sapiex",
+        "created_at": "2026-09-13T11:20:16Z",
+        "body": "@claude",
+        "url": "https://github.com/nc-sapiex/aegis-2/pull/85#issuecomment-5652941566"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-13T11:24:23Z",
+        "body": "`getEngagementWithTeam()` is also called by the RBIA layout/pages, which separately load meetings and branch scores (`rbia/layout.tsx:85-95`, `rbia/score/page.tsx:29-38`). Adding both relations here makes those routes fetch the same context repeatedly; keep this context in a page-specific query or reuse the included rows in the callers.",
+        "url": "https://github.com/nc-sapiex/aegis-2/pull/85#discussion_r3999474493"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-13T11:24:23Z",
+        "body": "### 🟡 Changes recommended\n\nAudit Manager transitions are defined but blocked by the page permission gate.\n\n*Get a fresh assessment by requesting another Copilot review.*\n\n<details>\n<summary>Pull request overview</summary>\n\nThis PR aligns engagement header actions with the legal state machine, including role and prerequisite checks.\n\n**Changes:**\n- Added derived transition availability and focused tests.\n- Loaded prerequisite context for transition evaluation.\n- Wired state-machine actions into the engagement header.\n</details>\n\n<details>\n<summary>File summaries</summary>\n\n| File | Summary |\r\n|---|---|\r\n| `src/lib/engagement-state-machine.ts` | Derives legal, role-aware transitions. |\r\n| `src/lib/__tests__/engagement-state-machine.test.ts` | Tests legal, blocked, and restricted transitions. |\r\n| `src/data-access/audit-execution.ts` | Loads meeting and score context. |\r\n| `src/components/audit-execution/engagement-header.tsx` | Renders derived actions. |\r\n| `src/app/(dashboard)/audit-ex",
+        "url": "https://github.com/nc-sapiex/aegis-2/pull/85#pullrequestreview-5190525826"
+      },
+      {
+        "type": "",
+        "user": "chatgpt-codex-connector[bot]",
+        "created_at": "2026-09-13T13:37:31Z",
+        "body": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Route meeting transitions through the meeting flow**\n\nWhen the engagement is `TEAM_ASSIGNED` or `IN_PROGRESS`, this button invokes `transitionEngagementStatus` directly for `OPENING_MEETING` or `EXIT_MEETING`, which updates only the status and does not create the meeting. The intended `recordMeeting` action creates the meeting and performs that transition atomically, but after this click it rejects recording because a same-state transition is illegal; consequently the unsigned-meeting prerequisite hides the next action and leaves the engagement stuck without a usable forward transition. These two targets should open/use the meeting-recording flow rather than calling the generic status action.\n\nUseful? React with 👍 / 👎.",
+        "url": "https://github.com/nc-sapiex/aegis-2/pull/85#discussion_r3999761080"
+      },
+      {
+        "type": "",
+        "user": "chatgpt-codex-connector[bot]",
+        "created_at": "2026-09-13T13:37:31Z",
+        "body": "\n### 💡 Codex Review\n\nHere are some automated review suggestions for this pull request.\n\n**Reviewed commit:** `783aaa61cd`\n    \n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\".\n\nIf Codex has suggestions, it will comment; otherwise it will react with 👍.\n\n\n\n\nCodex can also answer questions or update the PR. Try commenting \"@codex address that feedback\".\n            \n</details>",
+        "url": "https://github.com/nc-sapiex/aegis-2/pull/85#pullrequestreview-5190901178"
+      }
+    ]
+  },
+  "errors": []
+}
