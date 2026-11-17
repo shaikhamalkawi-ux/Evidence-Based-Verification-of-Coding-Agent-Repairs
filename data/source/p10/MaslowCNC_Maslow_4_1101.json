@@ -1,0 +1,121 @@
+{
+  "source": "MaslowCNC/Maslow_4#1101",
+  "read_only": true,
+  "freeze_commit": "0dfca364481605b12c2699296a9f948cb790b095",
+  "records": {
+    "pr": {
+      "state": "closed",
+      "merged_at": null,
+      "author": "Copilot",
+      "head_sha": "880401b97804ac416ee8604028cd0e794b5a7467",
+      "base_sha": "70982031c2ee02248e5961d67f2890740b61fb22",
+      "created_at": "2026-09-20T00:39:11Z",
+      "commits": 6,
+      "comments": 8,
+      "review_comments": 0
+    },
+    "commits": [
+      {
+        "sha": "d07647bb9ceeaa64608ce5577591ee624c4ef558",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-20T00:39:09Z",
+        "subject": "Initial plan"
+      },
+      {
+        "sha": "268061c51be4117454d7130497e902131cba76ca",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-20T00:42:46Z",
+        "subject": "Save serial log on alarms"
+      },
+      {
+        "sha": "91fe947c9a4c62d895e52d57d4f40f3f8867a08e",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-20T00:44:25Z",
+        "subject": "Only reset alarm log guard after leaving alarm"
+      },
+      {
+        "sha": "d892f204ba1eac628c13d482e752392b22dccc19",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-20T00:45:29Z",
+        "subject": "Set alarm log guard after save trigger"
+      },
+      {
+        "sha": "5235b3fbc267d7983d107fbca644e896e491ce9b",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-20T00:46:35Z",
+        "subject": "Use previous alarm state snapshot"
+      },
+      {
+        "sha": "880401b97804ac416ee8604028cd0e794b5a7467",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-20T00:47:36Z",
+        "subject": "Handle alarm log save guard atomically"
+      }
+    ],
+    "comments": [
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-20T00:59:21Z",
+        "body": "@MaslowBot please build",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1101#issuecomment-5746561895"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-20T01:02:24Z",
+        "body": "🤖 **Firmware & Web UI Compilation Complete** 🤖\n\n✅ Successfully compiled FluidNC firmware and ESP3D-WEBUI\n\n**Firmware Build Details:**\n- Commit: `880401b97804ac416ee8604028cd0e794b5a7467`\n- Version: `v1.25.0-9-g880401b9-dirty`\n- Environment: `wifi_s3` (ESP32-S3)\n- Firmware size: 1.90 MB\n- Flash usage: 1.90 MB (64.8%)\n- RAM usage: 136.2 KB (42.6%)\n\n**Web UI Build Details:**\n- Language: English only\n- WebUI size: 139.71 KB (compressed)\n- Format: index.html.gz\n\n**Download:**\nThe firmware package (containing firmware.bin, index.html.gz, and installation instructions) has been uploaded as a build artifact named \"firmware-package\" and can be downloaded from the [Actions tab](https://github.com/MaslowCNC/Maslow_4/actions/runs/35480198931).\n\nTo test this release please:\n[] Try running calibration with a fresh maslow.yaml file\n[] Test jogging the machine to see that movements are normal\n[] Try running a simple gcode file\n\n_This comment was automatically generated in response to a build request",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1101#issuecomment-5746575397"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-20T01:23:41Z",
+        "body": "@MaslowBot Serial log was not saved unless Serial log button clicked when error introduced. Please save log file automatically as though button clicked",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1101#issuecomment-5746676352"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-20T01:23:48Z",
+        "body": "@copilot-swe-agent\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot Serial log was not saved unless Serial log button clicked when error introduced. Please save log file automatically as though button clicked\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot-swe-agent can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1101#issuecomment-5746676896"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T00:08:09Z",
+        "body": "@MaslowBot Serial log not saved after error.\r\nSimulate Save Serial button click after recording error",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1101#issuecomment-5769353886"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-22T00:08:18Z",
+        "body": "@copilot-swe-agent\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot Serial log not saved after error.\r\nSimulate Save Serial button click after recording error\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot-swe-agent can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1101#issuecomment-5769355213"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-22T03:52:25Z",
+        "body": "This pull request has been automatically marked as stale because it has not had recent activity for 30 days.\nIt will be closed in 7 days if no further activity occurs.\nThank you for your contributions.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1101#issuecomment-6332254163"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-29T04:56:47Z",
+        "body": "This pull request has been automatically closed due to inactivity.\nIf you believe this PR is still relevant, please feel free to reopen it or create a new pull request.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1101#issuecomment-6488338324"
+      }
+    ]
+  },
+  "errors": []
+}
