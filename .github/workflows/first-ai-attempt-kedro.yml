@@ -1,0 +1,106 @@
+name: First coding-agent attempt on frozen Kedro issue (VISIBLE TESTS ONLY)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/first-ai-attempt-kedro.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  first-attempt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      TARGET_REPO: https://github.com/kedro-org/kedro.git
+      TARGET_BASE: a565d6607d1d16933dbb1ea42cfb9de39ef80980
+      INSTANCE_ID: kedro-org__kedro-4406
+    steps:
+      - name: Read locked source recipe, tests and frame
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate task membership
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          f=json.load(open('pilot/frozen_task_frame_20261117.json'))
+          assert f['selected'][0]['instance_id']==os.environ['INSTANCE_ID']
+          assert f['selected'][0]['repo']=='kedro-org/kedro'
+          print('Frozen first-case membership PASS')
+          PY
+      - name: Checkout only the registered upstream base commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/kedro_base"
+          git -C "$RUNNER_TEMP/kedro_base" init
+          git -C "$RUNNER_TEMP/kedro_base" remote add origin "$TARGET_REPO"
+          git -C "$RUNNER_TEMP/kedro_base" fetch --depth 1 origin "$TARGET_BASE"
+          git -C "$RUNNER_TEMP/kedro_base" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/kedro_base" rev-parse HEAD)" = "$TARGET_BASE"
+      - name: Apply first AI-proposed edit and save patch (NO official oracle)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pilot_output
+          python3 pilot/kedro/ai_candidate_initial.py --repo "$RUNNER_TEMP/kedro_base"
+          git -C "$RUNNER_TEMP/kedro_base" diff --check
+          git -C "$RUNNER_TEMP/kedro_base" diff -- kedro/__init__.py > pilot_output/initial_agent_patch.diff
+          test -s pilot_output/initial_agent_patch.diff
+          export GIT_AUTHOR_DATE="2026-11-17T19:20:00Z"
+          export GIT_COMMITTER_DATE="2026-11-17T19:20:00Z"
+          git -C "$RUNNER_TEMP/kedro_base" add kedro/__init__.py
+          git -C "$RUNNER_TEMP/kedro_base" -c user.name="AI-authored research candidate" -c user.email="ai-research@example.invalid" \
+            commit -m "AI first attempt: expose lazy Kedro IPython extension alias"
+          git -C "$RUNNER_TEMP/kedro_base" rev-parse HEAD > pilot_output/target_candidate_head_sha.txt
+          git -C "$RUNNER_TEMP/kedro_base" show --format= HEAD > pilot_output/target_candidate_commit_diff.patch
+          git -C "$RUNNER_TEMP/kedro_base" show --stat --oneline HEAD
+          sha256sum pilot_output/initial_agent_patch.diff pilot/kedro/visible_local_tests.py \
+            > pilot_output/source_file_sha256.txt
+      - name: Run three prespecified visible checks against patched source
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH="$RUNNER_TEMP/kedro_base" \
+            python3 pilot/kedro/visible_local_tests.py -v \
+            > pilot_output/local_test_receipt.log 2>&1
+          cat pilot_output/local_test_receipt.log
+          PYTHONPATH="$RUNNER_TEMP/kedro_base" python3 -m py_compile \
+            "$RUNNER_TEMP/kedro_base/kedro/__init__.py"
+          python3 - <<'PY'
+          import json,pathlib,re,os
+          log=pathlib.Path("pilot_output/local_test_receipt.log").read_text()
+          match=re.search(r"Ran (\d+) tests?",log)
+          if not match or int(match.group(1))!=3 or not re.search(r"^OK\s*$",log,re.M):
+              raise RuntimeError("Visible test-run receipt missing or incomplete")
+          patch=pathlib.Path("pilot_output/initial_agent_patch.diff").read_bytes()
+          sha=pathlib.Path("pilot_output/target_candidate_head_sha.txt").read_text().strip()
+          result={
+              "instance_id":os.environ["INSTANCE_ID"],
+              "task_stage":"AI_INITIAL_ATTEMPT_NOT_POST_PUSHBACK",
+              "base_commit":os.environ["TARGET_BASE"],
+              "candidate_head_sha":sha,
+              "visible_tests_executed":int(match.group(1)),
+              "visible_tests_passed":3,
+              "hidden_oracle_executed":False,
+              "patch_sha256":__import__("hashlib").sha256(patch).hexdigest(),
+              "local_test_source":"pilot/kedro/visible_local_tests.py",
+              "code_author_attribution":"RESEARCH_MODEL_AUTHORED_RECIPE_NOT_INDEPENDENT_AGENT_ATTESTATION",
+              "conclusion":"VISIBLE_LOCAL_PASS_ONLY_NO_GENERAL_REPAIR_CLAIM"
+          }
+          pathlib.Path("pilot_output/initial_receipt.json").write_text(json.dumps(result,indent=2)+"\n")
+          print(json.dumps(result,indent=2))
+          PY
+      - name: Archive initial candidate and visible tests
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: kedro-first-ai-attempt-visible-only
+          path: pilot_output/
+          retention-days: 30
+          if-no-files-found: warn
