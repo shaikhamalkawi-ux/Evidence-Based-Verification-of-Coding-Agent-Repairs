@@ -1,0 +1,212 @@
+{
+  "source": "MaslowCNC/Maslow_4#1103",
+  "read_only": true,
+  "freeze_commit": "0dfca364481605b12c2699296a9f948cb790b095",
+  "records": {
+    "pr": {
+      "state": "closed",
+      "merged_at": "2026-09-22T23:18:00Z",
+      "author": "Copilot",
+      "head_sha": "fd41fd4303fda1f61fb281b526475f878b428e95",
+      "base_sha": "72235cf94cf26cbb07347355c1617cd6dd584439",
+      "created_at": "2026-09-22T02:48:23Z",
+      "commits": 5,
+      "comments": 22,
+      "review_comments": 0
+    },
+    "commits": [
+      {
+        "sha": "24938204b45929951359d4641a0b951b97163a37",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-22T02:48:21Z",
+        "subject": "Initial plan"
+      },
+      {
+        "sha": "a8effb91c56433396cbb2b96a86364ed0c9a1c96",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-22T02:57:21Z",
+        "subject": "Auto-save serial log once per alarm event"
+      },
+      {
+        "sha": "f490f1ab2cbec9507234219374c921b62ea32361",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-22T20:27:13Z",
+        "subject": "Handle [MSG:ERR] faults for auto serial save"
+      },
+      {
+        "sha": "eca9ac03cbdfb21a15ccef16402b76d203464c43",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-22T21:07:17Z",
+        "subject": "Persist ERR/ALARM lines to LocalFS log"
+      },
+      {
+        "sha": "fd41fd4303fda1f61fb281b526475f878b428e95",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-22T21:52:10Z",
+        "subject": "Rollback LocalFS error log persistence change"
+      }
+    ],
+    "comments": [
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T02:57:55Z",
+        "body": "@MaslowBot please build",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5770576274"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-22T03:01:01Z",
+        "body": "🤖 **Firmware & Web UI Compilation Complete** 🤖\n\n✅ Successfully compiled FluidNC firmware and ESP3D-WEBUI\n\n**Firmware Build Details:**\n- Commit: `a8effb91c56433396cbb2b96a86364ed0c9a1c96`\n- Version: `v1.25.0-9-ga8effb91-dirty`\n- Environment: `wifi_s3` (ESP32-S3)\n- Firmware size: 1.90 MB\n- Flash usage: 1.90 MB (64.8%)\n- RAM usage: 136.2 KB (42.6%)\n\n**Web UI Build Details:**\n- Language: English only\n- WebUI size: 139.65 KB (compressed)\n- Format: index.html.gz\n\n**Download:**\nThe firmware package (containing firmware.bin, index.html.gz, and installation instructions) has been uploaded as a build artifact named \"firmware-package\" and can be downloaded from the [Actions tab](https://github.com/MaslowCNC/Maslow_4/actions/runs/35681398336).\n\nTo test this release please:\n[] Try running calibration with a fresh maslow.yaml file\n[] Test jogging the machine to see that movements are normal\n[] Try running a simple gcode file\n\n_This comment was automatically generated in response to a build request",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5770596825"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T03:23:02Z",
+        "body": "@MaslowBot did not save serial log when error induced by disconnecting BL encoder.\r\nSerial log attached\r\n[Maslow-serial - 2026-09-22T131733.651.log](https://github.com/user-attachments/files/32495843/Maslow-serial.-.2026-09-22T131733.651.log)\r\n",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5770750150"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-22T03:23:12Z",
+        "body": "@copilot-swe-agent\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot did not save serial log when error induced by disconnecting BL encoder.\r\nSerial log attached\r\n[Maslow-serial - 2026-09-22T131733.651.log](https://github.com/user-attachments/files/32495843/Maslow-serial.-.2026-09-22T131733.651.log)\r\n\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot-swe-agent can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5770751327"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T20:23:12Z",
+        "body": "@MaslowBot Any update on this",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5783554514"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-22T20:23:21Z",
+        "body": "@copilot\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot Any update on this\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5783556555"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-22T20:27:32Z",
+        "body": "\n> @copilot\n> \n> User @IDAbbott mentioned @MaslowBot with the following request:...\n\nI tracked this down and pushed a fix in `f490f1ab`.\n\nThe issue was that encoder disconnect faults come through as `[MSG:ERR: ...]`, which were not part of the previous auto-save trigger path. The update now treats `[MSG:ERR: ...]` as a fault trigger and performs the serial auto-save on first fault capture, matching the one-save guard behavior.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5783616115"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T20:29:31Z",
+        "body": "@MaslowBot please build",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5783646656"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-22T20:32:18Z",
+        "body": "🤖 **Firmware & Web UI Compilation Complete** 🤖\n\n✅ Successfully compiled FluidNC firmware and ESP3D-WEBUI\n\n**Firmware Build Details:**\n- Commit: `f490f1ab2cbec9507234219374c921b62ea32361`\n- Version: `v1.25.0-10-gf490f1ab-dirty`\n- Environment: `wifi_s3` (ESP32-S3)\n- Firmware size: 1.90 MB\n- Flash usage: 1.90 MB (64.8%)\n- RAM usage: 136.2 KB (42.6%)\n\n**Web UI Build Details:**\n- Language: English only\n- WebUI size: 139.67 KB (compressed)\n- Format: index.html.gz\n\n**Download:**\nThe firmware package (containing firmware.bin, index.html.gz, and installation instructions) has been uploaded as a build artifact named \"firmware-package\" and can be downloaded from the [Actions tab](https://github.com/MaslowCNC/Maslow_4/actions/runs/35780635345).\n\nTo test this release please:\n[] Try running calibration with a fresh maslow.yaml file\n[] Test jogging the machine to see that movements are normal\n[] Try running a simple gcode file\n\n_This comment was automatically generated in response to a build reques",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5783685843"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T21:00:44Z",
+        "body": "@MaslowBot There is a restriction preventing Maslow from requesting a file write on browser for security reasons.\r\nSo, instead save an error log to the local file system on the Maslow containing the error information accessible via the FluidNC pulldown Local File System button.\r\nCreate file if it does not exist and append any error information.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784086365"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-22T21:00:53Z",
+        "body": "@copilot\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot There is a restriction preventing Maslow from requesting a file write on browser for security reasons.\r\nSo, instead save an error log to the local file system on the Maslow containing the error information accessible via the FluidNC pulldown Local File System button.\r\nCreate file if it does not exist and append any error information.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784088533"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-22T21:07:34Z",
+        "body": "\n> @copilot\n> \n> User @IDAbbott mentioned @MaslowBot with the following request:...\n\nImplemented in `eca9ac0`.\n\nFault entries are now persisted on-device to LocalFS as `maslow-error.log`: each `[MSG:ERR: ...]` and `ALARM:...` line is appended (file is created automatically if missing). This makes the error history available via the FluidNC Local File System browser without relying on browser download prompts.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784177693"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T21:10:05Z",
+        "body": "@MaslowBot please build",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784214944"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-22T21:12:53Z",
+        "body": "🤖 **Firmware & Web UI Compilation Complete** 🤖\n\n✅ Successfully compiled FluidNC firmware and ESP3D-WEBUI\n\n**Firmware Build Details:**\n- Commit: `eca9ac03cbdfb21a15ccef16402b76d203464c43`\n- Version: `v1.25.0-11-geca9ac03-dirty`\n- Environment: `wifi_s3` (ESP32-S3)\n- Firmware size: 1.91 MB\n- Flash usage: 1.90 MB (64.8%)\n- RAM usage: 136.2 KB (42.5%)\n\n**Web UI Build Details:**\n- Language: English only\n- WebUI size: 139.67 KB (compressed)\n- Format: index.html.gz\n\n**Download:**\nThe firmware package (containing firmware.bin, index.html.gz, and installation instructions) has been uploaded as a build artifact named \"firmware-package\" and can be downloaded from the [Actions tab](https://github.com/MaslowCNC/Maslow_4/actions/runs/35784950560).\n\nTo test this release please:\n[] Try running calibration with a fresh maslow.yaml file\n[] Test jogging the machine to see that movements are normal\n[] Try running a simple gcode file\n\n_This comment was automatically generated in response to a build reques",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784251230"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T21:48:08Z",
+        "body": "@MaslowBot Rollback last change",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784725583"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-22T21:48:18Z",
+        "body": "@copilot\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot Rollback last change\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784727594"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-22T21:52:22Z",
+        "body": "\n> @copilot\n> \n> User @IDAbbott mentioned @MaslowBot with the following request:...\n\nDone — rolled back the last change in `fd41fd4`.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784781954"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T21:53:05Z",
+        "body": "@MaslowBot please build",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784791915"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-22T21:55:50Z",
+        "body": "🤖 **Firmware & Web UI Compilation Complete** 🤖\n\n✅ Successfully compiled FluidNC firmware and ESP3D-WEBUI\n\n**Firmware Build Details:**\n- Commit: `fd41fd4303fda1f61fb281b526475f878b428e95`\n- Version: `v1.25.0-12-gfd41fd43-dirty`\n- Environment: `wifi_s3` (ESP32-S3)\n- Firmware size: 1.90 MB\n- Flash usage: 1.90 MB (64.8%)\n- RAM usage: 136.2 KB (42.6%)\n\n**Web UI Build Details:**\n- Language: English only\n- WebUI size: 139.67 KB (compressed)\n- Format: index.html.gz\n\n**Download:**\nThe firmware package (containing firmware.bin, index.html.gz, and installation instructions) has been uploaded as a build artifact named \"firmware-package\" and can be downloaded from the [Actions tab](https://github.com/MaslowCNC/Maslow_4/actions/runs/35789251686).\n\nTo test this release please:\n[] Try running calibration with a fresh maslow.yaml file\n[] Test jogging the machine to see that movements are normal\n[] Try running a simple gcode file\n\n_This comment was automatically generated in response to a build reques",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5784829027"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T22:12:56Z",
+        "body": "@BarbourSmith Saves Serial log automatically when 1st error encountered in a session. Preserves fault information for later analysis. Let me know what you think. \r\nWill save file to all sessions which have an open connection to the Maslow. This may cause duplicate log files.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5785051746"
+      },
+      {
+        "type": "",
+        "user": "BarbourSmith",
+        "created_at": "2026-09-22T22:21:41Z",
+        "body": "That is a cool idea! So it will automatically download?",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5785165851"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-22T23:16:44Z",
+        "body": "Yes, tested it by pulling the encoder plug, errored out and it downloaded the serial log. After restoring and resetting alarm get message saying position data may not be accurate etc. Subsequent pulling the encoder plug fault did not cause serial log dump, until after browser was refreshed, which reset the guard. Recommend implementing.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1103#issuecomment-5785895731"
+      }
+    ]
+  },
+  "errors": []
+}
