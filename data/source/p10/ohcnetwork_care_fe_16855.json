@@ -1,0 +1,121 @@
+{
+  "source": "ohcnetwork/care_fe#16855",
+  "read_only": true,
+  "freeze_commit": "0dfca364481605b12c2699296a9f948cb790b095",
+  "records": {
+    "pr": {
+      "state": "open",
+      "merged_at": null,
+      "author": "Copilot",
+      "head_sha": "24a52b1a7d41152f857e984285eca34c0395f72e",
+      "base_sha": "38852cf45273f6c85cbc9accb8c72ea881e9a39b",
+      "created_at": "2026-09-21T19:26:26Z",
+      "commits": 3,
+      "comments": 3,
+      "review_comments": 5
+    },
+    "commits": [
+      {
+        "sha": "661d2e92bb4fa03c2cf86584b281b329c35e0377",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-21T19:26:24Z",
+        "subject": "Initial plan"
+      },
+      {
+        "sha": "f077cef238a7ce71ed5d010c98490e3ca9b42ecd",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-21T19:37:30Z",
+        "subject": "Replace navigation-only buttons with semantic links"
+      },
+      {
+        "sha": "24a52b1a7d41152f857e984285eca34c0395f72e",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-21T19:49:34Z",
+        "subject": "Preserve query parameters in native new-tab navigation"
+      }
+    ],
+    "comments": [
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-21T19:26:32Z",
+        "body": "Copilot wasn't able to review any files in this pull request.\n\n\n\n\n\n---\n\n💡 <a href=\"/ohcnetwork/care_fe/new/develop?filename=.github/skills/code-review/SKILL.md\" class=\"Link--inTextBlock\" target=\"_blank\" rel=\"noopener noreferrer\">Add a `code-review` agent skill</a> or configure MCP servers for context-aware, tailored reviews. <a href=\"https://docs.github.com/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=webui#mcp-servers-and-agent-skills\" class=\"Link--inTextBlock\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more in the docs.</a>",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#pullrequestreview-5270894527"
+      },
+      {
+        "type": "",
+        "user": "coderabbitai[bot]",
+        "created_at": "2026-09-21T19:26:33Z",
+        "body": "<!-- This is an auto-generated comment: summarize by coderabbit.ai -->\n<!-- This is an auto-generated comment: skip review by coderabbit.ai -->\n\n> [!IMPORTANT]\n> ## Review skipped\n> \n> Bot user detected.\n> \n> To trigger a single review, invoke the `@coderabbitai review` command.\n> \n> <details>\n> <summary>⚙️ Run configuration</summary>\n> \n> **Configuration used**: Repository UI\n> \n> **Review profile**: ASSERTIVE\n> \n> **Plan**: Advanced\n> \n> **Run ID**: `dca7ae36-8b84-4e0f-a81b-d77681cc0d47`\n> \n> </details>\n> \n> You can disable this status message by setting the `reviews.review_status` to `false` in the CodeRabbit configuration file.\n> \n> Use the checkbox below for a quick retry:\n> - [ ] <!-- {\"checkboxId\":\"e9bb8d72-00e8-4f67-9cb2-caf3b22574fe\"} --> 🔍 Trigger review\n\n<!-- end of auto-generated comment: skip review by coderabbit.ai -->\n\n<!-- tips_start -->\n\n---\n\n\n\n\n<sub>Comment `@coderabbitai help` to get the list of available commands.</sub>\n\n<!-- tips_end -->",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#issuecomment-5766232842"
+      },
+      {
+        "type": "",
+        "user": "cloudflare-workers-and-pages[bot]",
+        "created_at": "2026-09-21T19:39:07Z",
+        "body": "## Deploying care-preview with &nbsp;<a href=\"https://pages.dev\"><img alt=\"Cloudflare Pages\" src=\"https://user-images.githubusercontent.com/23264/106598434-9e719e00-654f-11eb-9e59-6167043cfa01.png\" width=\"16\"></a> &nbsp;Cloudflare Pages\n\n<table><tr><td><strong>Latest commit:</strong> </td><td>\n<code>24a52b1</code>\n</td></tr>\n<tr><td><strong>Status:</strong></td><td>&nbsp;✅&nbsp; Deploy successful!</td></tr>\n<tr><td><strong>Preview URL:</strong></td><td>\n<a href='https://2ed06fdf.care-preview-a7w.pages.dev'>https://2ed06fdf.care-preview-a7w.pages.dev</a>\n</td></tr>\n<tr><td><strong>Branch Preview URL:</strong></td><td>\n<a href='https://copilot-replace-onclick-with.care-preview-a7w.pages.dev'>https://copilot-replace-onclick-with.care-preview-a7w.pages.dev</a>\n</td></tr>\n</table>\n\n[View logs](https://dash.cloudflare.com/?to=/db6d08276fae8cc36808cc6d13f71ca6/pages/view/care-preview/2ed06fdf-d416-4bfb-ba07-c93907290555)\n",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#issuecomment-5766401128"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-21T19:45:28Z",
+        "body": "The surrounding encounter result row still performs pure navigation via `onClick={() => navigateToVerify(...)}` at lines 519-524. As a result, the main row interaction remains unavailable to keyboard users and cannot be opened in a new tab; only this secondary action was converted. Replace the row's navigation-only handler with an anchor-backed affordance too.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#discussion_r4065777781"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-21T19:45:28Z",
+        "body": "The mobile card and desktop table row still navigate through `onClick={() => navigate(...)}` at lines 89-91 and 181-183. Converting only the nested View button leaves the primary questionnaire navigation mouse-only and does not complete the PR's stated replacement. Make the card/row navigation anchor-backed as well and remove the remaining `useNavigate` handlers.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#discussion_r4065777840"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-21T19:45:29Z",
+        "body": "This no longer preserves the previous row interaction: clicking the practitioner, status, token, or unused area of an appointment row now does nothing because only the patient-name content is inside the link. Keep the semantic link, but extend an anchor-backed hit target across the same non-action row area that previously navigated.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#discussion_r4065777894"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-21T19:45:29Z",
+        "body": "These handlers make the new-tab flow depend on one shared `localStorage` entry. Opening appointments for two practitioners in separate tabs lets the later interaction overwrite the first tab's practitioner; `AppointmentSuccess` then reads that global value (`src/pages/PublicAppointments/Success.tsx:24,69`) and can show the wrong doctor/nurse. Merely opening the context menu also mutates state without navigating. Put the practitioner identity in tab-specific navigation state/the URL, or derive it from the fetched appointment instead.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#discussion_r4065777930"
+      },
+      {
+        "type": "",
+        "user": "Copilot",
+        "created_at": "2026-09-21T19:45:29Z",
+        "body": "Previously the whole non-action portion of this child-organization row opened the department. The new inline link limits navigation to the organization name, so clicks on the row padding, icon, child indicator, or type cell silently stop working. Preserve the former hit area with anchor-backed content across the navigable cells while keeping the actions cell separate.",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#discussion_r4065777966"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-21T19:45:30Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🟡 Changes recommended\n\nSome navigation remains click-only, two row conversions regress their hit areas, and appointment new-tab state can race through shared local storage.\n\n*Get a fresh assessment by requesting another Copilot review.*\n\n**Review effort:** Balanced  \n**Findings:** 5 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (5)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/cop",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#pullrequestreview-5271081089"
+      },
+      {
+        "type": "",
+        "user": "copilot-pull-request-reviewer[bot]",
+        "created_at": "2026-09-21T19:56:13Z",
+        "body": "<!-- ccr-overview-v2 -->\n\n## Copilot review overview\n\n### 🔵 Needs a closer look\n\nModified Enter shortcuts are broken, questionnaire click handlers remain, and an unvalidated query value is exposed as a native link target.\n\n**Review effort:** Balanced  \n**Findings:** 5 <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.svg\"><img src=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-light.png\" alt=\"Medium severity\" width=\"62\" height=\"18\" align=\"texttop\"></picture>\n\n<details open>\n<summary><strong>Open (5)</strong></summary>\n\n- <picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://github.githubassets.com/static/images/icons/copilot-code-review/medium-v2-dark.svg\"><source media=\"(prefers-color-scheme",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#pullrequestreview-5271206498"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-26T04:15:35Z",
+        "body": "Conflicts have been detected against the base branch. Please merge the base branch into your branch.\ncc: @copilot-swe-agent\n> _See: https://docs.ohc.network/docs/contributing#how-to-resolve-merge-conflicts_",
+        "url": "https://github.com/ohcnetwork/care_fe/pull/16855#issuecomment-6408088264"
+      }
+    ]
+  },
+  "errors": []
+}
