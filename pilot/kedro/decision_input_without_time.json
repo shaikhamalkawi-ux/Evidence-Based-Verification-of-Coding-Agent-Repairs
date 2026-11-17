@@ -1,0 +1,30 @@
+{
+  "episode_id": "kedro-org__kedro-4406__INITIAL_ATTEMPT_ONLY",
+  "task_family": "python_ipython_extension",
+  "repo": "kedro-org/kedro",
+  "head_sha": "355ae83abe163ab9bbe2aaf7a59cc055f220d13e",
+  "patch_applied": true,
+  "agent_claimed_fixed": true,
+  "target_agent_is_commit_author": false,
+  "unrelated_intervening_edit": false,
+  "receipts": [
+    {
+      "kind": "local_test",
+      "completed_at": "2026-11-17T19:21:26Z",
+      "head_sha": "355ae83abe163ab9bbe2aaf7a59cc055f220d13e",
+      "source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44157642628",
+      "test_count": 3,
+      "status": "success",
+      "test_scope_prespecified": true
+    }
+  ],
+  "source_verification": {
+    "candidate_patch_sha256": "b7149c1ff128bf79dbe794f139b77a6c9c1417eb496824917874800e12c67af2",
+    "candidate_source_base_sha": "a565d6607d1d16933dbb1ea42cfb9de39ef80980",
+    "visible_tests_committed_before_candidate": "e71d3794071ac5847e1353c3b3e477fcb4c9f964",
+    "candidate_recipe_commit": "c6d0f3551c8082b5d16236b9dda5eca9409ea07a",
+    "github_actions_first_attempt_run_id": 44157642628,
+    "claim_boundary": "INITIAL_ATTEMPT_ONLY_NOT_POST_FEEDBACK_REPAIR_AND_NOT_ACTOR_ATTESTED",
+    "next_stage": "Freeze pre-oracle decisions; only then run independent hidden task tests"
+  }
+}
