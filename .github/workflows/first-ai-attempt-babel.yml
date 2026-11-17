@@ -47,6 +47,35 @@ jobs:
           git -C "$RUNNER_TEMP/babel_base" checkout --detach FETCH_HEAD
           test "$(git -C "$RUNNER_TEMP/babel_base" rev-parse HEAD)" = "$SOURCE_BASE_SHA"
           python3 -m pip install -e "$RUNNER_TEMP/babel_base"
+          # Babel's historic Git checkout omits generated CLDR .dat resources.
+          # Recover matching official 2.16.0 wheel data; do NOT use future source code.
+          python3 -m pip download --no-deps --only-binary=:all: \
+            --dest "$RUNNER_TEMP/babel_data_wheel" 'Babel==2.16.0'
+          python3 - <<'PYDATA'
+          import hashlib,json,os,pathlib,zipfile
+          target=pathlib.Path(os.environ['RUNNER_TEMP'])/'babel_base'
+          matches=list((pathlib.Path(os.environ['RUNNER_TEMP'])/'babel_data_wheel').glob('babel-2.16.0-*.whl'))
+          if len(matches)!=1:raise RuntimeError("Need exactly one Babel 2.16.0 wheel")
+          pkg=matches[0]
+          copied=0
+          with zipfile.ZipFile(pkg) as z:
+              paths=[p for p in z.namelist() if p=='babel/global.dat' or
+                     (p.startswith('babel/locale-data/') and p.endswith('.dat') and '..' not in p)]
+              if 'babel/global.dat' not in paths or 'babel/locale-data/en.dat' not in paths:
+                  raise RuntimeError("Official wheel missing required CLDR data")
+              for p in paths:
+                  dst=target/p
+                  dst.parent.mkdir(parents=True,exist_ok=True)
+                  dst.write_bytes(z.read(p))
+                  copied+=1
+          data={'source_repo_sha':os.environ['SOURCE_BASE_SHA'],
+                'source_package_version':'2.16.0',
+                'official_cldr_data_wheel_sha256':hashlib.sha256(pkg.read_bytes()).hexdigest(),
+                'copied_data_files':copied,
+                'scope':'generated localization resources only, no source code'}
+          pathlib.Path('pilot_output/cldr_environment_reconstruction.json').write_text(json.dumps(data,indent=2)+"\n")
+          print(json.dumps(data,sort_keys=True))
+          PYDATA
       - name: Execute predeclared visible checks on original base and save failures
         shell: bash
         run: |
