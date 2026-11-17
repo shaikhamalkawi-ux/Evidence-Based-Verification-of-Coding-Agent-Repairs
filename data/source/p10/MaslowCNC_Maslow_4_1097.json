@@ -1,0 +1,114 @@
+{
+  "source": "MaslowCNC/Maslow_4#1097",
+  "read_only": true,
+  "freeze_commit": "0dfca364481605b12c2699296a9f948cb790b095",
+  "records": {
+    "pr": {
+      "state": "closed",
+      "merged_at": null,
+      "author": "Copilot",
+      "head_sha": "d22ae6d8a0aad8e3a0555ab5b6fb1c6f0d0431de",
+      "base_sha": "70982031c2ee02248e5961d67f2890740b61fb22",
+      "created_at": "2026-09-19T03:02:52Z",
+      "commits": 2,
+      "comments": 11,
+      "review_comments": 0
+    },
+    "commits": [
+      {
+        "sha": "7773ec1c0ae5826b2d738703e42305ef67a9d68e",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-19T03:02:50Z",
+        "subject": "Initial plan"
+      },
+      {
+        "sha": "d22ae6d8a0aad8e3a0555ab5b6fb1c6f0d0431de",
+        "author": "Copilot",
+        "commit_author": "copilot-swe-agent[bot]",
+        "at": "2026-09-19T03:05:59Z",
+        "subject": "Update main UI trace and release controls"
+      }
+    ],
+    "comments": [
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-19T03:16:56Z",
+        "body": "@MaslowBot please build",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5738926187"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-09-19T03:19:59Z",
+        "body": "🤖 **Firmware & Web UI Compilation Complete** 🤖\n\n✅ Successfully compiled FluidNC firmware and ESP3D-WEBUI\n\n**Firmware Build Details:**\n- Commit: `d22ae6d8a0aad8e3a0555ab5b6fb1c6f0d0431de`\n- Version: `v1.25.0-5-gd22ae6d8-dirty`\n- Environment: `wifi_s3` (ESP32-S3)\n- Firmware size: 1.90 MB\n- Flash usage: 1.90 MB (64.8%)\n- RAM usage: 136.2 KB (42.6%)\n\n**Web UI Build Details:**\n- Language: English only\n- WebUI size: 139.68 KB (compressed)\n- Format: index.html.gz\n\n**Download:**\nThe firmware package (containing firmware.bin, index.html.gz, and installation instructions) has been uploaded as a build artifact named \"firmware-package\" and can be downloaded from the [Actions tab](https://github.com/MaslowCNC/Maslow_4/actions/runs/35418103754).\n\nTo test this release please:\n[] Try running calibration with a fresh maslow.yaml file\n[] Test jogging the machine to see that movements are normal\n[] Try running a simple gcode file\n\n_This comment was automatically generated in response to a build request",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5738948614"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-19T03:46:09Z",
+        "body": "@MaslowBot change background color of the Release button to Gold",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5739110399"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-19T03:46:16Z",
+        "body": "@copilot-swe-agent\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot change background color of the Release button to Gold\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot-swe-agent can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5739111107"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-19T06:01:39Z",
+        "body": "@MaslowBot change Release button on UI to color \"gold\"",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5739807254"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-19T06:01:50Z",
+        "body": "@copilot-swe-agent\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot change Release button on UI to color \"gold\"\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot-swe-agent can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5739808022"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-19T20:41:26Z",
+        "body": "@MaslowBot please change size of buttons \"Run\", \"Stop\", \"Idle\", Trace Boundary\" to match \"Apply Tension\"",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5745147032"
+      },
+      {
+        "type": "",
+        "user": "MaslowBot",
+        "created_at": "2026-09-19T20:41:35Z",
+        "body": "@copilot-swe-agent\n\nUser @IDAbbott mentioned @MaslowBot with the following request:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n@MaslowBot please change size of buttons \"Run\", \"Stop\", \"Idle\", Trace Boundary\" to match \"Apply Tension\"\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n_This comment was automatically relayed by MaslowBot so that @copilot-swe-agent can respond to the request._",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5745147842"
+      },
+      {
+        "type": "",
+        "user": "IDAbbott",
+        "created_at": "2026-09-19T22:21:09Z",
+        "body": "@BarbourSmith Copilate was not responding so created #1098 and #1099. Close or ignore #1096 and #1097.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-5745723028"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-20T04:03:39Z",
+        "body": "This pull request has been automatically marked as stale because it has not had recent activity for 30 days.\nIt will be closed in 7 days if no further activity occurs.\nThank you for your contributions.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-6283094953"
+      },
+      {
+        "type": "",
+        "user": "github-actions[bot]",
+        "created_at": "2026-10-27T04:15:42Z",
+        "body": "This pull request has been automatically closed due to inactivity.\nIf you believe this PR is still relevant, please feel free to reopen it or create a new pull request.",
+        "url": "https://github.com/MaslowCNC/Maslow_4/pull/1097#issuecomment-6433602751"
+      }
+    ]
+  },
+  "errors": []
+}
