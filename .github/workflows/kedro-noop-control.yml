@@ -1,0 +1,169 @@
+name: Kedro no-op source control for benchmark P2P audit (DIAGNOSTIC ONLY)
+on:
+  push:
+    paths:
+      - '.github/workflows/kedro-noop-control.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  baseline-control:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      INSTANCE_ID: kedro-org__kedro-4406
+      BASE_SHA: a565d6607d1d16933dbb1ea42cfb9de39ef80980
+      DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      RUN_NAME: evcar-kedro-noop-control-20261117
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - name: Check registered diagnostic control
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p null_control_output
+          python3 - <<'PY'
+          import json,os
+          d=json.load(open('pilot/kedro/null_semantic_patch_control_prereg.json'))
+          assert d['instance_id']==os.environ['INSTANCE_ID']
+          assert d['base_commit']==os.environ['BASE_SHA']
+          assert d['comparator'].startswith("Comment-only")
+          assert d['status']=='PREREGISTERED_AFTER_DISCLOSURE_OF_FIRST_AI_ORACLE'
+          print('Post-reveal diagnostic-only protocol admitted')
+          PY
+          docker version
+      - name: Prepare exact Kedro baseline and no-op test patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/kedro_base"
+          git -C "$RUNNER_TEMP/kedro_base" remote add origin https://github.com/kedro-org/kedro.git
+          git -C "$RUNNER_TEMP/kedro_base" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/kedro_base" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/kedro_base" rev-parse HEAD)" = "$BASE_SHA"
+          printf '\n# EVCAR_DIAGNOSTIC_COMMENT_ONLY_NO_FUNCTIONAL_CHANGE\n' >> "$RUNNER_TEMP/kedro_base/kedro/__init__.py"
+          git -C "$RUNNER_TEMP/kedro_base" diff --check
+          git -C "$RUNNER_TEMP/kedro_base" diff -- kedro/__init__.py > null_control_output/noop_patch.diff
+          test -s null_control_output/noop_patch.diff
+          python3 -m py_compile "$RUNNER_TEMP/kedro_base/kedro/__init__.py"
+          python3 - <<'PY'
+          import json,hashlib,pathlib,os
+          patch=pathlib.Path('null_control_output/noop_patch.diff').read_text()
+          assert '+# EVCAR_DIAGNOSTIC_COMMENT_ONLY_NO_FUNCTIONAL_CHANGE' in patch
+          assert patch.count('@@ ')==1
+          obj={'instance_id':os.environ['INSTANCE_ID'],'model_name_or_path':'diagnostic_comment_only_baseline',
+               'model_patch':patch}
+          pathlib.Path('null_control_output/predictions.jsonl').write_text(json.dumps(obj)+'\n')
+          pathlib.Path('null_control_output/noop_patch_sha256.txt').write_text(
+               hashlib.sha256(patch.encode()).hexdigest()+'\n')
+          PY
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install exact original oracle code
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/evaluator"
+          git -C "$RUNNER_TEMP/evaluator" fetch --depth 1 origin "$HARNESS_SHA"
+          git -C "$RUNNER_TEMP/evaluator" checkout --detach "$HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/evaluator" rev-parse HEAD)" = "$HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/evaluator"
+          python3 -m pip freeze > null_control_output/python_environment.txt
+      - name: Restore same immutable dataset snapshot inside isolated evaluator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,os
+          from datasets import load_dataset
+          row=[dict(x) for x in load_dataset("SWE-bench-Live/SWE-bench-Live",split="lite",
+                      revision=os.environ['DATASET_REV']) if x['instance_id']==os.environ['INSTANCE_ID']]
+          if len(row)!=1:raise RuntimeError('Missing frozen original task')
+          path=pathlib.Path(os.environ['RUNNER_TEMP'])/'kedro_noop_task.jsonl'
+          path.write_text(json.dumps(row[0],default=str,ensure_ascii=False)+'\n')
+          print('Frozen case loaded; test patch is never modified')
+          PY
+      - name: Run official full original oracle against no-op control
+        id: full_test
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          date -u +'%Y-%m-%dT%H:%M:%SZ' > null_control_output/oracle_started_utc.txt
+          cd "$RUNNER_TEMP/evaluator"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/kedro_noop_task.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/null_control_output/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "$RUN_NAME" \
+            > "$GITHUB_WORKSPACE/null_control_output/harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/null_control_output/harness_exit_code.txt"
+          tail -n 75 "$GITHUB_WORKSPACE/null_control_output/harness_stdout.log" || true
+          exit "$rc"
+      - name: Preserve scoped comparator test identities and provenance
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,os,hashlib,shutil
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'evaluator'
+          out=pathlib.Path('null_control_output')
+          iid=os.environ['INSTANCE_ID']
+          reports=[]
+          for path in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(path):continue
+              try:
+                  data=json.loads(path.read_text())
+                  if isinstance(data,dict) and iid in data:reports.append((path,data[iid]))
+              except (OSError,ValueError):pass
+          summary={'classification':'POST_REVEAL_DIAGNOSTIC_NOT_PROSPECTIVE',
+                   'instance_id':iid,'source_base_sha':os.environ['BASE_SHA'],
+                   'source_dataset_revision':os.environ['DATASET_REV'],
+                   'oracle_harness_sha':os.environ['HARNESS_SHA'],
+                   'reports':len(reports),'status':'HOLD_NO_EXECUTED_ORACLE'}
+          if len(reports)==1:
+              p,d=reports[0]
+              shutil.copyfile(p,out/'official_report.json')
+              st=d.get('tests_status',{})
+              f=st.get('FAIL_TO_PASS',{});pp=st.get('PASS_TO_PASS',{})
+              ok_f,bad_f=f.get('success',[]),f.get('failure',[])
+              ok_p,bad_p=pp.get('success',[]),pp.get('failure',[])
+              if all(isinstance(q,list) for q in (ok_f,bad_f,ok_p,bad_p)):
+                  summary.update({'f2p_pass':len(ok_f),'f2p_fail':len(bad_f),
+                                  'p2p_pass':len(ok_p),'p2p_fail':len(bad_p),
+                                  'p2p_failed_test_ids':bad_p,
+                                  'status':'EXECUTED_DIAGNOSTIC' if len(ok_p)+len(bad_p)>0 else 'HOLD_ZERO_TESTS'})
+              tp=p.parent/'test_output.txt'
+              if tp.is_file():
+                  shutil.copyfile(tp,out/'original_test_output.txt')
+                  summary['original_test_output_sha256']=hashlib.sha256(tp.read_bytes()).hexdigest()
+              lg=p.parent/'run_instance.log'
+              if lg.is_file():shutil.copyfile(lg,out/'run_instance.log')
+          (out/'control_report.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          print(json.dumps({k:v for k,v in summary.items() if k!='p2p_failed_test_ids'},indent=2))
+          PY
+          docker image ls --digests > null_control_output/docker_images.txt || true
+          df -h / > null_control_output/disk_after.txt || true
+      - name: Upload no-op diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: kedro-noop-p2p-diagnostic
+          path: null_control_output/
+          retention-days: 30
+          if-no-files-found: error
