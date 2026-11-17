@@ -1,0 +1,65 @@
+name: Prepare frozen tasks for coding agent (problem and base SHA only)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/export-visible-task-frame.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  allowed-task-export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout preregistered task frame
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install fixed read-only dataset clients
+        run: python3 -m pip install datasets==5.2.0 huggingface-hub==2.4.0
+      - name: Emit allowlisted visible task metadata and descriptions only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib,sys
+          from datasets import load_dataset
+          sys.path.insert(0,str(pathlib.Path("scripts").resolve()))
+          from export_agent_visible_tasks import save_visible
+          frame=json.loads(pathlib.Path("pilot/frozen_task_frame_20261117.json").read_text())
+          sha=frame["dataset_revision_sha"]
+          assert sha=="babb27e45e072219195db7a744bbf0d3c1a36e56"
+          assert frame["n_selected"]==10 and frame["source_execution"]["github_actions_run_id"]==44156082711
+          # The source loader holds all fields in this isolated runner process.
+          # The export function writes ONLY explicitly allowed, agent-visible fields.
+          dataset=load_dataset(frame["dataset_id"],split=frame["split"],revision=sha)
+          allowed=save_visible(frame,list(dataset),pathlib.Path("agent_visible/ten_issues.jsonl"))
+          pathlib.Path("agent_visible/revision.txt").write_text(sha+"\n")
+          manifest={"source_revision":sha,
+                    "selection_sha256":hashlib.sha256(pathlib.Path("pilot/frozen_task_frame_20261117.json").read_bytes()).hexdigest(),
+                    "visible_file_sha256":hashlib.sha256(pathlib.Path("agent_visible/ten_issues.jsonl").read_bytes()).hexdigest(),
+                    "count":len(allowed),
+                    "allowed_fields":["base_commit","instance_id","problem_sha256","problem_statement","repo"],
+                    "oracle_fields_exported":False,"agent_patch_generated":False}
+          pathlib.Path("agent_visible/manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
+          print("ALLOWED_METADATA_ONLY: "+json.dumps(manifest,sort_keys=True))
+          for index,rec in enumerate(allowed):
+              print("AGENT_VISIBLE_JSON: "+json.dumps(rec,ensure_ascii=False,sort_keys=True))
+          PY
+      - name: Verify export test suite
+        run: python3 -m unittest discover -s tests -v
+      - name: Save only permitted fields as a research artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ten-agent-visible-task-problems
+          path: agent_visible/
+          retention-days: 30
+          if-no-files-found: warn
