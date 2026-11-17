@@ -1,0 +1,114 @@
+name: Babel first AI candidate vs prespecified visible checks (NO hidden oracle)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/first-ai-attempt-babel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  babel-local-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SOURCE_REPO: https://github.com/python-babel/babel.git
+      SOURCE_BASE_SHA: fb8dbba89cfc8d8a54d4c34c60b38fd504c4906e
+      INSTANCE: python-babel__babel-1163
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout frozen visible source instructions
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate membership in ten-case frozen frame
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os
+          f=json.load(open("pilot/frozen_task_frame_20261117.json"))
+          assert f['selected'][3]['instance_id']==os.environ['INSTANCE']
+          assert f['selected'][3]['repo']=='python-babel/babel'
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retrieve exact historic Babel repository and install local dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pilot_output
+          git init "$RUNNER_TEMP/babel_base"
+          git -C "$RUNNER_TEMP/babel_base" remote add origin "$SOURCE_REPO"
+          git -C "$RUNNER_TEMP/babel_base" fetch --depth 1 origin "$SOURCE_BASE_SHA"
+          git -C "$RUNNER_TEMP/babel_base" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/babel_base" rev-parse HEAD)" = "$SOURCE_BASE_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/babel_base"
+      - name: Execute predeclared visible checks on original base and save failures
+        shell: bash
+        run: |
+          set -uo pipefail
+          PYTHONPATH="$RUNNER_TEMP/babel_base" python3 pilot/babel/visible_local_tests.py -v \
+            > pilot_output/visible_base_checks.log 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > pilot_output/base_local_exit_code.txt
+          tail -n 100 pilot_output/visible_base_checks.log || true
+          echo "BASELINE_PREPATCH_LOCAL_EXIT_CODE=$rc (no hidden oracle)"
+          # Baseline could pass or fail; neither is a hidden test result.
+          exit 0
+      - name: Apply first GPT-6 candidate with exact original blob SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/babel/ai_candidate_initial.py --repo "$RUNNER_TEMP/babel_base"
+          git -C "$RUNNER_TEMP/babel_base" diff --check
+          git -C "$RUNNER_TEMP/babel_base" diff -- babel/dates.py \
+            > pilot_output/initial_agent_patch.diff
+          test -s pilot_output/initial_agent_patch.diff
+          export GIT_AUTHOR_DATE="2026-11-17T19:40:00Z"
+          export GIT_COMMITTER_DATE="2026-11-17T19:40:00Z"
+          git -C "$RUNNER_TEMP/babel_base" add babel/dates.py
+          git -C "$RUNNER_TEMP/babel_base" -c user.name="AI-authored research candidate" -c user.email="ai-research@example.invalid" commit \
+            -m "GPT-6 initial attempt: localized compact relative duration pattern"
+          git -C "$RUNNER_TEMP/babel_base" rev-parse HEAD > pilot_output/target_head_sha.txt
+          sha256sum pilot_output/initial_agent_patch.diff pilot/babel/visible_local_tests.py > pilot_output/sha256.txt
+      - name: Run visible issue-derived tests on initial candidate and record all outcomes
+        shell: bash
+        run: |
+          set -uo pipefail
+          PYTHONPATH="$RUNNER_TEMP/babel_base" python3 pilot/babel/visible_local_tests.py -v \
+            > pilot_output/visible_candidate_checks.log 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > pilot_output/candidate_local_exit_code.txt
+          tail -n 130 pilot_output/visible_candidate_checks.log || true
+          python3 - <<'PY'
+          import json,os,pathlib,hashlib,re
+          out=pathlib.Path("pilot_output")
+          txt=(out/"visible_candidate_checks.log").read_text()
+          m=re.search(r"Ran (\d+) tests?",txt)
+          count=int(m.group(1)) if m else 0
+          rc=int((out/"candidate_local_exit_code.txt").read_text())
+          obj={"instance_id":os.environ["INSTANCE"],"candidate_stage":"INITIAL_ATTEMPT_NO_DEVELOPER_PUSHBACK",
+               "base_sha":os.environ["SOURCE_BASE_SHA"],
+               "candidate_head_sha":(out/"target_head_sha.txt").read_text().strip(),
+               "patch_sha256":hashlib.sha256((out/"initial_agent_patch.diff").read_bytes()).hexdigest(),
+               "local_test_count":count,"local_test_exit_code":rc,
+               "local_pass":bool(rc==0 and count==7 and re.search(r"^OK$",txt,re.M)),
+               "hidden_oracle_executed":False,
+               "human_corrective_feedback_received":False,
+               "actor_independently_attested":False}
+          (out/"initial_receipt.json").write_text(json.dumps(obj,indent=2)+"\n")
+          print("LOCAL_RECEIPT "+json.dumps(obj))
+          PY
+          exit 0
+      - name: Upload initial patch with complete visible baseline and candidate results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: babel-initial-visible-only
+          path: pilot_output/
+          retention-days: 30
+          if-no-files-found: error
