@@ -1,0 +1,31 @@
+{
+  "protocol": "EVCAR_PILOT_BABEL_INITIAL_ORACLE_20261117",
+  "status": "PREORACLE_REGISTERED",
+  "task_stage": "INITIAL_ATTEMPT_ONLY_NO_HUMAN_PUSHBACK",
+  "instance_id": "python-babel__babel-1163",
+  "upstream_repo": "python-babel/babel",
+  "upstream_base_sha": "fb8dbba89cfc8d8a54d4c34c60b38fd504c4906e",
+  "target_candidate_head_sha": "e73fbf2b9f4be33af74a29c84bec6814998abe46",
+  "target_patch_sha256": "4e395f0de164252d12b0d8174eed50d51f94c771a96f9624b470cc00343ed821",
+  "dataset_repo": "SWE-bench-Live/SWE-bench-Live",
+  "dataset_revision_sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "dataset_split": "lite",
+  "harness_repo": "microsoft/SWE-bench-Live",
+  "harness_ref": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "docker_namespace": "starryzhang",
+  "preoracle_github_commit": "3278e4a23c3263dd2e07f87684b984037c29d52d",
+  "preoracle_decisions_sha256": "b9f5f0669e8f0aea3cb87ea24bbfe4cf255874f485b3500b54e581c4ee019081",
+  "preoracle_decision_time_utc": "2026-11-17T19:42:02Z",
+  "local_test_scope": "Seven preregistered visible tests; two failed due en_US short CLDR 'hr.' vs reporter 'hrs'",
+  "oracle_execution_order": [
+    "verify locked public decision seal",
+    "recreate exact GPT-6 initial candidate",
+    "verify candidate source patch SHA and target Git SHA",
+    "download original pinned oracle only in evaluator",
+    "execute original heldout test suite",
+    "archive raw execution logs/test receipts",
+    "score same-SHA sealed decisions"
+  ],
+  "claim_boundary": "single initial model candidate; not a post-feedback correction, no method superiority",
+  "no_substitution": "If original tests missing, retain HOLD; do not replace tests/case"
+}
