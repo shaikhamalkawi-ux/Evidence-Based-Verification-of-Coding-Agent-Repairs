@@ -27,7 +27,7 @@ jobs:
           import datetime,json,pathlib
           p=pathlib.Path("pilot/babel/decision_input_without_time.json")
           x=json.loads(p.read_text())
-          assert x["episode_id"]=="babel-org__babel-4406__INITIAL_ATTEMPT_ONLY"
+          assert x["episode_id"]=="python-babel__babel-1163__INITIAL_ATTEMPT_ONLY"
           assert x["head_sha"]==x["receipts"][0]["head_sha"]
           assert x["receipts"][0]["test_count"]==7
           assert x["target_agent_is_commit_author"] is False
