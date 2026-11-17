@@ -1,0 +1,62 @@
+name: Seal first Kedro AI candidate BEFORE any hidden oracle (INITIAL STAGE ONLY)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/seal-kedro-initial.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preoracle-decision-seal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout decision gate and local receipts
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate staged records and lock decision time
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pilot_seal
+          python3 - <<'PY'
+          import datetime,json,pathlib
+          p=pathlib.Path("pilot/kedro/decision_input_without_time.json")
+          x=json.loads(p.read_text())
+          assert x["episode_id"]=="kedro-org__kedro-4406__INITIAL_ATTEMPT_ONLY"
+          assert x["head_sha"]==x["receipts"][0]["head_sha"]
+          assert x["receipts"][0]["test_count"]==3
+          assert x["target_agent_is_commit_author"] is False
+          assert x["source_verification"]["next_stage"].startswith("Freeze pre-oracle")
+          x["t_decision"]=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00","Z")
+          pathlib.Path("pilot_seal/decision_input.jsonl").write_text(json.dumps(x,sort_keys=True)+"\n")
+          print("UTC pre-oracle decision time:",x["t_decision"])
+          PY
+          python3 scripts/p9_decide.py \
+            --input pilot_seal/decision_input.jsonl \
+            --out pilot_seal/sealed
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          p=pathlib.Path("pilot_seal")
+          d=json.loads((p/"sealed/P9_DECISIONS_SEALED.jsonl").read_text())
+          assert d["decisions"]=={"self_report":"ACCEPT","local_pass":"ACCEPT","source_linked":"HOLD"}
+          for name,fp in [
+             ("EVCAR_LOCKED_INPUT",p/"decision_input.jsonl"),
+             ("EVCAR_LOCKED_DECISIONS",p/"sealed/P9_DECISIONS_SEALED.jsonl"),
+             ("EVCAR_LOCKED_MANIFEST",p/"sealed/P9_DECISION_SEAL.json")
+          ]:
+              print(name+"="+json.dumps(fp.read_text(encoding="utf-8")))
+          print("NO_ORACLE_RUN: decision was sealed using local records only.")
+          PY
+      - name: Archive pre-oracle seal for external timestamp audit
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: kedro-initial-preoracle-sealed-decision
+          path: pilot_seal/
+          retention-days: 30
+          if-no-files-found: error
