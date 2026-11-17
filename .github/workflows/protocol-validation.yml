@@ -1,4 +1,4 @@
-name: Evidence-based repair protocol checks (synthetic only)
+name: Repair protocol software tests and frozen-source audit
 
 on:
   push:
@@ -9,6 +9,8 @@ on:
       - 'scripts/**'
       - 'tests/**'
       - 'examples/**'
+      - 'data/**'
+      - 'protocol/**'
   pull_request:
     paths:
       - '.github/workflows/protocol-validation.yml'
@@ -65,3 +67,17 @@ jobs:
           assert result['policies']['source_linked']['false_accept']==0
           print('PASS: synthetic software fixture only; no independent task-oracle execution')
           PYVERIFY
+
+      - name: Recompute real P10 source coverage without oracle labels
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_p10_source.py --output "$RUNNER_TEMP/P10_SOURCE_AUDIT.json"
+      - name: Preserve machine-readable source audit
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: frozen-source-audit-${{ github.run_id }}
+          path: ${{ runner.temp }}/P10_SOURCE_AUDIT.json
+          if-no-files-found: warn
+          retention-days: 30
