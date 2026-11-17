@@ -29,5 +29,6 @@
   },
   "data_isolation": "hidden F2P/P2P/test_patch never read by candidate or local decision policies; official downstream evaluator only after sealed public commit",
   "author_boundary": "ChatGPT GPT-6 proposed the code patch; author name in local git commit deliberately artificial, no independently authenticated agent actor. No real developer pushback in this initial candidate.",
-  "claim_boundary": "single initial agent proposal hidden-oracle test only, not experimental effect, not repair after user correction, not a comparative study of X1"
+  "claim_boundary": "single initial agent proposal hidden-oracle test only, not experimental effect, not repair after user correction, not a comparative study of X1",
+  "preoracle_github_commit": "9141e7c3ec254721ef174597571ede3a1eaf7d17"
 }
