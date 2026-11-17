@@ -1,0 +1,124 @@
+name: Faker AI initial candidate with visible-only tests (NO HIDDEN ORACLE)
+
+on:
+  push:
+    paths: ['.github/workflows/first-ai-attempt-faker.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  faker-visible-repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      SOURCE_REPO: https://github.com/joke2k/faker.git
+      SOURCE_BASE_SHA: da39d8262b1b4a3d88c3bf934c047deca354b01e
+      INSTANCE: joke2k__faker-2155
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout frozen task frame and pre-oracle candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Check prespecified membership, source version and visible-only boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          frame=json.load(open("pilot/frozen_task_frame_20261117.json"))
+          assert frame["dataset_revision_sha"]=="babb27e45e072219195db7a744bbf0d3c1a36e56"
+          assert frame["selected"][7]["instance_id"]==os.environ["INSTANCE"]
+          assert frame["selected"][7]["repo"]=="joke2k/faker"
+          assert frame["selected"][7]["selection_sha256"]=="041334c6fa307607a14a31fdc57288f9deb9dae30c2f7c67925d1b57caea1b29"
+          print("VISIBLE_TASK_ONLY: exact frozen record, no hidden test_patch or oracle fields")
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch exact historical repo and install requirements
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p faker_visible_output
+          git init "$RUNNER_TEMP/faker_base"
+          git -C "$RUNNER_TEMP/faker_base" remote add origin "$SOURCE_REPO"
+          git -C "$RUNNER_TEMP/faker_base" fetch --depth 1 origin "$SOURCE_BASE_SHA"
+          git -C "$RUNNER_TEMP/faker_base" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/faker_base" rev-parse HEAD)" = "$SOURCE_BASE_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/faker_base"
+          python3 -m pip freeze > faker_visible_output/python_environment.txt
+          git -C "$RUNNER_TEMP/faker_base" rev-parse HEAD > faker_visible_output/base_commit_sha.txt
+
+      - name: Execute predeclared visible tests BEFORE patch
+        shell: bash
+        run: |
+          set +e
+          PYTHONPATH="$RUNNER_TEMP/faker_base" python3 pilot/faker/visible_local_tests.py -v             > faker_visible_output/base_visible_tests.log 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > faker_visible_output/base_visible_tests_exit.txt
+          tail -n 70 faker_visible_output/base_visible_tests.log || true
+          echo "BASELINE_VISIBLE_EXIT=${rc}; no hidden benchmark oracle executed"
+          exit 0
+
+      - name: Apply GPT-6 initial candidate with exact Git blob lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/faker/ai_candidate_initial.py --repo "$RUNNER_TEMP/faker_base"
+          git -C "$RUNNER_TEMP/faker_base" diff --check
+          git -C "$RUNNER_TEMP/faker_base" diff -- faker/providers/date_time/__init__.py             > faker_visible_output/initial_agent_patch.diff
+          test -s faker_visible_output/initial_agent_patch.diff
+          # Artificial, fixed commit dates ONLY to reproduce a local SHA.
+          # This timestamp is NOT an observation or evidence of agent behavior.
+          export GIT_AUTHOR_DATE="2026-11-17T19:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-17T19:00:00Z"
+          git -C "$RUNNER_TEMP/faker_base" add faker/providers/date_time/__init__.py
+          git -C "$RUNNER_TEMP/faker_base"             -c user.name="AI-generated research prototype"             -c user.email="ai-research@example.invalid"             commit -m "GPT-6 initial candidate: preserve epoch start with relative end"
+          git -C "$RUNNER_TEMP/faker_base" rev-parse HEAD > faker_visible_output/candidate_head_sha.txt
+          sha256sum faker_visible_output/initial_agent_patch.diff pilot/faker/visible_local_tests.py             > faker_visible_output/sha256.txt
+
+      - name: Run all eight visible tests after first AI patch
+        shell: bash
+        run: |
+          set +e
+          PYTHONPATH="$RUNNER_TEMP/faker_base" python3 pilot/faker/visible_local_tests.py -v             > faker_visible_output/candidate_visible_tests.log 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > faker_visible_output/candidate_visible_tests_exit.txt
+          tail -n 85 faker_visible_output/candidate_visible_tests.log || true
+          python3 - <<'PY'
+          import hashlib,json,pathlib,re,os
+          root=pathlib.Path("faker_visible_output")
+          txt=(root/"candidate_visible_tests.log").read_text()
+          m=re.search(r"Ran (\d+) tests?",txt)
+          n=int(m.group(1)) if m else 0
+          rc=int((root/"candidate_visible_tests_exit.txt").read_text())
+          receipt={"instance_id":os.environ["INSTANCE"],
+            "stage":"GPT6_INITIAL_ATTEMPT_NO_DEVELOPER_PUSHBACK",
+            "base_commit":os.environ["SOURCE_BASE_SHA"],
+            "candidate_head_sha":(root/"candidate_head_sha.txt").read_text().strip(),
+            "candidate_patch_sha256":hashlib.sha256((root/"initial_agent_patch.diff").read_bytes()).hexdigest(),
+            "visible_test_count":n,"visible_test_exit_code":rc,
+            "visible_test_pass":bool(rc==0 and n==8 and re.search(r"^OK$",txt,re.M)),
+            "hidden_oracle_executed":False,
+            "human_corrective_feedback_received":False,
+            "agent_authorship_independently_attested":False}
+          (root/"initial_visible_receipt.json").write_text(json.dumps(receipt,indent=2)+"\n")
+          print("VISIBLE_RECEIPT "+json.dumps(receipt))
+          PY
+          exit 0
+
+      - name: Upload complete source-locked visible-stage outputs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: faker-initial-visible-only-${{ github.run_id }}
+          path: faker_visible_output/
+          retention-days: 30
+          if-no-files-found: error
