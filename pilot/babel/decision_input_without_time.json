@@ -1,0 +1,34 @@
+{
+  "episode_id": "python-babel__babel-1163__INITIAL_ATTEMPT_ONLY",
+  "task_family": "python_localization_relative_duration",
+  "repo": "python-babel/babel",
+  "head_sha": "e73fbf2b9f4be33af74a29c84bec6814998abe46",
+  "patch_applied": true,
+  "agent_claimed_fixed": false,
+  "target_agent_is_commit_author": false,
+  "unrelated_intervening_edit": false,
+  "receipts": [
+    {
+      "kind": "local_test",
+      "completed_at": "2026-11-17T19:35:46Z",
+      "head_sha": "e73fbf2b9f4be33af74a29c84bec6814998abe46",
+      "source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44160187692",
+      "test_count": 7,
+      "status": "failure",
+      "test_scope_prespecified": true
+    }
+  ],
+  "source_verification": {
+    "candidate_patch_sha256": "4e395f0de164252d12b0d8174eed50d51f94c771a96f9624b470cc00343ed821",
+    "candidate_source_base_sha": "fb8dbba89cfc8d8a54d4c34c60b38fd504c4906e",
+    "visible_tests_committed_before_candidate": "b250fcf6855a3a86906b452974d1d7ae61521977",
+    "candidate_recipe_commit": "ee4ed187f457fe71303a644804cef4321808c9a4",
+    "locale_data_reconstructed_from_official_wheel_sha256": "368b5b98b37c06b7daf6696391c3240c938b37767d4584413e8438c5c435fa8b",
+    "candidate_run_id": 44160187692,
+    "observed_test_count": 7,
+    "observed_test_failures": 2,
+    "reason": "CLDR short width emits 'hr.' whereas issue example writes 'hrs'; no changes to preregistered visible expectations",
+    "claim_boundary": "INITIAL_ATTEMPT_ONLY_NOT_POST_PUSHBACK_AND_NOT_ACTOR_ATTESTED",
+    "next_stage": "Freeze pre-oracle decisions; only then run independent hidden task tests"
+  }
+}
