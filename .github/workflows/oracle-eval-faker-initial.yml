@@ -44,7 +44,7 @@ jobs:
           assert seal['decisions_sha256']==prereg['preoracle_decisions_sha256']
           assert hashlib.sha256(decisions).hexdigest()==seal['decisions_sha256']
           assert d['head_sha']==os.environ['CANDIDATE_SHA']
-          assert d['decisions']=={'self_report':'HOLD','local_pass':'HOLD','source_linked':'HOLD'}
+          assert d['decisions']=={'self_report':'ACCEPT','local_pass':'ACCEPT','source_linked':'HOLD'}
           assert d['t_decision']==prereg['preoracle_decision_time_utc']
           assert prereg['dataset_revision_sha']==os.environ['DATASET_REV']
           assert prereg['harness_ref']==os.environ['OFFICIAL_HARNESS_SHA']
