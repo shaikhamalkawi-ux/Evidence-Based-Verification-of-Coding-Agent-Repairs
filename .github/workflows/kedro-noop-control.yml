@@ -55,7 +55,10 @@ jobs:
           import json,hashlib,pathlib,os
           patch=pathlib.Path('null_control_output/noop_patch.diff').read_text()
           assert '+# EVCAR_DIAGNOSTIC_COMMENT_ONLY_NO_FUNCTIONAL_CHANGE' in patch
-          assert patch.count('@@ ')==1
+          # Some valid one-hunk diffs include function context after a second '@@ '.
+          # Confirm the only added executable source is a Python comment instead.
+          added=[line for line in patch.splitlines() if line.startswith('+') and not line.startswith('+++')]
+          assert added==['+', '+# EVCAR_DIAGNOSTIC_COMMENT_ONLY_NO_FUNCTIONAL_CHANGE']
           obj={'instance_id':os.environ['INSTANCE_ID'],'model_name_or_path':'diagnostic_comment_only_baseline',
                'model_patch':patch}
           pathlib.Path('null_control_output/predictions.jsonl').write_text(json.dumps(obj)+'\n')
