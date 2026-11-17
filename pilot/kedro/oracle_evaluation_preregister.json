@@ -1,0 +1,30 @@
+{
+  "protocol": "EVCAR_PILOT_KEDRO_INITIAL_ORACLE_20261117",
+  "status": "PREORACLE_REGISTERED",
+  "task_stage": "INITIAL_ATTEMPT_ONLY_NO_HUMAN_PUSHBACK",
+  "instance_id": "kedro-org__kedro-4406",
+  "upstream_repo": "kedro-org/kedro",
+  "upstream_base_sha": "a565d6607d1d16933dbb1ea42cfb9de39ef80980",
+  "target_candidate_head_sha": "355ae83abe163ab9bbe2aaf7a59cc055f220d13e",
+  "target_patch_sha256": "b7149c1ff128bf79dbe794f139b77a6c9c1417eb496824917874800e12c67af2",
+  "dataset_repo": "SWE-bench-Live/SWE-bench-Live",
+  "dataset_revision_sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "dataset_split": "lite",
+  "harness_repo": "microsoft/SWE-bench-Live",
+  "harness_ref": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "docker_namespace": "starryzhang",
+  "preoracle_github_commit": "2d030624d0ec1d8cf4712cbc37d6315f687d18ad",
+  "preoracle_decisions_sha256": "f9d7e379f5dae88a1dfd218d511dceaf5bf06774cbaa13238e5a24214735bd36",
+  "preoracle_decision_time_utc": "2026-11-17T19:23:50Z",
+  "oracle_execution_order": [
+    "verify immutable decision seal",
+    "recreate exact initial candidate",
+    "verify patch and candidate SHA",
+    "download pinned oracle snapshot inside separate evaluator only",
+    "run original hidden tests",
+    "archive authenticated report and raw logs",
+    "score sealed decisions on that exact candidate only"
+  ],
+  "allowed_result_scope": "Single initial-attempt source-linked diagnostic; no postpushback recovery inference; no model/generalization claims.",
+  "no_substitution_rule": "If image or original tests fail, remain HOLD. Do not replace target or fall back to easier tests."
+}
