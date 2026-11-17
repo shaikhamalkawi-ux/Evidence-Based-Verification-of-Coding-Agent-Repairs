@@ -50,6 +50,7 @@ jobs:
       - name: Execute predeclared visible checks on original base and save failures
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           PYTHONPATH="$RUNNER_TEMP/babel_base" python3 pilot/babel/visible_local_tests.py -v \
             > pilot_output/visible_base_checks.log 2>&1
@@ -78,6 +79,7 @@ jobs:
       - name: Run visible issue-derived tests on initial candidate and record all outcomes
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           PYTHONPATH="$RUNNER_TEMP/babel_base" python3 pilot/babel/visible_local_tests.py -v \
             > pilot_output/visible_candidate_checks.log 2>&1
