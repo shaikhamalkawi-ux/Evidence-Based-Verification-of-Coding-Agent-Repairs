@@ -71,7 +71,7 @@ jobs:
           export GIT_AUTHOR_DATE="2026-11-17T19:00:00Z"
           export GIT_COMMITTER_DATE="2026-11-17T19:00:00Z"
           git -C "$RUNNER_TEMP/faker_base" add faker/providers/date_time/__init__.py
-          git -C "$RUNNER_TEMP/faker_base" -c user.name="AI-authored research candidate" -c user.email="ai-research@example.invalid" \
+          git -C "$RUNNER_TEMP/faker_base" -c user.name="AI-generated research prototype" -c user.email="ai-research@example.invalid" \
             commit -m "GPT-6 initial candidate: preserve epoch start with relative end"
           test "$(git -C "$RUNNER_TEMP/faker_base" rev-parse HEAD)" = "$CANDIDATE_SHA"
           python3 - <<'PY'
