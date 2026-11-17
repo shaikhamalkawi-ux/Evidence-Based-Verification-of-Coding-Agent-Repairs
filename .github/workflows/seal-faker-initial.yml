@@ -1,0 +1,59 @@
+name: Seal Faker initial candidate decisions before hidden oracle (NO PUSHBACK)
+
+on:
+  push:
+    paths: ['.github/workflows/seal-faker-initial.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preoracle-seal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout frozen decision inputs
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify predecision source receipts and apply real UTC decision timestamp
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p faker_seal
+          python3 - <<'PY'
+          import datetime,json,pathlib
+          x=json.loads(pathlib.Path('pilot/faker/decision_input_without_time.json').read_text())
+          assert x['episode_id']=='joke2k__faker-2155__INITIAL_ATTEMPT_ONLY'
+          assert x['head_sha']=='b9c8202d097f88fd43150681edbe14c085bbe1c3'
+          assert x['receipts'][0]['status']=='success' and x['receipts'][0]['test_count']==8
+          assert x['target_agent_is_commit_author'] is False
+          assert x['source_verification']['candidate_patch_sha256']=='1d99fd20d14ddc88ec5c2f170f4c9ed7c1a9a9952ac971b2ce6de971715dd6d7'
+          x['t_decision']=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
+          assert x['t_decision'] > x['receipts'][0]['completed_at']
+          pathlib.Path('faker_seal/decision_input.jsonl').write_text(json.dumps(x,sort_keys=True)+'\n')
+          print('Faker decision actual UTC timestamp:',x['t_decision'])
+          PY
+          python3 scripts/p9_decide.py --input faker_seal/decision_input.jsonl --out faker_seal/sealed
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('faker_seal')
+          d=json.loads((root/'sealed/P9_DECISIONS_SEALED.jsonl').read_text())
+          assert d['decisions']=={'self_report':'ACCEPT','local_pass':'ACCEPT','source_linked':'HOLD'}
+          for label,p in [
+            ('LOCKED_FAKER_INPUT',root/'decision_input.jsonl'),
+            ('LOCKED_FAKER_DECISIONS',root/'sealed/P9_DECISIONS_SEALED.jsonl'),
+            ('LOCKED_FAKER_MANIFEST',root/'sealed/P9_DECISION_SEAL.json')
+          ]:
+              print(label+'='+p.read_text().strip())
+          print('NO HIDDEN ORACLE ACCESSED IN SEAL JOB')
+          PY
+      - name: Publish timestamped pre-oracle decision seal
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: faker-initial-preoracle-seal-${{ github.run_id }}
+          path: faker_seal/
+          retention-days: 30
+          if-no-files-found: error
