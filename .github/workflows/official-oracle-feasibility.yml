@@ -1,0 +1,144 @@
+name: Official SWE-bench-Live oracle infrastructure calibration (GOLD ONLY)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/official-oracle-feasibility.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  calibrate-original-harness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      OFFICIAL_REF: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      CALIBRATION_CASE: amoffat__sh-744
+      CALIBRATION_RUN: evcar-gold-calibration-20261117
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout registered protocol
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Check registered scope and runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p calibration_diagnostics
+          python3 - <<'PY'
+          import json,os
+          d=json.load(open('protocol/infrastructure_calibration_20261117.json'))
+          assert d['calibration_only'] is True
+          assert d['harness_commit']==os.environ['OFFICIAL_REF']
+          assert d['instance_ids']==[os.environ['CALIBRATION_CASE']]
+          assert d['patch_source']=='gold' and d['max_workers']==1
+          print('Calibration pre-registration checked; not an agent outcome')
+          PY
+          cp protocol/infrastructure_calibration_20261117.json calibration_diagnostics/preregistered_scope.json
+          df -h /
+          docker version
+      - name: Use Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install exact official Python-only evaluation source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-swebench-live"
+          git -C "$RUNNER_TEMP/official-swebench-live" fetch --depth 1 origin "$OFFICIAL_REF"
+          git -C "$RUNNER_TEMP/official-swebench-live" checkout --detach "$OFFICIAL_REF"
+          test "$(git -C "$RUNNER_TEMP/official-swebench-live" rev-parse HEAD)" = "$OFFICIAL_REF"
+          echo "$OFFICIAL_REF" > calibration_diagnostics/harness_commit.txt
+          python3 -m pip install -e "$RUNNER_TEMP/official-swebench-live"
+          python3 -m pip freeze > calibration_diagnostics/python_environment.txt
+      - name: Run official gold-patch reference case (infrastructure ONLY)
+        id: execute
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          cd "$RUNNER_TEMP/official-swebench-live"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name SWE-bench-Live/SWE-bench-Live \
+              --split lite \
+              --instance_ids "$CALIBRATION_CASE" \
+              --namespace starryzhang \
+              --predictions_path gold \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "$CALIBRATION_RUN" \
+            > "$GITHUB_WORKSPACE/calibration_diagnostics/harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/calibration_diagnostics/harness_exit_code.txt"
+          tail -n 75 "$GITHUB_WORKSPACE/calibration_diagnostics/harness_stdout.log" || true
+          exit "$rc"
+      - name: Capture exact SHA and executed-test report; missing results are HOLD
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib,hashlib,shutil
+          out=pathlib.Path(os.environ['GITHUB_WORKSPACE'])/'calibration_diagnostics'
+          out.mkdir(exist_ok=True)
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-swebench-live'
+          iid=os.environ['CALIBRATION_CASE']
+          eligible=[]
+          for p in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(p):continue
+              try:
+                  d=json.loads(p.read_text())
+                  if isinstance(d,dict) and iid in d:eligible.append((p,d[iid]))
+              except (ValueError,OSError):continue
+          o={'classification':'CALIBRATION_ONLY_NOT_AI_REPAIR',
+             'instance_id':iid,
+             'harness_commit':os.environ['OFFICIAL_REF'],
+             'github_run_id':os.environ.get('GITHUB_RUN_ID'),
+             'github_commit':os.environ.get('GITHUB_SHA'),
+             'report_count':len(eligible),
+             'status':'HOLD_NO_VALID_CASE_REPORT'}
+          if len(eligible)==1:
+              p,d=eligible[0]
+              shutil.copyfile(p,out/'official_report.json')
+              statuses=d.get('tests_status',{})
+              ft=statuses.get('FAIL_TO_PASS',{})
+              pt=statuses.get('PASS_TO_PASS',{})
+              if isinstance(ft,dict) and isinstance(pt,dict):
+                  vals=[ft.get('success',[]),ft.get('failure',[]),pt.get('success',[]),pt.get('failure',[])]
+                  if all(isinstance(v,list) for v in vals):
+                      n=sum(map(len,vals))
+                      o.update({'f2p_total':len(vals[0])+len(vals[1]),
+                                'f2p_passed':len(vals[0]),
+                                'p2p_total':len(vals[2])+len(vals[3]),
+                                'p2p_failed':len(vals[3]),
+                                'graded_test_count':n,
+                                'official_report_resolved':d.get('resolved'),
+                                'status':'EXECUTED_GOLD_CALIBRATION_ONLY' if n>0 else 'HOLD_ZERO_TESTS'})
+              testlog=p.parent/'test_output.txt'
+              if testlog.is_file():
+                  shutil.copyfile(testlog,out/'test_output.txt')
+                  o['test_output_sha256']=hashlib.sha256(testlog.read_bytes()).hexdigest()
+                  o['test_output_bytes']=testlog.stat().st_size
+              else:o['status']='HOLD_MISSING_RAW_TEST_OUTPUT'
+              runlog=p.parent/'run_instance.log'
+              if runlog.is_file():shutil.copyfile(runlog,out/'run_instance.log')
+          (out/'calibration_summary.json').write_text(json.dumps(o,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(o,indent=2))
+          PY
+          docker image ls --digests > calibration_diagnostics/docker_images.txt || true
+          df -h / > calibration_diagnostics/disk_after.txt || true
+      - name: Upload original-calibration evidence (even if blocked)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: original-oracle-gold-calibration
+          path: calibration_diagnostics/
+          retention-days: 30
+          if-no-files-found: error
