@@ -111,7 +111,7 @@ jobs:
           if len(selected)!=1:raise ValueError("Expected exactly one original benchmark task")
           # This whole dataset row (including tests) remains private to the evaluator runner.
           out=pathlib.Path(os.environ['RUNNER_TEMP'])/'heldout_oracle'/'instance.jsonl'
-          out.write_text(json.dumps(selected[0])+'\n')
+          out.write_text(json.dumps(selected[0],default=str,ensure_ascii=False)+'\n')
           print("Frozen evaluator input loaded after sealed decisions; withheld test fields not printed.")
           PY
       - name: Execute untouched official evaluator against AI patch
