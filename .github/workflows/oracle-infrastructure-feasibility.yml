@@ -1,0 +1,84 @@
+name: Held-out oracle infrastructure feasibility (GOLD ONLY)
+
+# Gold patches are benchmark references, NOT new coding-agent repairs.
+# This job is explicitly excluded from X1 policy-efficacy estimates.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/oracle-infrastructure-feasibility.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  one-reference-task:
+    name: One-task Docker harness feasibility, reference patch only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      HF_HUB_DISABLE_PROGRESS_BARS: '1'
+      HF_HOME: ${{ runner.temp }}/hf-cache
+      SWEBENCH_DOCKER_TIMEOUT: '900'
+    steps:
+      - name: Checkout pinned study code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Record resources, Docker, Python and provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "study_commit=${GITHUB_SHA}"
+          python3 --version
+          docker version
+          df -h /
+          free -h
+          mkdir -p infrastructure_logs
+          {
+            echo "study_commit=${GITHUB_SHA}"
+            echo "harness_commit=02e7a74ffd0b707aab73d203fe87bdc7c76afc8e"
+            echo "dataset=SWE-bench/SWE-bench_Lite"
+            echo "instance_id=sympy__sympy-20590"
+            echo "predictions=gold (REFERENCE ONLY)"
+            echo "purpose=one-instance harness feasibility, not agent evaluation"
+          } > infrastructure_logs/run_metadata.txt
+
+      - name: Install harness at an exact Git commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/swebench-env"
+          "$RUNNER_TEMP/swebench-env/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/swebench-env/bin/python" -m pip install --no-cache-dir             "git+https://github.com/SWE-bench/SWE-bench.git@02e7a74ffd0b707aab73d203fe87bdc7c76afc8e"
+          "$RUNNER_TEMP/swebench-env/bin/python" -m pip freeze > infrastructure_logs/pip_freeze.txt
+          docker system df
+
+      - name: Execute ONE official reference patch in Docker
+        shell: bash
+        run: |
+          set -o pipefail
+          set +e
+          "$RUNNER_TEMP/swebench-env/bin/python" -m swebench.harness.run_evaluation             --dataset_name SWE-bench/SWE-bench_Lite             --split test             --predictions_path gold             --instance_ids sympy__sympy-20590             --max_workers 1             --timeout 900             --run_id "gold_infra_${GITHUB_RUN_ID}"             2>&1 | tee infrastructure_logs/harness_stdout.txt
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "${rc}" > infrastructure_logs/harness_exit_code.txt
+          find logs/evaluation -type f 2>/dev/null | sort | head -100 || true
+          echo "harness_exit_code=${rc}"
+          exit "${rc}"
+
+      - name: Preserve provenance and execution logs regardless of outcome
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p infrastructure_logs
+          docker images --digests --format '{{.Repository}} {{.Tag}} {{.Digest}} {{.ID}}' > infrastructure_logs/docker_images.txt || true
+          docker ps -a --no-trunc > infrastructure_logs/docker_containers.txt || true
+          df -h / > infrastructure_logs/final_disk.txt || true
+          if [ -d logs/evaluation ]; then
+            cp -a logs/evaluation infrastructure_logs/evaluation || true
+          fi
+          find infrastructure_logs -type f -print0 | sort -z | xargs -0 -r sha256sum > infrastructure_logs/file_sha256_manifest.txt || true
