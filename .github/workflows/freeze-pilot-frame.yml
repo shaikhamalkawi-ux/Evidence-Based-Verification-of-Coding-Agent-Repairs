@@ -1,0 +1,79 @@
+name: Freeze ten ID-only SWE-bench-Live feasibility tasks (NO TESTS OR PATCHES)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/freeze-pilot-frame.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  id-only-source-frame:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout selector precommitted without oracle
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install data readers only
+        run: python3 -m pip install datasets==5.2.0 huggingface-hub==2.4.0
+      - name: Export only public task identifiers and repository names
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p feasibility_frame
+          python3 - <<'PY'
+          import json,pathlib
+          from huggingface_hub import HfApi
+          from datasets import load_dataset
+          root=pathlib.Path("feasibility_frame")
+          dataset_id="SWE-bench-Live/SWE-bench-Live"
+          revision=HfApi().dataset_info(dataset_id).sha
+          assert isinstance(revision,str) and len(revision)==40
+          rows=load_dataset(dataset_id,split="lite",revision=revision)
+          meta=[]
+          for r in rows:
+              if not isinstance(r.get("instance_id"),str) or not isinstance(r.get("repo"),str):
+                  raise ValueError("Dataset does not provide expected public metadata")
+              meta.append({"instance_id":r["instance_id"],"repo":r["repo"]})
+          (root/"metadata_only.jsonl").write_text("".join(json.dumps(x,sort_keys=True)+"\n" for x in meta),encoding="utf-8")
+          (root/"dataset_revision.txt").write_text(revision+"\n")
+          (root/"data_source.json").write_text(json.dumps({
+              "dataset_id":dataset_id,"revision_sha":revision,"split":"lite",
+              "rows":len(meta),"fields_released":["instance_id","repo"],
+              "forbidden_agent_fields":["patch","test_patch","FAIL_TO_PASS","PASS_TO_PASS"],
+              "oracle_executed":False,"purpose":"ID-only pilot selection"
+          },indent=2)+"\n")
+          print("Metadata-only source revision:",revision,"number of IDs:",len(meta))
+          PY
+      - name: Run frozen deterministic ID selector and its negative tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -v
+          python3 scripts/select_pilot_frame.py \
+            --metadata feasibility_frame/metadata_only.jsonl \
+            --dataset-sha "$(cat feasibility_frame/dataset_revision.txt)" \
+            --out feasibility_frame/selected_ten.json \
+            --n 10
+          python3 - <<'PY'
+          import json
+          r=json.load(open("feasibility_frame/selected_ten.json"))
+          assert len(r["selected"])==10
+          print("ID-only frame created. Not an efficacy or repair result.")
+          PY
+      - name: Archive ID-only frame (no hidden task tests or patches)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: metadata-only-frozen-ten
+          path: feasibility_frame/
+          retention-days: 30
+          if-no-files-found: warn
