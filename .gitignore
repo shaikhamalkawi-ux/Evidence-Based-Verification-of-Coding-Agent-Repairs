@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+.env.*
+*.pem
+*.key
+*.token
+.DS_Store
+# Protect raw unpublished oracles and unreviewed third-party datasets:
+raw_data/
+unpublished_traces/
+hidden_oracle/
+# Decision seals are NOT ignored: an actual preregistration requires a timestamped commit.

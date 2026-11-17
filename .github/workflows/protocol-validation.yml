@@ -1,0 +1,67 @@
+name: Evidence-based repair protocol checks (synthetic only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/protocol-validation.yml'
+      - 'README.md'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'examples/**'
+  pull_request:
+    paths:
+      - '.github/workflows/protocol-validation.yml'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'examples/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coding-repair-synthetic-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  protocol-software-validation:
+    name: Unit tests and synthetic decision sealing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout this commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Report interpreter and Docker availability
+        shell: bash
+        run: |
+          python3 --version
+          docker version --format 'Docker client {{.Client.Version}} / server {{.Server.Version}}'
+      - name: Run software-only unit and negative-case tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Demonstrate pre-oracle seal and synthetic reveal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p9_decide.py \
+            --input examples/SYNTHETIC_decision_only.jsonl \
+            --out "$RUNNER_TEMP/repair-decision-seal"
+          python3 scripts/p9_reveal.py \
+            --sealed-dir "$RUNNER_TEMP/repair-decision-seal" \
+            --oracle examples/SYNTHETIC_oracle_AFTER_SEAL.jsonl \
+            --out "$RUNNER_TEMP/synthetic-score.json"
+          python3 - "$RUNNER_TEMP/synthetic-score.json" <<'PYVERIFY'
+          import json, sys
+          with open(sys.argv[1],encoding='utf-8') as f:
+              result=json.load(f)
+          assert result['total_decisions']==2
+          assert result['oracle_admitted']==2
+          assert result['oracle_pass']==1 and result['oracle_fail']==1
+          assert result['policies']['self_report']['false_accept']==1
+          assert result['policies']['source_linked']['false_accept']==0
+          print('PASS: synthetic software fixture only; no independent task-oracle execution')
+          PYVERIFY
