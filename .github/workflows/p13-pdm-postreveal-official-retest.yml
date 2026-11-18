@@ -1,0 +1,186 @@
+name: P13 POST-REVEAL PDM original task retest (NOT BLIND NOR GATE)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p13-pdm-postreveal-official-retest.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  postreveal-official-retest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      INSTANCE_ID: pdm-project__pdm-3419
+      BASE_SHA: 564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5
+      CANDIDATE_SHA: 75473b04603db84fa67dc814f4d67e459a183bb0
+      HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      DATASET_SHA: babb27e45e072219195db7a744bbf0d3c1a36e56
+      RUN_ID: evcar-p13-pdm-postreveal-diagnostic-20261118
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout P13 source, with explicit earlier oracle exposure
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Assert this is an EXPOSED task and not a second sealed acceptance trial
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p13_retest
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          p=json.loads(pathlib.Path('pilot/pdm/P13_POSTREVEAL_DIAGNOSTIC_PLAN_20261118.json').read_text())
+          assert p['status']=='DIAGNOSTIC_POST_REVEAL_NOT_PROSPECTIVE_BLIND'
+          assert p['no_causal_effect_no_blind_claim'] is True
+          assert p['parent_original_hidden_task_result']['run_id']==44237374542
+          assert p['parent_original_hidden_task_result']['status']=='FAIL'
+          assert p['parent_original_hidden_task_result']['f2p_passed']==0
+          assert p['parent_original_hidden_task_result']['p2p_failed']==2
+          assert p['source_base_commit']==os.environ['BASE_SHA']
+          assert hashlib.sha256(pathlib.Path('pilot/pdm/locked/P9_DECISIONS_SEALED.jsonl').read_bytes()).hexdigest()==p['parent_preoracle_decisions_sha256']
+          print('P13_ORACLE_ROLE=POSTREVEAL_MECHANISTIC_RETEST_NO_NEW_BLIND_EVIDENCE')
+          PY
+          docker version
+      - name: Reproduce exact P13 diagnostic commit from historical upstream source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" remote add origin https://github.com/pdm-project/pdm.git
+          git -C "$RUNNER_TEMP/pdm_base" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/pdm_base" checkout --detach FETCH_HEAD
+          python3 pilot/pdm/p13_candidate_postreveal.py --repo "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" diff --check
+          git -C "$RUNNER_TEMP/pdm_base" diff -- src/pdm/cli/commands/update.py > p13_retest/diagnostic_patch.diff
+          test -s p13_retest/diagnostic_patch.diff
+          sha256sum p13_retest/diagnostic_patch.diff pilot/pdm/p13_candidate_postreveal.py > p13_retest/sha256.txt
+          export GIT_AUTHOR_DATE="2026-11-18T04:31:30Z"
+          export GIT_COMMITTER_DATE="2026-11-18T04:31:30Z"
+          git -C "$RUNNER_TEMP/pdm_base" add src/pdm/cli/commands/update.py
+          git -C "$RUNNER_TEMP/pdm_base" -c user.name="GPT-6 P13 diagnostic (unattested)" -c user.email="ai-research@example.invalid" \
+            commit -m "P13 unblinded: retain group metadata and transient specifier edits"
+          test "$(git -C "$RUNNER_TEMP/pdm_base" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          python3 - <<'PY'
+          import json,os,pathlib
+          patch=pathlib.Path('p13_retest/diagnostic_patch.diff').read_text()
+          pred={'instance_id':os.environ['INSTANCE_ID'],
+                'model_name_or_path':'p13_gpt6_research_postreveal_NOT_BLIND',
+                'model_patch':patch}
+          pathlib.Path('p13_retest/predictions.jsonl').write_text(json.dumps(pred)+'\n')
+          print('P13_EXACT_PATCH_SHA_AND_POSTREVEAL_MODE_ASSERTED')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned original SWE-bench-Live evaluator
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > p13_retest/environment.txt
+      - name: Read original same-task dataset only inside evaluator AFTER diagnostic patch frozen
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/oracle"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          dataset=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['DATASET_SHA'])
+          selected=[dict(row) for row in dataset if row['instance_id']==os.environ['INSTANCE_ID']]
+          assert len(selected)==1
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'oracle/instance.jsonl'
+          out.write_text(json.dumps(selected[0],default=str,ensure_ascii=False)+'\n')
+          print('P13_ORIGINAL_TASK_ALREADY_EXPOSED; TEST_PATCH_NOT_USED_IN_CANDIDATE_RECIPE')
+          PY
+      - name: Run same pinned original task oracle on POST-REVEAL diagnostic patch
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          set -uo pipefail
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p13_retest/oracle_started_at.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/oracle/instance.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/p13_retest/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "$RUN_ID" \
+            > "$GITHUB_WORKSPACE/p13_retest/harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p13_retest/harness_exit_code.txt"
+          tail -n 85 "$GITHUB_WORKSPACE/p13_retest/harness_stdout.log"
+          exit "$rc"
+      - name: Extract exact task test counts; NEVER score P13 as a blinded gate trial
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,shutil
+          out=pathlib.Path('p13_retest')
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          iid=os.environ['INSTANCE_ID']
+          matches=[]
+          for f in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(f): continue
+              try:
+                  obj=json.loads(f.read_text())
+                  if isinstance(obj,dict) and iid in obj: matches.append((f,obj[iid]))
+              except (ValueError,OSError): continue
+          res={'study':'P13_POSTREVEAL_EXPLORATORY_RETEST_NOT_BLIND',
+               'instance_id':iid,'candidate_sha':os.environ['CANDIDATE_SHA'],
+               'old_p12_independent_oracle_run_id':44237374542,
+               'new_blinded_decision':False,'post_developer_feedback_trial':False,
+               'comparison_not_independent':True,
+               'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+               'original_harness_commit':os.environ['HARNESS_SHA'],
+               'dataset_revision':os.environ['DATASET_SHA'],
+               'matched_reports':len(matches),'result_status':'NOT_ADMITTED',
+               'f2p_total':None,'f2p_passed':None,'p2p_failed':None,'tests_executed':None}
+          if len(matches)==1:
+              path,record=matches[0]
+              shutil.copyfile(path,out/'original_report.json')
+              f=record.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              p=record.get('tests_status',{}).get('PASS_TO_PASS',{})
+              vals=[f.get('success',[]),f.get('failure',[]),p.get('success',[]),p.get('failure',[])]
+              t=path.parent/'test_output.txt'
+              if t.is_file():
+                  shutil.copyfile(t,out/'original_test_output.txt')
+              if t.is_file() and all(isinstance(v,list) for v in vals) and sum(map(len,vals))>0 and sum(map(len,vals[:2]))>0:
+                  res.update({'result_status':'COMPLETE_POSTREVEAL',
+                      'f2p_total':len(vals[0])+len(vals[1]),
+                      'f2p_passed':len(vals[0]),
+                      'p2p_failed':len(vals[3]),
+                      'tests_executed':sum(map(len,vals)),
+                      'original_resolved':record.get('resolved'),
+                      'original_test_output_sha256':hashlib.sha256(t.read_bytes()).hexdigest()})
+              log=path.parent/'run_instance.log'
+              if log.is_file(): shutil.copyfile(log,out/'run_instance.log')
+          (out/'P13_POSTREVEAL_TASK_RETEST.json').write_text(json.dumps(res,sort_keys=True,indent=2)+'\n')
+          print('P13_POSTREVEAL_TASK_RETEST '+json.dumps(res,sort_keys=True))
+          PY
+      - name: Preserve original report and code provenance without efficacy claims
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p13-pdm-postreveal-original-task-retest
+          path: p13_retest/
+          retention-days: 60
+          if-no-files-found: error
