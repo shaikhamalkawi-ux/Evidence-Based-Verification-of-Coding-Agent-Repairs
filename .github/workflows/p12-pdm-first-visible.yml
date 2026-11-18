@@ -1,0 +1,125 @@
+name: P12 PDM first GPT-6 patch vs predeclared visible tests ONLY
+
+on:
+  push:
+    paths:
+      - .github/workflows/p12-pdm-first-visible.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pdm-first-visible:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BASE_SHA: "564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5"
+      INSTANCE_ID: "pdm-project__pdm-3419"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout preregistered candidate and frozen visible tests
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Assert frozen trial and candidate identity without hidden data
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          p=json.load(open('pilot/pdm/P12_PREREGISTRATION_20261118.json'))
+          f=json.load(open('pilot/frozen_task_frame_20261117.json'))
+          assert f['selected'][1]['instance_id']==p['task']['instance_id']==os.environ['INSTANCE_ID']
+          assert p['task']['base_commit']==os.environ['BASE_SHA']
+          assert p['source']['dataset_revision']==f['dataset_revision_sha']
+          assert p['stage']=='PRE_CANDIDATE_PRE_VISIBLE_TEST_PRE_ORACLE'
+          print('NO_HIDDEN_TEST_FIELDS_PRESENT_IN_FIRST_STAGE')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Checkout exact public base commit and install historical locked dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" remote add origin https://github.com/pdm-project/pdm.git
+          git -C "$RUNNER_TEMP/pdm_base" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/pdm_base" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/pdm_base" rev-parse HEAD)" = "$BASE_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/pdm_base[pytest]"
+          # Exact versions drawn from historical pdm.lock for reproducibility.
+          python3 -m pip install "hishel==0.0.33" "pytest==8.3.3" "pytest-mock==3.14.0" "dep-logic==0.4.11" "resolvelib==1.1.0" "tomlkit==0.13.2" "rich==13.9.2"
+          python3 -m pip check
+      - name: Apply original GPT-6 proposed fix and create exact synthetic author-labeled Git commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p12_initial_output
+          python3 pilot/pdm/ai_candidate_initial.py --repo "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" diff --check
+          git -C "$RUNNER_TEMP/pdm_base" diff -- src/pdm/cli/commands/update.py > p12_initial_output/agent_patch.diff
+          test -s p12_initial_output/agent_patch.diff
+          sha256sum pilot/pdm/visible_local_tests.py pilot/pdm/ai_candidate_initial.py p12_initial_output/agent_patch.diff > p12_initial_output/sha256.txt
+          export GIT_AUTHOR_DATE="2026-11-18T04:10:00Z"
+          export GIT_COMMITTER_DATE="2026-11-18T04:10:00Z"
+          git -C "$RUNNER_TEMP/pdm_base" add src/pdm/cli/commands/update.py
+          git -C "$RUNNER_TEMP/pdm_base" -c user.name="GPT-6 research-generated candidate (unattested)" -c user.email="ai-research@example.invalid" commit -m "GPT-6 P12 initial: include ancestor group provenance during update"
+          git -C "$RUNNER_TEMP/pdm_base" rev-parse HEAD > p12_initial_output/candidate_head_sha.txt
+          printf '%s\n' "$BASE_SHA" > p12_initial_output/base_sha.txt
+          python3 -m pip freeze > p12_initial_output/python_environment.txt
+          echo "P12_INITIAL_CANDIDATE_HEAD=$(cat p12_initial_output/candidate_head_sha.txt)"
+          echo "FIRST_ATTEMPT_NO_HUMAN_PUSHBACK_OR_HIDDEN_ORACLE"
+      - name: Run pre-registered visible regression tests on exact first patch
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          cp pilot/pdm/visible_local_tests.py "$RUNNER_TEMP/pdm_base/tests/cli/test_p12_visible.py"
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p12_initial_output/tests_started_at_utc.txt
+          cd "$RUNNER_TEMP/pdm_base"
+          python3 -m pytest tests/cli/test_p12_visible.py -q -ra \
+            > "$GITHUB_WORKSPACE/p12_initial_output/first_visible_pytest.log" 2>&1
+          rc=$?
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > "$GITHUB_WORKSPACE/p12_initial_output/tests_finished_at_utc.txt"
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p12_initial_output/first_visible_exit_code.txt"
+          tail -n 180 "$GITHUB_WORKSPACE/p12_initial_output/first_visible_pytest.log"
+          echo "P12_FIRST_VISIBLE_EXIT=$rc; no hidden oracle seen"
+          exit 0
+      - name: Create machine-readable visible receipt; no claims of agent attestation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib,re,os
+          d=pathlib.Path('p12_initial_output')
+          txt=(d/'first_visible_pytest.log').read_text()
+          rc=int((d/'first_visible_exit_code.txt').read_text())
+          source=(d/'agent_patch.diff').read_bytes()
+          terms=re.findall(r'(\d+) passed',txt)
+          failures=re.findall(r'(\d+) failed',txt)
+          errors=re.findall(r'(\d+) errors?',txt)
+          n=sum(map(int,terms[-1:]))+sum(map(int,failures[-1:]))+sum(map(int,errors[-1:]))
+          # No fabricated count if pytest did not report an actual nonempty run.
+          receipt={'episode_id':os.environ['INSTANCE_ID']+'__INITIAL_STAGE',
+            'base_sha':os.environ['BASE_SHA'],
+            'head_sha':(d/'candidate_head_sha.txt').read_text().strip(),
+            'patch_sha256':hashlib.sha256(source).hexdigest(),
+            'visible_test_count':n,
+            'completed_at':(d/'tests_finished_at_utc.txt').read_text().strip(),
+            'test_status':'success' if rc==0 and n>=3 and not failures and not errors else 'failure_or_setup_error',
+            'visible_test_exit_code':rc,'synthetic_commit_author_not_attested':True,
+            'developer_feedback_received':False,'benchmark_oracle_executed':False}
+          (d/'first_visible_receipt.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print("P12_FIRST_VISIBLE_RECEIPT "+json.dumps(receipt,sort_keys=True))
+          PY
+      - name: Save full non-oracle source evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: p12-pdm-first-visible
+          path: p12_initial_output/
+          retention-days: 60
+          if-no-files-found: warn
