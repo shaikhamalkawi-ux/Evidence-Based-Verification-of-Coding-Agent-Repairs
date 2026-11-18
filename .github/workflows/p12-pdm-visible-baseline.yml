@@ -1,0 +1,90 @@
+name: P12 PDM visible-only baseline calibration (NO HIDDEN ORACLE)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p12-pdm-visible-baseline.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pdm-baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BASE_SHA: "564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5"
+      INSTANCE_ID: "pdm-project__pdm-3419"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout source prereg and predeclared visible tests
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate frozen PDM membership without oracle access
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          p=json.load(open('pilot/pdm/P12_PREREGISTRATION_20261118.json'))
+          f=json.load(open('pilot/frozen_task_frame_20261117.json'))
+          assert p["stage"]=="PRE_CANDIDATE_PRE_VISIBLE_TEST_PRE_ORACLE"
+          assert f["selected"][1]["instance_id"]==p["task"]["instance_id"]==os.environ["INSTANCE_ID"]
+          assert p["task"]["base_commit"]==os.environ["BASE_SHA"]
+          assert p["source"]["dataset_revision"]==f["dataset_revision_sha"]
+          assert len(f["selected"])==10
+          print("P12_BOUNDARY_OK: first unevaluated preselected task; original oracle NEVER imported")
+          PY
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact upstream base without target PR or benchmark answers
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" remote add origin https://github.com/pdm-project/pdm.git
+          git -C "$RUNNER_TEMP/pdm_base" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/pdm_base" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/pdm_base" rev-parse HEAD)" = "$BASE_SHA"
+      - name: Install published source and visible-test dependencies (no oracle)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -e "$RUNNER_TEMP/pdm_base[pytest]"
+          # Historical PDM pdm.lock versions, because modern hishel 2 breaks pre-2025 PDM tests.
+          python3 -m pip install "hishel==0.0.33" "pytest==8.3.3" "pytest-mock==3.14.0" "dep-logic==0.4.11" "resolvelib==1.1.0" "tomlkit==0.13.2" "rich==13.9.2" "httpx==0.27.2" "httpcore==1.0.6" "unearth==0.17.2" "findpython==0.6.2" "pbs-installer==2025.2.12" "virtualenv==20.27.0" "packaging==24.1"
+          # Broad install initially pulled hishel2's httpcore2; original PDM needs old httpcore.
+          python3 -m pip uninstall -y httpcore2 httpx2
+          python3 -m pip check
+      - name: Run locked visible checks on ORIGINAL unpatched base
+        shell: bash
+        run: |
+          # Runner wrapper erratum: default bash inherits -e; disable only to capture test diagnostics.
+          set +e
+          set -uo pipefail
+          mkdir -p p12_visible_output
+          cp pilot/pdm/visible_local_tests.py "$RUNNER_TEMP/pdm_base/tests/cli/test_p12_visible.py"
+          sha256sum pilot/pdm/visible_local_tests.py > p12_visible_output/visible_test_sha256.txt
+          python3 -m pip freeze > p12_visible_output/python_environment.txt
+          printf '%s\n' "$BASE_SHA" > p12_visible_output/base_sha.txt
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p12_visible_output/started_at.txt
+          cd "$RUNNER_TEMP/pdm_base"
+          python3 -m pytest tests/cli/test_p12_visible.py -q -ra \
+            > "$GITHUB_WORKSPACE/p12_visible_output/baseline_visible_pytest.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p12_visible_output/baseline_visible_exit_code.txt"
+          tail -n 160 "$GITHUB_WORKSPACE/p12_visible_output/baseline_visible_pytest.log"
+          echo "VISIBLE_BASELINE_EXIT=$rc; result not an oracle; original upstream tree unchanged"
+          exit 0
+      - name: Archive pre-candidate visible evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: p12-pdm-visible-baseline
+          path: p12_visible_output/
+          retention-days: 60
+          if-no-files-found: warn

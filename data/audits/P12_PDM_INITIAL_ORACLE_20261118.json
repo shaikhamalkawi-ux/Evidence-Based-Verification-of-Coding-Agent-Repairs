@@ -1,0 +1,160 @@
+{
+  "schema": "99llm_X1_P12_PDM_IndependentOracle_20261118_v1",
+  "scope": "First AI-generated attempt only on second prespecified task in the frozen ten-task SWE-bench-Live feasibility frame. No post-feedback repair, no causal effect.",
+  "publication_status": "DESCRIPTIVE_EXECUTED_SINGLE_TASK_NOT_EFFICACY",
+  "task": {
+    "benchmark": "SWE-bench-Live/SWE-bench-Live",
+    "split": "lite",
+    "revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "instance_id": "pdm-project__pdm-3419",
+    "index_in_frozen_frame_one_based": 2,
+    "source_repository": "pdm-project/pdm",
+    "source_base_sha": "564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5",
+    "original_source_blob_sha": "02c49f0a135429508c2eca400a63d1a9f7b9e335",
+    "first_candidate_sha": "5c5ea31661c70a7bd7ec7b661f32f380b45c1d40",
+    "first_patch_sha256": "53c79ba925902cfd39739be353686dd7970dc683e5716afa79b8638e974552e9",
+    "candidate_changed_file": "src/pdm/cli/commands/update.py",
+    "exact_candidate_source_recipe": "pilot/pdm/ai_candidate_initial.py",
+    "generation": "GPT-6 research-generated; synthetic Git author label does not independently attest agent authorship",
+    "real_human_developer_feedback": false,
+    "scripted_developer_feedback": false,
+    "second_patch_exists": false,
+    "stop_rule": "Originally preregistered scripted feedback only if first visible suite failed; it passed 3/3, so no feedback was manufactured."
+  },
+  "preregistration": {
+    "path": "pilot/pdm/P12_PREREGISTRATION_20261118.json",
+    "visible_test_path": "pilot/pdm/visible_local_tests.py",
+    "dataset_frame_path": "pilot/frozen_task_frame_20261117.json",
+    "locked_decision_time_utc": "2026-11-18T04:24:00Z",
+    "locked_decision_sha256": "bc51ef445bc321854288d882677b42c416d7d6584b55a51854d79c40a36b3503",
+    "locked_decision_input_sha256": "999ea08327723ec1eb49cf3cfb7bd21476c0ee16a679d51c1b458a8fe6f32d7d",
+    "policy_script_sha256": "baea708bacf643bdf6110d5c0ba3a584d8ad0783f993bfe481f96ce8149ae6fd",
+    "sealed_manifest_commit": "dd9dc14c09608df3863655fa2f7080bbce96d34d",
+    "seal_run_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44237029383",
+    "policy_decisions": {
+      "self_report": "ACCEPT",
+      "local_pass": "ACCEPT",
+      "source_linked": "HOLD"
+    },
+    "source_linked_hold_reason": "No independent attestation of software-agent Git commit authorship."
+  },
+  "evidence": [
+    {
+      "kind": "predeclared_visible_base",
+      "run_id": 44236766300,
+      "url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44236766300",
+      "passed": 0,
+      "failed": 3,
+      "admissible_as_hidden_task_truth": false
+    },
+    {
+      "kind": "predeclared_visible_candidate",
+      "run_id": 44236769972,
+      "url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44236769972",
+      "passed": 3,
+      "failed": 0,
+      "admissible_as_hidden_task_truth": false
+    },
+    {
+      "kind": "postseal_existing_public_PDM_tests_on_base",
+      "run_id": 44237704069,
+      "url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44237704069",
+      "passed": 22,
+      "failed": 0,
+      "decision_time_feature": false
+    },
+    {
+      "kind": "postseal_existing_public_PDM_tests_on_candidate",
+      "run_id": 44237704069,
+      "url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44237704069",
+      "passed": 20,
+      "failed": 2,
+      "regression_test_ids": [
+        "tests/cli/test_update.py::test_update_ignore_constraints",
+        "tests/cli/test_update.py::test_update_existing_package_with_prerelease"
+      ],
+      "decision_time_feature": false
+    },
+    {
+      "kind": "postseal_official_independent_SWEbenchLive",
+      "run_id": 44237374542,
+      "url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44237374542",
+      "original_harness_commit": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+      "oracle_code_sha256": "9a9361d7c53f64d573ef546325b6f13d5b593fa78b4ddcbaa380efa0cd0aac04",
+      "oracle_started_at_utc": "2026-11-18T04:27:41Z",
+      "exact_head_sha": "5c5ea31661c70a7bd7ec7b661f32f380b45c1d40",
+      "status": "complete",
+      "matched_reports": 1,
+      "f2p_total": 3,
+      "f2p_passed": 0,
+      "p2p_failed": 2,
+      "tests_executed": 939,
+      "official_resolved": false,
+      "original_test_output_sha256": "5cabc4e9b21d4a803c19e6f399bb2434f25519a268361511d48c75478eddb132",
+      "artifact_id": 14397996854,
+      "admitted": true
+    }
+  ],
+  "single_episode_after_reveal": {
+    "oracle_status": "FAIL",
+    "oracle_admitted": 1,
+    "self_report_false_accept": 1,
+    "local_pass_false_accept": 1,
+    "source_linked_false_accept": 0,
+    "source_linked_accepted_count": 0,
+    "source_linked_false_accept_rate_among_accepted": null
+  },
+  "mechanistic_interpretation": {
+    "hypothesis": "Replacing existing (mutated) requirement objects with new project.get_dependencies group-expanded objects repairs group provenance but can discard prerelease/unconstrained temporary object properties.",
+    "status": "Plausible source-grounded mechanism; not yet demonstrated by an isolated mechanistic intervention.",
+    "original_code_preservation": "Original `all_dependencies` iterated objects are mutated earlier in do_update (`prerelease`, `unconstrained`); replacement creates fresh objects.",
+    "alternative_explanations": "Other resolver interactions and benchmark test expectations may contribute, cannot infer from F2P counts alone."
+  },
+  "denominator_and_claims": {
+    "benchmark_frame_frozen_count": 10,
+    "benchmark_tasks_with_original_oracle_as_of_P12": 4,
+    "benchmark_tasks_still_not_executed": 6,
+    "previous_three_tasks_source": "P11 summary, first-attempt only; distinct from 10 naturalistic Copilot PRs",
+    "four_case_summary": {
+      "admitted_oracles": 4,
+      "oracle_true_pass": 2,
+      "oracle_true_fail": 2,
+      "self_report": {
+        "accept": 3,
+        "hold": 1,
+        "false_accept_count": 2,
+        "true_pass_hold_count": 1
+      },
+      "local_pass": {
+        "accept": 3,
+        "hold": 1,
+        "false_accept_count": 2,
+        "true_pass_hold_count": 1
+      },
+      "source_linked": {
+        "accept": 0,
+        "hold": 4,
+        "false_accept_count": 0,
+        "true_pass_hold_count": 2,
+        "false_accept_rate_among_accepted": null
+      }
+    },
+    "restriction": "Four-case summary is a tiny descriptive feasibility sample, no statistical or causal efficacy estimate. A zero-accept policy has an undefined false-accept rate among accepted cases."
+  },
+  "reproducibility": {
+    "software_checks": "GitHub Actions software suite 50/50 pass on P12 head prior to later manuscript update",
+    "source_and_oracle_logs_public": true,
+    "oracle_binary_rerun_by_this_audit": false,
+    "original_test_artifact_retained_in_workflow": true
+  },
+  "publication_guard": [
+    "MR30 unchanged",
+    "P10 naturalistic 10 PRs remain separate",
+    "No second human coder",
+    "No human corrective message claimed",
+    "No repeat of PDM task as untouched after official oracle reveal",
+    "Not a post-feedback recovery experiment",
+    "Do not interpret green CI workflow as task success",
+    "No model-wide generalization"
+  ]
+}
