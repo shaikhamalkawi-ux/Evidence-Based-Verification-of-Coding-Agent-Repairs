@@ -56,7 +56,7 @@ jobs:
           set -euo pipefail
           python3 -m pip install -e "$RUNNER_TEMP/pdm_base[pytest]"
           # Historical PDM pdm.lock versions, because modern hishel 2 breaks pre-2025 PDM tests.
-          python3 -m pip install "hishel==0.0.33" "pytest==8.3.3" "pytest-mock==3.14.0" "dep-logic==0.4.11" "resolvelib==1.1.0" "tomlkit==0.13.2" "rich==13.9.2" "httpx==0.27.2" "httpcore==1.0.6"
+          python3 -m pip install "hishel==0.0.33" "pytest==8.3.3" "pytest-mock==3.14.0" "dep-logic==0.4.11" "resolvelib==1.1.0" "tomlkit==0.13.2" "rich==13.9.2" "httpx==0.27.2" "httpcore==1.0.6" "unearth==0.17.2" "findpython==0.6.2" "pbs-installer==2025.2.12" "virtualenv==20.27.0" "packaging==24.1"
           # Broad install initially pulled hishel2's httpcore2; original PDM needs old httpcore.
           python3 -m pip uninstall -y httpcore2 httpx2
           python3 -m pip check
