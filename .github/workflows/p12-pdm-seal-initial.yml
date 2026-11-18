@@ -1,0 +1,77 @@
+name: P12 seal first PDM AI patch decisions BEFORE ANY HIDDEN ORACLE
+
+on:
+  push:
+    paths:
+      - .github/workflows/p12-pdm-seal-initial.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pdm-preoracle-decision-seal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout predecision-only source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Assert candidate and frozen scope, set real decision time
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p12_pdm_seal
+          python3 - <<'PY'
+          import datetime,json,pathlib
+          source=pathlib.Path('pilot/pdm/decision_input_without_time.json')
+          x=json.loads(source.read_text())
+          p=json.loads(pathlib.Path('pilot/pdm/P12_PREREGISTRATION_20261118.json').read_text())
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert x['episode_id']=='pdm-project__pdm-3419__INITIAL_ATTEMPT_ONLY'
+          assert frame['selected'][1]['instance_id']=='pdm-project__pdm-3419'
+          assert x['head_sha']=='5c5ea31661c70a7bd7ec7b661f32f380b45c1d40'
+          assert x['receipts'][0]['head_sha']==x['head_sha']
+          assert x['receipts'][0]['status']=='success' and x['receipts'][0]['test_count']==3
+          assert x['source_verification']['initial_patch_sha256']=='53c79ba925902cfd39739be353686dd7970dc683e5716afa79b8638e974552e9'
+          assert x['target_agent_is_commit_author'] is False
+          assert not x['source_verification']['human_developer_feedback_received']
+          assert not x['source_verification']['scripted_developer_feedback_received']
+          assert not x['source_verification']['post_feedback_patch_exists']
+          assert p['synthetic_feedback_rule'].startswith('If the initial visible suite has a real failing assertion')
+          x['t_decision']=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
+          assert x['t_decision']>x['receipts'][0]['completed_at']
+          pathlib.Path('p12_pdm_seal/decision_input.jsonl').write_text(json.dumps(x,sort_keys=True)+'\n')
+          print('P12_DECISION_TIMESTAMP '+x['t_decision'])
+          print('FIRST_VISIBLE_SUITE_PASSED_NO_POST_FEEDBACK_STAGE')
+          PY
+      - name: Seal all three frozen policies from original P9 decision script
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p9_decide.py --input p12_pdm_seal/decision_input.jsonl --out p12_pdm_seal/locked
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('p12_pdm_seal')
+          decisions=(root/'locked/P9_DECISIONS_SEALED.jsonl').read_bytes()
+          d=json.loads(decisions)
+          seal=json.loads((root/'locked/P9_DECISION_SEAL.json').read_text())
+          assert d['decisions']=={'self_report':'ACCEPT','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert hashlib.sha256(decisions).hexdigest()==seal['decisions_sha256']
+          for label,path in [
+            ('P12_LOCKED_DECISION_INPUT',root/'decision_input.jsonl'),
+            ('P12_LOCKED_POLICY_DECISIONS',root/'locked/P9_DECISIONS_SEALED.jsonl'),
+            ('P12_LOCKED_SHA_MANIFEST',root/'locked/P9_DECISION_SEAL.json'),
+          ]:
+            print(label+'='+path.read_text().strip())
+          print('NO_ORACLE_DOWNLOAD_AND_NO_ORACLE_EXECUTION')
+          PY
+      - name: Upload pre-oracle immutable receipt artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: p12-pdm-initial-preoracle-seal
+          path: p12_pdm_seal/
+          retention-days: 60
+          if-no-files-found: error
