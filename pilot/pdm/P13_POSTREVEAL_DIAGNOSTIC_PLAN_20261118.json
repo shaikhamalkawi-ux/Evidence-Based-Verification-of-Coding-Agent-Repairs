@@ -1,0 +1,35 @@
+{
+  "id": "P13_POSTREVEAL_PDM_REQUIREMENT_IDENTITY_MECHANISM_20261118",
+  "status": "DIAGNOSTIC_POST_REVEAL_NOT_PROSPECTIVE_BLIND",
+  "parent_science": "P12 original initial-only source-locked experiment, no changes to its frozen decisions",
+  "parent_preoracle_decisions_sha256": "bc51ef445bc321854288d882677b42c416d7d6584b55a51854d79c40a36b3503",
+  "parent_public_ci_result": {
+    "original_existing_22": 22,
+    "initial_existing_22": 20,
+    "initial_visible_3": 3,
+    "baseline_visible_3": 0
+  },
+  "parent_original_hidden_task_result": {
+    "status": "FAIL",
+    "f2p_passed": 0,
+    "f2p_total": 3,
+    "p2p_failed": 2,
+    "tests_executed": 939,
+    "run_id": 44237374542
+  },
+  "data_use_boundary": "All P12 results already revealed. P13 code is written using only original public PDM source and the two failing PUBLIC update tests. This stage is NOT an untouched benchmark evaluation, even if an original oracle is run again.",
+  "mechanism_hypothesis": "The P12 initial fix reconstructs PDM Requirement objects from the project, which restores groups but discards earlier in-memory prerelease/unconstrained specifier edits. Preserve previously mutated direct Requirement objects and union their group provenance with the included-group expansion.",
+  "source_repo": "pdm-project/pdm",
+  "source_base_commit": "564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5",
+  "source_file": "src/pdm/cli/commands/update.py",
+  "candidate_strategy": "For each included group, expand project.get_dependencies(group). If a requirement identify() matches a direct original requirement for the same group, reuse the original object (preserving earlier mutations) and union its groups. Otherwise use the expanded indirect requirement.",
+  "public_diagnostic_tests": [
+    "pilot/pdm/visible_local_tests.py, three transparent group-provenance assertions",
+    "Historical PDM tests/cli/test_update.py, 22 existing public behavioral tests"
+  ],
+  "actor_claim": "GPT-6-generated proposed code, replayed in GitHub Actions with an artificial commit author. No independent agent authorization or real developer feedback.",
+  "no_hidden_lookups_used_in_patch_generation": true,
+  "no_causal_effect_no_blind_claim": true,
+  "author_decision": "Keep P12 immutable and separate; P13 is exploratory repair and mechanism stress test.",
+  "no_human_coders": true
+}
