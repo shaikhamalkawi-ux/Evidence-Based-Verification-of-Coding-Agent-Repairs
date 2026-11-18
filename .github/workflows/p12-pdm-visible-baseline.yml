@@ -58,6 +58,8 @@ jobs:
       - name: Run locked visible checks on ORIGINAL unpatched base
         shell: bash
         run: |
+          # Runner wrapper erratum: default bash inherits -e; disable only to capture test diagnostics.
+          set +e
           set -uo pipefail
           mkdir -p p12_visible_output
           cp pilot/pdm/visible_local_tests.py "$RUNNER_TEMP/pdm_base/tests/cli/test_p12_visible.py"
