@@ -1,0 +1,128 @@
+name: P13 post-reveal PDM mechanism test on PUBLIC tests only (NOT BLIND)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p13-pdm-postreveal-public-mechanism.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-mechanism:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      BASE_SHA: 564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout explicitly post-reveal diagnostic
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Assert P12 outcome previously revealed, no fresh blind claim
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          p=json.loads(pathlib.Path("pilot/pdm/P13_POSTREVEAL_DIAGNOSTIC_PLAN_20261118.json").read_text())
+          assert p["status"]=="DIAGNOSTIC_POST_REVEAL_NOT_PROSPECTIVE_BLIND"
+          assert p["parent_original_hidden_task_result"]=={
+              "status":"FAIL","f2p_passed":0,"f2p_total":3,
+              "p2p_failed":2,"tests_executed":939,"run_id":44237374542}
+          frozen=pathlib.Path("pilot/pdm/locked/P9_DECISIONS_SEALED.jsonl").read_bytes()
+          assert hashlib.sha256(frozen).hexdigest()==p["parent_preoracle_decisions_sha256"]
+          assert p["no_hidden_lookups_used_in_patch_generation"]
+          print("P13_POST_REVEAL_PUBLIC_DIAGNOSTIC_ONLY")
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact historical PDM upstream and dependencies from pdm.lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p13_public_output
+          git init "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" remote add origin https://github.com/pdm-project/pdm.git
+          git -C "$RUNNER_TEMP/pdm_base" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/pdm_base" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/pdm_base" rev-parse HEAD)" = "$BASE_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/pdm_base[pytest]"
+          python3 -m pip install "hishel==0.0.33" "pytest==8.3.3" "pytest-mock==3.14.0" "dep-logic==0.4.11" "resolvelib==1.1.0" "tomlkit==0.13.2" "rich==13.9.2" "httpx==0.27.2" "httpcore==1.0.6" "unearth==0.17.2" "findpython==0.6.2" "pbs-installer==2025.2.12" "virtualenv==20.27.0" "packaging==24.1"
+          python3 -m pip uninstall -y httpcore2 httpx2
+          python3 -m pip check
+          python3 -m pip freeze > p13_public_output/requirements.txt
+      - name: Apply P13 diagnostic correction to original PDM base
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/pdm/p13_candidate_postreveal.py --repo "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" diff -- src/pdm/cli/commands/update.py > p13_public_output/diagnostic_patch.diff
+          test -s p13_public_output/diagnostic_patch.diff
+          sha256sum pilot/pdm/p13_candidate_postreveal.py pilot/pdm/visible_local_tests.py p13_public_output/diagnostic_patch.diff > p13_public_output/sha256.txt
+          export GIT_AUTHOR_DATE="2026-11-18T04:31:30Z"
+          export GIT_COMMITTER_DATE="2026-11-18T04:31:30Z"
+          git -C "$RUNNER_TEMP/pdm_base" add src/pdm/cli/commands/update.py
+          git -C "$RUNNER_TEMP/pdm_base" -c user.name="GPT-6 P13 diagnostic (unattested)" -c user.email="ai-research@example.invalid" commit -m "P13 unblinded: retain group metadata and transient specifier edits"
+          git -C "$RUNNER_TEMP/pdm_base" rev-parse HEAD > p13_public_output/candidate_sha.txt
+          echo "P13_DIAGNOSTIC_COMMIT=$(cat p13_public_output/candidate_sha.txt)"
+      - name: Execute same prespecified P12 visible tests (now POST-REVEAL)
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          cp pilot/pdm/visible_local_tests.py "$RUNNER_TEMP/pdm_base/tests/cli/test_p12_visible.py"
+          cd "$RUNNER_TEMP/pdm_base"
+          python3 -m pytest tests/cli/test_p12_visible.py -q -ra \
+            > "$GITHUB_WORKSPACE/p13_public_output/visible_tests.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p13_public_output/visible_exit.txt"
+          tail -n 90 "$GITHUB_WORKSPACE/p13_public_output/visible_tests.log"
+          echo "P13_VISIBLE_EXIT=$rc"
+          exit 0
+      - name: Execute existing unmodified public PDM update suite
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          cd "$RUNNER_TEMP/pdm_base"
+          python3 -m pytest tests/cli/test_update.py -q -ra \
+            > "$GITHUB_WORKSPACE/p13_public_output/public_update_tests.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p13_public_output/public_update_exit.txt"
+          tail -n 100 "$GITHUB_WORKSPACE/p13_public_output/public_update_tests.log"
+          echo "P13_PUBLIC_UPDATE_EXIT=$rc"
+          exit 0
+      - name: Summarize diagnostics without mislabeling task truth
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,re
+          p=pathlib.Path("p13_public_output")
+          out={"study":"P13_POST_REVEAL_PUBLIC_DIAGNOSTIC",
+               "independent_oracle_executed_here":False,
+               "candidate_sha":(p/"candidate_sha.txt").read_text().strip() if (p/"candidate_sha.txt").exists() else None,
+               "source": "pdm-project/pdm original historical commit"}
+          for name,prefix in (("visible","visible"),("public_update","public_update")):
+            txt=(p/(prefix+"_tests.log")).read_text() if (p/(prefix+"_tests.log")).exists() else ""
+            ef=p/(prefix+"_exit.txt")
+            out[name]={"exit_code":int(ef.read_text()) if ef.exists() else None,
+                       "last_summary_lines":[line for line in txt.splitlines() if re.search(r"\d+ (passed|failed|error)",line)][-4:],
+                       "is_hidden_task_oracle":False}
+          (p/"summary.json").write_text(json.dumps(out,indent=2)+"\n")
+          print("P13_PUBLIC_ONLY_SUMMARY "+json.dumps(out))
+          PY
+      - name: Retain full post-reveal public diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p13-pdm-postreveal-public-mechanism
+          path: p13_public_output/
+          retention-days: 60
+          if-no-files-found: warn

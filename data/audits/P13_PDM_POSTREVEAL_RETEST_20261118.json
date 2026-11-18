@@ -1,0 +1,124 @@
+{
+  "schema": "99llm_X1_P13_PDM_PostRevealMechanisticRecheck_20261118_v1",
+  "date_utc": "2026-11-18",
+  "status": "EXECUTED_POSTREVEAL_DIAGNOSTIC_NOT_BLIND",
+  "scope": "One already revealed SWE-bench-Live PDM task; source-locked public tests and same original task oracle retest; no new prospective agent-policy trial",
+  "task": {
+    "instance_id": "pdm-project__pdm-3419",
+    "source_repo": "pdm-project/pdm",
+    "upstream_base_sha": "564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5",
+    "dataset_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "n_prespecified_visible_tests": 3,
+    "n_existing_public_tests": 22
+  },
+  "variants": [
+    {
+      "name": "original_upstream_base",
+      "provenance": "original_source_same_SHA",
+      "candidate_sha": "564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5",
+      "visible_pass": 0,
+      "visible_total": 3,
+      "public_pass": 22,
+      "public_total": 22,
+      "official_hidden_status": "NOT_RUN_AS_BASE_IN_THIS_COMPARISON",
+      "f2p_passed": null,
+      "f2p_total": null,
+      "p2p_failed": null,
+      "not_blinded_by_this_test": false
+    },
+    {
+      "name": "P12_initial_preoracle_sealed",
+      "provenance": "frozen_before_hidden_oracle",
+      "candidate_sha": "5c5ea31661c70a7bd7ec7b661f32f380b45c1d40",
+      "patch_sha256": "53c79ba925902cfd39739be353686dd7970dc683e5716afa79b8638e974552e9",
+      "visible_pass": 3,
+      "visible_total": 3,
+      "public_pass": 20,
+      "public_total": 22,
+      "official_hidden_status": "COMPLETE_UNRESOLVED",
+      "f2p_passed": 0,
+      "f2p_total": 3,
+      "p2p_failed": 2,
+      "original_tests_executed": 939,
+      "not_blinded_by_this_test": false,
+      "official_run_id": 44237374542,
+      "source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44237374542"
+    },
+    {
+      "name": "P13_postreveal_mechanistic_revision",
+      "provenance": "explicitly_after_P12_hidden_oracle_reveal",
+      "candidate_sha": "75473b04603db84fa67dc814f4d67e459a183bb0",
+      "visible_pass": 3,
+      "visible_total": 3,
+      "public_pass": 22,
+      "public_total": 22,
+      "official_hidden_status": "COMPLETE_UNRESOLVED_POSTREVEAL",
+      "f2p_passed": 0,
+      "f2p_total": 3,
+      "p2p_failed": 0,
+      "original_tests_executed": 939,
+      "not_blinded_by_this_test": true,
+      "official_run_id": 44238901257,
+      "original_test_output_sha256": "a4a7d78aba6777d65aebcf9f691db1b1bbdf33e09e69839b7432d2305d72dad9",
+      "original_artifact_id": 14398837795,
+      "source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44238901257"
+    }
+  ],
+  "public_retest": {
+    "workflow_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44238675293",
+    "artifact_id": 14398083602,
+    "source_patch_recipe": "pilot/pdm/p13_candidate_postreveal.py",
+    "p13_public_visible_pass": 3,
+    "p13_existing_update_pass": 22,
+    "upstream_existing_update_pass": 22,
+    "p12_existing_update_pass": 20,
+    "original_public_regression_ids": [
+      "tests/cli/test_update.py::test_update_ignore_constraints",
+      "tests/cli/test_update.py::test_update_existing_package_with_prerelease"
+    ]
+  },
+  "causal_mechanism": {
+    "observed": "Variant P13 preserves direct, already-modified Requirement instances while joining included-group metadata, removing public regressions present in P12.",
+    "proposed_explanation": "P12's group-expanded Requirement recreation discarded transient version/prerelease edits; P13's identity preservation retains both provenance and state.",
+    "status": "Source-grounded and supported by controlled public-test contrast; not a formal proof of all unseen behavior.",
+    "nonresult": "Both P12 and P13 fail all 3 benchmark F2P tests; retaining prior functionality is insufficient to resolve this benchmark issue."
+  },
+  "three_axes": {
+    "group_provenance_narrow": "P12 and P13 visible 3/3; original baseline 0/3",
+    "existing_api_regressions": "P12 2/22 public failures, P13 0/22",
+    "independently_scored_issue_fix": "P12 0/3 F2P, P13 0/3 F2P; P13 oracle reuse is post-reveal and not independent validation of a new blind candidate."
+  },
+  "frozen_policy_unchanged": {
+    "original_P12_decisions_sha256": "bc51ef445bc321854288d882677b42c416d7d6584b55a51854d79c40a36b3503",
+    "original_P12_self_report": "ACCEPT",
+    "original_P12_local": "ACCEPT",
+    "original_P12_source_linked": "HOLD",
+    "P13_has_new_preoracle_decision": false,
+    "P13_is_new_policy_evaluation": false
+  },
+  "claim_limits": [
+    "No real human developer feedback",
+    "No second human coder",
+    "No independent agent author attestation",
+    "No new blinded or generalizable P13 result; same benchmark test data previously revealed",
+    "Zero tasks solved by P13 is not a model-wide success rate",
+    "P10 naturalistic PR cohort is disjoint",
+    "MR30 baseline unmodified",
+    "The P13 historical test output and GitHub artifact have a finite retention; preserve source and checksum ledger for reproducibility"
+  ],
+  "references": [
+    {
+      "title": "SWE-bench-Live evaluation protocol and benchmark field definitions",
+      "url": "https://huggingface.co/datasets/SWE-bench-Live/SWE-bench-Live"
+    },
+    {
+      "title": "When Old Meets New: Evaluating the Impact of Regression Tests on SWE Issue Resolution (2025)",
+      "url": "https://arxiv.org/abs/2510.18270"
+    },
+    {
+      "title": "Are Benchmark Tests Strong Enough? Mutation-Guided Diagnosis and Augmentation of Regression Suites (2026)",
+      "url": "https://arxiv.org/abs/2604.01518"
+    }
+  ]
+}
