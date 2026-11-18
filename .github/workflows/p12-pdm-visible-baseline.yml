@@ -55,6 +55,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m pip install -e "$RUNNER_TEMP/pdm_base[pytest]"
+          # Historical PDM pdm.lock versions, because modern hishel 2 breaks pre-2025 PDM tests.
+          python3 -m pip install "hishel==0.0.33" "pytest==8.3.3" "pytest-mock==3.14.0" "dep-logic==0.4.11" "resolvelib==1.1.0" "tomlkit==0.13.2" "rich==13.9.2"
+          python3 -m pip check
       - name: Run locked visible checks on ORIGINAL unpatched base
         shell: bash
         run: |
