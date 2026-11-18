@@ -1,0 +1,219 @@
+name: Independent SWE-bench-Live oracle for pre-sealed PDM initial attempt
+
+on:
+  push:
+    paths:
+      - '.github/workflows/p12-pdm-official-oracle-initial.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  external-original-harness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      INSTANCE_ID: pdm-project__pdm-3419
+      BASE_SHA: 564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5
+      CANDIDATE_SHA: 5c5ea31661c70a7bd7ec7b661f32f380b45c1d40
+      PATCH_SHA256: 53c79ba925902cfd39739be353686dd7970dc683e5716afa79b8638e974552e9
+      OFFICIAL_HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      RUN_NAME: evcar-pdm-initial-gpt6-20261118
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout immutable decision seal
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Assert prior seal and pre-oracle registration before reading withheld data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p agent_oracle_output
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          root=pathlib.Path('pilot/pdm')
+          prereg=json.loads((root/'oracle_evaluation_preregister.json').read_text())
+          seal=json.loads((root/'locked/P9_DECISION_SEAL.json').read_text())
+          decisions=(root/'locked/P9_DECISIONS_SEALED.jsonl').read_bytes()
+          d=json.loads(decisions)
+          assert prereg['preoracle_github_commit']=='dd9dc14c09608df3863655fa2f7080bbce96d34d'
+          assert seal['decisions_sha256']==prereg['preoracle_decisions_sha256']
+          assert hashlib.sha256(decisions).hexdigest()==seal['decisions_sha256']
+          assert hashlib.sha256((root/'decision_input.jsonl').read_bytes()).hexdigest()==seal['input_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==seal['script_sha256']
+          assert prereg['preoracle_input_sha256']==seal['input_sha256']
+          assert prereg['preoracle_policy_code_sha256']==seal['script_sha256']
+          assert prereg['target_patch_sha256']==os.environ['PATCH_SHA256']
+          assert prereg['task_stage']=='INITIAL_ATTEMPT_ONLY_PER_FROZEN_STOP_RULE'
+          assert prereg['agent_authorship_independently_attested'] is False
+          assert prereg['scripted_feedback_issued'] is False
+          assert d['head_sha']==os.environ['CANDIDATE_SHA']
+          assert d['decisions']=={'self_report':'ACCEPT','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert d['t_decision']==prereg['preoracle_decision_time_utc']
+          assert prereg['dataset_revision_sha']==os.environ['DATASET_REV']
+          assert prereg['harness_ref']==os.environ['OFFICIAL_HARNESS_SHA']
+          print('Pre-oracle GitHub source seal verified BEFORE oracle retrieval')
+          PY
+          df -h /
+          docker version
+      - name: Rebuild the exact first-attempt patch without any hidden data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" remote add origin https://github.com/pdm-project/pdm.git
+          git -C "$RUNNER_TEMP/pdm_base" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/pdm_base" checkout --detach FETCH_HEAD
+          python3 pilot/pdm/ai_candidate_initial.py --repo "$RUNNER_TEMP/pdm_base"
+          git -C "$RUNNER_TEMP/pdm_base" diff --check
+          git -C "$RUNNER_TEMP/pdm_base" diff -- src/pdm/cli/commands/update.py > agent_oracle_output/agent_patch.diff
+          python3 - <<'PY'
+          import hashlib,os,pathlib
+          p=pathlib.Path('agent_oracle_output/agent_patch.diff').read_bytes()
+          assert hashlib.sha256(p).hexdigest()==os.environ['PATCH_SHA256']
+          PY
+          export GIT_AUTHOR_DATE="2026-11-18T04:10:00Z"
+          export GIT_COMMITTER_DATE="2026-11-18T04:10:00Z"
+          git -C "$RUNNER_TEMP/pdm_base" add src/pdm/cli/commands/update.py
+          git -C "$RUNNER_TEMP/pdm_base" -c user.name="GPT-6 research-generated candidate (unattested)" -c user.email="ai-research@example.invalid" \
+            commit -m "GPT-6 P12 initial: include ancestor group provenance during update"
+          test "$(git -C "$RUNNER_TEMP/pdm_base" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          python3 - <<'PY'
+          import json,os,pathlib
+          patch=pathlib.Path('agent_oracle_output/agent_patch.diff').read_text()
+          obj={'instance_id':os.environ['INSTANCE_ID'],
+               'model_name_or_path':'gpt6_research_initial_only',
+               'model_patch':patch}
+          pathlib.Path('agent_oracle_output/predictions.jsonl').write_text(json.dumps(obj)+'\n')
+          print('Candidate exact commit SHA and patch SHA256 PASS, before oracle download')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned original evaluator code
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$OFFICIAL_HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$OFFICIAL_HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$OFFICIAL_HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > agent_oracle_output/python_environment.txt
+      - name: Download original oracle ONLY AFTER seal and exact-patch checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/heldout_oracle"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          dataset=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['DATASET_REV'])
+          selected=[dict(row) for row in dataset if row['instance_id']==os.environ['INSTANCE_ID']]
+          if len(selected)!=1:raise ValueError("Expected exactly one original benchmark task")
+          # This whole dataset row (including tests) remains private to the evaluator runner.
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'heldout_oracle'/'instance.jsonl'
+          out.write_text(json.dumps(selected[0],default=str,ensure_ascii=False)+'\n')
+          print("Frozen evaluator input loaded after sealed decisions; withheld test fields not printed.")
+          PY
+      - name: Execute untouched official evaluator against AI patch
+        id: official
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > agent_oracle_output/oracle_started_utc.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/heldout_oracle/instance.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/agent_oracle_output/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "$RUN_NAME" \
+            > "$GITHUB_WORKSPACE/agent_oracle_output/harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/agent_oracle_output/harness_exit_code.txt"
+          tail -n 100 "$GITHUB_WORKSPACE/agent_oracle_output/harness_stdout.log" || true
+          exit "$rc"
+      - name: Admit only exact-source observed test execution and compare frozen decisions
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,hashlib,json,os,pathlib,shutil
+          iid=os.environ['INSTANCE_ID']
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          out=pathlib.Path('agent_oracle_output')
+          found=[]
+          for fp in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(fp):continue
+              try:
+                  full=json.loads(fp.read_text())
+                  if isinstance(full,dict) and iid in full:found.append((fp,full[iid]))
+              except (ValueError,OSError):continue
+          code=root/'swebench/harness/run_evaluation.py'
+          started=out/'oracle_started_utc.txt'
+          obj={'episode_id':'pdm-project__pdm-3419__INITIAL_ATTEMPT_ONLY',
+               'head_sha':os.environ['CANDIDATE_SHA'],
+               'oracle_type':'heldout_harness',
+               'oracle_code_sha256':hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else '',
+               'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+               'started_at':started.read_text().strip() if started.exists() else '',
+               'oracle_test_manifest_frozen_before_decision':True,
+               'oracle_independent_of_visible_receipts':True,
+               'oracle_unmodified_by_agent':True,
+               'status':'error','f2p_total':0,'f2p_passed':0,'p2p_failed':0,'tests_executed':0,
+               'scientific_scope':'INITIAL_ATTEMPT_ONLY_NOT_POST_PUSHBACK',
+               'source_revision':os.environ['DATASET_REV'],
+               'original_harness_commit':os.environ['OFFICIAL_HARNESS_SHA'],
+               'matched_reports':len(found)}
+          if len(found)==1:
+              path,d=found[0]
+              shutil.copyfile(path,out/'original_eval_report.json')
+              f=d.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              p=d.get('tests_status',{}).get('PASS_TO_PASS',{})
+              vals=[f.get('success',[]),f.get('failure',[]),p.get('success',[]),p.get('failure',[])]
+              t=path.parent/'test_output.txt'
+              if t.is_file():shutil.copyfile(t,out/'original_test_output.txt')
+              # A valid original parsed test log, not just a successful job label.
+              if t.is_file() and all(isinstance(v,list) for v in vals) and sum(map(len,vals))>0 and len(vals[0])+len(vals[1])>0:
+                  obj.update({'status':'complete',
+                              'f2p_total':len(vals[0])+len(vals[1]),
+                              'f2p_passed':len(vals[0]),
+                              'p2p_failed':len(vals[3]),
+                              'tests_executed':sum(map(len,vals)),
+                              'official_resolved':d.get('resolved'),
+                              'original_test_output_sha256':hashlib.sha256(t.read_bytes()).hexdigest()})
+              else:obj['nonadmission_reason']='invalid_or_missing_original_test_report'
+              lg=path.parent/'run_instance.log'
+              if lg.is_file():shutil.copyfile(lg,out/'original_run_instance.log')
+          else:obj['nonadmission_reason']='no_unique_original_report'
+          (out/'postseal_oracle.jsonl').write_text(json.dumps(obj,sort_keys=True)+'\n')
+          print('POSTSEAL_ORACLE_EVIDENCE: '+json.dumps(obj,sort_keys=True))
+          PY
+          python3 scripts/p9_reveal.py \
+            --sealed-dir pilot/pdm/locked \
+            --oracle agent_oracle_output/postseal_oracle.jsonl \
+            --out agent_oracle_output/postseal_comparison.json
+          df -h / > agent_oracle_output/disk_after.txt || true
+          docker image ls --digests > agent_oracle_output/docker_images.txt || true
+      - name: Archive original test output and reproducibility metadata
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pdm-gpt6-initial-heldout-oracle
+          path: agent_oracle_output/
+          retention-days: 30
+          if-no-files-found: error
