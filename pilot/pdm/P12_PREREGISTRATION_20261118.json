@@ -1,0 +1,62 @@
+{
+  "id": "99llm-X1-P12-PDM-3419-20261118",
+  "date_utc": "2026-11-18",
+  "stage": "PRE_CANDIDATE_PRE_VISIBLE_TEST_PRE_ORACLE",
+  "objective": "One two-stage research-generated coding candidate and scripted developer-style feedback for first previously unevaluated task in the already frozen ten-task SWE-bench-Live pilot, without looking at hidden tests or original answer.",
+  "task": {
+    "frozen_index_one_based": 2,
+    "instance_id": "pdm-project__pdm-3419",
+    "source_repo": "pdm-project/pdm",
+    "base_commit": "564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5",
+    "source_problem_sha256": "0faabedc43413e5eb938f74733df5162fd0e1cfd97b8c126a6099d5c1e267e58",
+    "visible_task": "pdm update with dependency-group include-group may drop group attribution on other packages",
+    "selected_due_to_order_not_outcome": true
+  },
+  "source": {
+    "dataset": "SWE-bench-Live/SWE-bench-Live",
+    "split": "lite",
+    "dataset_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "frozen_frame": "pilot/frozen_task_frame_20261117.json",
+    "original_harness_commit": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "excluded_calibration": "amoffat__sh-744"
+  },
+  "roles": {
+    "coder": "GPT-6 AI-generated research candidate, not independently attested Copilot/autonomous bot",
+    "human_developer_feedback": "None; when issued, scripted AI-generated developer-style feedback, not a real human review or intervention",
+    "human_coders": 0
+  },
+  "prospective_order": [
+    "1. Freeze this protocol, visible checks, branch and source base BEFORE generating first candidate",
+    "2. Read only allowed task statement and source at base_commit, never benchmark test_patch or gold patch",
+    "3. Run predeclared visible checks on unmodified base and first patch; preserve both logs and patch hash",
+    "4. Fix first-stage patch and the exact visible correction request before obtaining any hidden oracle; prohibit oracle access for all agents while coding",
+    "5. Run prespecified visible suite on second patch; record exact revision tree hash, local test receipt and explicit commit-author limitation",
+    "6. Produce and Git-commit immutable P9 decisions and SHA seal, not merely uncommitted timestamps",
+    "7. Only after publicly confirmed seal run pinned original benchmark oracle on first and second patches, preserving executed F2P/P2P and raw logs",
+    "8. Admit only exact SHA/manifest/test-count matched outcomes; leave zero-tests and unavailable runs UNKNOWN"
+  ],
+  "first_attempt_rule": "Implement a narrow fix to update lock input so included dependency groups preserve parent group provenance. Do not use future test patches, original benchmark gold, PRs representing official fixes, or oracle results.",
+  "visible_checks": {
+    "source_file": "pilot/pdm/visible_local_tests.py",
+    "runner": "pytest tests/cli/test_p12_visible.py -q after copying pre-frozen visible file; PDM test fixtures and offline repository stubs",
+    "predeclared_assertions": [
+      "An explicitly included dependency must keep both originating and including group in lockfile on update.",
+      "Unrelated groups and default dependencies must not acquire spurious group membership.",
+      "Partial package update retains metadata on other members of include-containing group.",
+      "An update that keeps a version pinned must not erase existing group membership."
+    ],
+    "notes": "Existing upstream test_update_dependency_group_with_include contains only exit-code check; newly visible checks add group metadata assertions. All visible test code is allowed to the candidate, not an independent oracle."
+  },
+  "synthetic_feedback_rule": "If the initial visible suite has a real failing assertion, issue exactly one narrow instruction referencing its failure text, with no hidden-test inputs, and change the actual code. If all checks pass, explicitly record NO_CORRECTIVE_FEEDBACK_NEEDED; do not fabricate a failed first attempt or a repair.",
+  "independent_oracle": "SWE-bench-Live lite, original harness at exact SHA and pre-pinned dataset revision, Docker runner with no agent access to hidden fields; run both initial and corrected patch only after second-stage decisions sealed. If no corrected patch, run initial oracle only after initial seal and label INITIAL-ONLY.",
+  "decision_policy": "scripts/p9_decide.py unchanged; policies self_report/local_pass/source_linked read the same visible input; commit author attestation cannot be fabricated; artificial Git commit name is not independent authorship proof.",
+  "publication_guards": [
+    "Never imply human coder or real human developer pushback",
+    "Do not combine this sample with P10 source-only PR frame",
+    "No post-hoc substitution of frozen cases",
+    "Do not claim efficacy from n=1",
+    "Keep MR30 unchanged",
+    "Never use future oracle labels in visible feedback, code, or decision features"
+  ],
+  "status": "PREREGISTERED_PENDING_FIRST_ATTEMPT"
+}
