@@ -1,0 +1,54 @@
+{
+  "protocol": "EVCAR_P12_PDM_INITIAL_ORACLE_20261118",
+  "status": "PREORACLE_SEALED_AND_TIMESTAMPED_NOT_YET_EXECUTED",
+  "task_stage": "INITIAL_ATTEMPT_ONLY_PER_FROZEN_STOP_RULE",
+  "instance_id": "pdm-project__pdm-3419",
+  "upstream_repo": "pdm-project/pdm",
+  "upstream_base_sha": "564d09acbf2c8ef6500a3864f1fa1d38b3c5cdd5",
+  "original_update_py_git_blob": "02c49f0a135429508c2eca400a63d1a9f7b9e335",
+  "target_candidate_head_sha": "5c5ea31661c70a7bd7ec7b661f32f380b45c1d40",
+  "target_patch_sha256": "53c79ba925902cfd39739be353686dd7970dc683e5716afa79b8638e974552e9",
+  "dataset_repo": "SWE-bench-Live/SWE-bench-Live",
+  "dataset_revision_sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "dataset_split": "lite",
+  "harness_repo": "microsoft/SWE-bench-Live",
+  "harness_ref": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "docker_namespace": "starryzhang",
+  "preoracle_github_commit": "dd9dc14c09608df3863655fa2f7080bbce96d34d",
+  "preoracle_decisions_sha256": "bc51ef445bc321854288d882677b42c416d7d6584b55a51854d79c40a36b3503",
+  "preoracle_input_sha256": "999ea08327723ec1eb49cf3cfb7bd21476c0ee16a679d51c1b458a8fe6f32d7d",
+  "preoracle_policy_code_sha256": "baea708bacf643bdf6110d5c0ba3a584d8ad0783f993bfe481f96ce8149ae6fd",
+  "preoracle_decision_time_utc": "2026-11-18T04:24:00Z",
+  "preoracle_seal_run_id": 44237029383,
+  "local_candidate_visible_run_id": 44236769972,
+  "base_visible_run_id": 44236766300,
+  "baseline_visible_tests": {
+    "passed": 0,
+    "failed": 3
+  },
+  "initial_visible_tests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "scripted_feedback_issued": false,
+  "scripted_feedback_not_issued_reason": "ALL_THREE_INITIAL_VISIBLE_TESTS_PASS; prereg P12 prohibits manufactured correction",
+  "human_developer_feedback_issued": false,
+  "agent_authorship_independently_attested": false,
+  "allowed_oracle_stage": "FIRST_ATTEMPT_ONLY_NOT_POST_FEEDBACK",
+  "oracle_execution_order": [
+    "verify public GitHub pre-oracle decision commit and SHA",
+    "regenerate candidate at exact source commit and patch SHA",
+    "download pinned hidden oracle only in separate evaluator job",
+    "run original pinned harness",
+    "admit only if original test count/result matches exact task and candidate SHA",
+    "archive raw logs and postseal comparison"
+  ],
+  "no_substitution_rule": "If official evaluator fails, unavailable or unsupported, report unadmitted and do not pick a new task based on outcome; all ten original frozen members remain.",
+  "limitations": [
+    "No real developer correction",
+    "No second agent correction",
+    "Source-linked HOLD cannot prove superiority",
+    "No human coder",
+    "MR30 and P10 untouched"
+  ]
+}
