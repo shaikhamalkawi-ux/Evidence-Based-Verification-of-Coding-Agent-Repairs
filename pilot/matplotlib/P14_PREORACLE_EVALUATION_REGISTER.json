@@ -1,0 +1,88 @@
+{
+  "protocol_id": "99llm_X1_P14_MATPLOTLIB_TWO_STAGE_PREORACLE_REGISTER_20261119",
+  "trial_kind": "ONE frozen SWE-bench-Live task, TWO correlated candidate revisions under ONE AI-written synthetic feedback event",
+  "task": "matplotlib__matplotlib-28933",
+  "upstream_repo": "matplotlib/matplotlib",
+  "upstream_base_sha": "cf84d9a6410dec07f57916905c9f54bf00d22b2e",
+  "original_source_blob_sha": "9629a821368cc66ddf98f31371ef7c0672642ead",
+  "benchmark": "SWE-bench-Live/SWE-bench-Live",
+  "split": "lite",
+  "dataset_revision_sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "harness_repo": "microsoft/SWE-bench-Live",
+  "harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "docker_namespace": "starryzhang",
+  "preoracle_timestamp_utc": "2026-11-19T19:00:29Z",
+  "preoracle_git_seal_commit": "3aced6a089fa27e7802e8220404afb2ab9f21e28",
+  "preoracle_decisions_sha256": "9ad19413cc0a447464759bafc5786f6b63b179393c429d61dc69b5290ea7496a",
+  "preoracle_input_sha256": "709a2ba056fa0181e4f7724395623c7764dd966e16eac996963e4c2b40931242",
+  "p9_policy_version": "X1-P9-alpha-1-20261116",
+  "seal_runner": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44593723635",
+  "original_sample_size": 10,
+  "benchmark_task_position_one_based": 3,
+  "frames_not_to_pool": [
+    "P10 10 naturalistic Copilot PRs",
+    "P11/P12 prior first-attempt benchmark cases",
+    "P13 post-reveal PDM diagnostic"
+  ],
+  "base_visible": {
+    "passed": 1,
+    "total": 6,
+    "run_id": 44592478321
+  },
+  "stage1": {
+    "episode_id": "matplotlib__matplotlib-28933__STAGE1_PRE_FEEDBACK",
+    "candidate_sha": "ad65fe2531ce297d5770257370b469b80731a614",
+    "base_to_candidate_patch_sha256": "38d8adc4b7de66735b1318afde6e6e38b0b1bd3f6508157634f11407d7ce6050",
+    "source_recipe": "pilot/matplotlib/ai_candidate_initial.py",
+    "visible": {
+      "passed": 5,
+      "total": 6,
+      "run_id": 44592478321,
+      "test_finished_at": "2026-11-19T18:54:33Z"
+    },
+    "preoracle_policy_decisions": {
+      "self_report": "HOLD",
+      "local_pass": "HOLD",
+      "source_linked": "HOLD"
+    }
+  },
+  "stage2": {
+    "episode_id": "matplotlib__matplotlib-28933__STAGE2_POST_SYNTHETIC_FEEDBACK",
+    "candidate_sha": "1c9cb477367e56439fc71e08a4da0661cd105843",
+    "base_to_candidate_patch_sha256": "f29d98f8cfe6ef1cf29a9852ce02f3af7fd03e48171ca627a411813dab2c5512",
+    "source_recipe": "pilot/matplotlib/ai_candidate_after_feedback.py",
+    "feedback_file": "pilot/matplotlib/P14_SCRIPTED_FEEDBACK_AFTER_FIRST.json",
+    "preoracle_self_report_file": "pilot/matplotlib/P14_STAGE2_PREORACLE_AI_CLAIM.md",
+    "visible": {
+      "passed": 6,
+      "total": 6,
+      "run_id": 44593154169,
+      "test_finished_at": "2026-11-19T18:58:15Z"
+    },
+    "preoracle_policy_decisions": {
+      "self_report": "ACCEPT",
+      "local_pass": "ACCEPT",
+      "source_linked": "HOLD"
+    }
+  },
+  "original_oracle_execution_sequence": [
+    "Verify source checksum of published pre-oracle input, decisions, policy script and SHA seal; compare these to this published preoracle registration.",
+    "Rebuild exact original upstream commit and exact stage1 patch and git SHA without reading any benchmark oracle.",
+    "Rebuild exact stage2 patch and git SHA, retaining same historical base and synthetic author labels.",
+    "Only after source and decision seal pass, retrieve original pinned SWE-bench-Live task row in evaluator-only isolated environment.",
+    "Run original immutable harness separately against each of stage1 and stage2 (no code edits or feedback after oracle), reporting F2P and P2P on exact SHA.",
+    "Archive raw report.json, test_output.txt, execution logs and Docker environment/runner metadata.",
+    "Keep missing or zero-test outcomes UNKNOWN rather than FAIL. Count task n=1 regardless of the two candidate stages."
+  ],
+  "stage1_stage2_statistical_independence": false,
+  "feedback_real_human": false,
+  "feedback_synthetic_ai": true,
+  "agent_authorship_independently_attested": false,
+  "scientific_guard": [
+    "P9 policy remains unchanged",
+    "SOURCE_LINKED HOLD is an authorship-evidence hold, not an independently learned bug detector",
+    "No overclaim of comparative superiority from one task",
+    "MR30 unchanged",
+    "P11/P12/P13 baseline code/evidence not overwritten"
+  ]
+}
