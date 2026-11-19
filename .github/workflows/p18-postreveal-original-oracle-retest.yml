@@ -100,7 +100,7 @@ jobs:
           assert len(neg)==len(pos)==1,(neg,pos)
           assert 'DoRA magnitude norm is still on meta device' in neg[0]
           assert 'Cannot initialize DoRA magnitude: computed norm is still on meta device' in pos[0]
-          assert neg[0].replace('DoRA magnitude norm is still on meta device','Cannot initialize DoRA magnitude: computed norm is still on meta device')==pos[0]
+          assert neg[0][1:].replace('DoRA magnitude norm is still on meta device','Cannot initialize DoRA magnitude: computed norm is still on meta device')==pos[0][1:]
           print('P18_EXACTLY_ONE_EXCEPTION_STRING_CHANGED_NO_EXECUTABLE_LOGIC_DELTA')
           PY
           git -C "$RUNNER_TEMP/torchtune_src" diff "$BASE_SHA" HEAD -- torchtune/modules/peft/dora.py \
