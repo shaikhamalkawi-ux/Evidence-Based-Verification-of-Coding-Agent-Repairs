@@ -65,7 +65,25 @@ Two P18 workflow execution limitations were logged and fixed at infrastructure l
 
 **Editor decision:** KEEP as post-reveal mechanistic **endpoint-sensitivity demonstration** or supplementary negative-result explanation. HOLD claims of benchmark-wide validity problems or superiority of a proposed new gate. Any future systematic error-contract study should preregister a taxonomy (behavioral resolution, interface signature, error-message contract, regression preservation, resource feasibility), collect samples independently of observing failure content, quantify categories with task-level denominators and use new untouched instances; do not infer rates from one post-reveal experiment.
 
-## 5. Reproducibility inventory
+## 5. External literature / priority audit (current as of November 2026)
+
+**This phenomenon is not a new discovery in the general SWE-bench literature.** OpenAI's February 23, 2026 audit of *SWE-bench Verified* documented tests that reject functionally correct candidates and public-data contamination ([OpenAI, 2026-02-23](https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/)). Its July 8, 2026 audit of *SWE-Bench Pro* classified overstrict implementation-dependent tests, underspecified tasks, and low-coverage tests among material evaluation flaws ([OpenAI, 2026-07-08](https://openai.com/index/separating-signal-from-noise-coding-evaluations/)). *SWE-Bench Pro Verified* (Zheng et al., September 2026) likewise studies task-quality and leakage-related reliability ([arXiv:2609.08149](https://arxiv.org/abs/2609.08149)). The September 22, 2026 public benchmark V2 update includes source/instruction mismatch corrections and reruns against pristine images ([Scale AI SWE-Bench Pro V2](https://labs.scale.com/leaderboard/swe_bench_pro_public_v2)).
+
+These cited works concern **different benchmark variants**, not our exact SWE-bench-Live case. Their prevalence estimates **do not transfer** to SWE-bench-Live, and their authorship/priority must be respected. P18's contribution, if used, is the uniquely timestamped and SHA-reproducible **within-task literal-only** contrast under a fixed original evaluator — one specific corroborating example, not a population estimate, novel test-auditing algorithm, or first report of overstrict test behavior.
+
+### Claim-boundary matrix
+
+| Measured object | Grounded P18 claim | Unsupported extension |
+| --- | --- | --- |
+| Original hidden F2P/P2P under unchanged evaluator | One-source-literal post-reveal variant scored 1/1 F2P, zero P2P regressions | General benchmark reliability or population effect |
+| Conditional magnitude implementation | Original P17/P18 logic identical, six source-AST CPU checks pass | Full two-GPU DoRA training correct, all quantization/FSDP invariants proven |
+| Error-text contract | The original task test enforces a specific exception regex, satisfied by P18 | All exact-error-message checks are invalid or irrelevant |
+| Agent evaluation policy | Original P17 blinded HOLD/ACCEPT/HOLD frozen | A new policy has been successfully validated by P18 |
+| Authorship and developer feedback | Synthetic Git author, no independently attested actor or real human correction | Human-in-the-loop or autonomous-agent ground truth |
+
+**Editorial hold:** No general SWE-bench-Live defect rate, novel evaluation methodology, or independent post-feedback recovery is inferable from one exposed task. The correct role is an evidence-sufficiency and contract-sensitivity demonstration.
+
+## 6. Reproducibility inventory
 
 - [Original P17 scientific paper](../reports/P17_HISTORICAL_DORA_SOURCE_AND_ORIGINAL_ORACLE_20261120.md) and [original task ledger](../data/audits/P17_TORCHTUNE_ORIGINAL_ORACLE_20261120.json) — unchanged.
 - [P18 protocol bounding post-reveal evidence](../protocol/P18_POSTREVEAL_TORCHTUNE_BOUNDARIES_20261120.json), [literal ablation registration](../protocol/P18_POSTREVEAL_LITERAL_SENSITIVITY_REGISTER_20261120.json) and [pre-retest registration](../pilot/torchtune/P18_POSTREVEAL_ORIGINAL_TASK_RETEST_REGISTER.json).
