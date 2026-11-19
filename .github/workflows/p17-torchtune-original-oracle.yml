@@ -1,0 +1,228 @@
+name: P17 torchtune ORIGINAL pinned SWE-bench-Live task oracle AFTER public seal
+
+on:
+  push:
+    paths:
+      - .github/workflows/p17-torchtune-original-oracle.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-harness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      INSTANCE_ID: pytorch__torchtune-2139
+      BASE_SHA: f2bd4bc25b24587aef40f486087412b9da8f1d94
+      DORA_ORIGINAL_BLOB: 6f097da6d039738c320e8775ad61950c56fe0108
+      CANDIDATE_SHA: 57f45fdd5552908d4b5d42cccd7359ccb4de2560
+      PATCH_SHA256: c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801
+      DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      OFFICIAL_HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout publicly immutable P17 decision and source recipe
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify GitHub preoracle seal, source/test scope and fixed task BEFORE any hidden data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p17_oracle
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          p=pathlib.Path('pilot/torchtune')
+          r=json.loads((p/'P17_PREORACLE_EVALUATION_REGISTER.json').read_text())
+          s=json.loads((p/'sealed/P9_DECISION_SEAL.json').read_text())
+          decision=(p/'sealed/P9_DECISIONS_SEALED.jsonl').read_bytes()
+          input_bytes=(p/'sealed/P17_DECISION_INPUT.jsonl').read_bytes()
+          d=json.loads(decision)
+          original=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert original['selected'][4]['instance_id']==r['original_task']==os.environ['INSTANCE_ID']
+          assert original['selected'][4]['repo']=='pytorch/torchtune'
+          assert original['dataset_revision_sha']==r['official_dataset']['revision']==os.environ['DATASET_REV']
+          assert r['original_base_sha']==os.environ['BASE_SHA']
+          assert r['candidate_sha']==os.environ['CANDIDATE_SHA']
+          assert r['full_patch_sha256']==os.environ['PATCH_SHA256']
+          assert r['official_harness']['commit']==os.environ['OFFICIAL_HARNESS_SHA']
+          assert r['public_github_preoracle_seal_commit']=='6f95206a3a6d9ee8266c433e21de1085fe4119ea'
+          assert r['preoracle_timestamp_utc']=='2026-11-19T20:45:51Z'
+          assert r['original_P9_policy_sha256']==s['decisions_sha256']==hashlib.sha256(decision).hexdigest()
+          assert r['original_P9_input_sha256']==s['input_sha256']==hashlib.sha256(input_bytes).hexdigest()
+          assert r['original_P9_script_sha256']==s['script_sha256']==hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()
+          assert d['t_decision']==r['preoracle_timestamp_utc']
+          assert d['head_sha']==os.environ['CANDIDATE_SHA']
+          assert d['decisions']=={'self_report':'HOLD','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert r['independent_agent_authorship_attested'] is False
+          assert r['not_claimed_task_fixed'] is True
+          print('P17_P9_PREORACLE_PUBLIC_SHA='+s['decisions_sha256'])
+          print('P17_TASK=FROZEN_INDEX_FIVE_AND_SOURCE_LOCKED')
+          print('P17_NO_ORIGINAL_HIDDEN_ORACLE_YET')
+          PY
+          df -h /
+          docker version
+      - name: Reproduce frozen torchtune candidate exact source patch and git SHA (before gold)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" remote add origin https://github.com/meta-pytorch/torchtune.git
+          git -C "$RUNNER_TEMP/torchtune_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/torchtune_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" hash-object torchtune/modules/peft/dora.py)" = "$DORA_ORIGINAL_BLOB"
+          python3 pilot/torchtune/p17_candidate_initial.py --repo "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" diff --check
+          git -C "$RUNNER_TEMP/torchtune_src" diff -- torchtune/modules/peft/dora.py \
+            > p17_oracle/agent_patch.diff
+          test "$(sha256sum p17_oracle/agent_patch.diff | awk '{print $1}')" = "$PATCH_SHA256"
+          export GIT_AUTHOR_DATE="2026-11-20T03:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:00:00Z"
+          git -C "$RUNNER_TEMP/torchtune_src" add torchtune/modules/peft/dora.py
+          git -C "$RUNNER_TEMP/torchtune_src" \
+            -c user.name="GPT-6 P17 research-generated (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P17 initial: materialize stale DoRA meta magnitude only when necessary"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          python3 - <<'PY'
+          import json,os,pathlib
+          patch=pathlib.Path('p17_oracle/agent_patch.diff').read_text()
+          item={'instance_id':os.environ['INSTANCE_ID'],
+                'model_name_or_path':'gpt6_research_P17_hypothesis_informed_not_agent_attested',
+                'model_patch':patch}
+          pathlib.Path('p17_oracle/predictions.jsonl').write_text(json.dumps(item)+'\n')
+          print('P17_CANDIDATE_SHA_RECONSTRUCTED_EXACTLY='+os.environ['CANDIDATE_SHA'])
+          print('P17_ORIGINAL_BENCHMARK_NOT_YET_FETCHED')
+          PY
+          sha256sum p17_oracle/agent_patch.diff > p17_oracle/agent_patch.sha256
+      - name: Python 3.12 for pinned official evaluator
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original pinned SWE-bench-Live harness source (not modified)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$OFFICIAL_HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$OFFICIAL_HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$OFFICIAL_HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > p17_oracle/python_environment.txt
+      - name: Fetch pinned ORIGINAL benchmark task row only after patch and policy seal verified
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/original_oracle"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          data=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['DATASET_REV'])
+          rows=[dict(row) for row in data if row['instance_id']==os.environ['INSTANCE_ID']]
+          assert len(rows)==1
+          path=pathlib.Path(os.environ['RUNNER_TEMP'])/'original_oracle'/'one_task.jsonl'
+          path.write_text(json.dumps(rows[0],default=str,ensure_ascii=False)+'\n')
+          print('P17_ORIGINAL_HIDDEN_INPUT_ACCESSED_ONLY_INSIDE_EVALUATOR_POST_SEAL')
+          PY
+      - name: Run exact original benchmark task oracle without altering candidate
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p17_oracle/oracle_started_at_utc.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/original_oracle/one_task.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/p17_oracle/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "evcar-p17-torchtune-first-20261120" \
+            > "$GITHUB_WORKSPACE/p17_oracle/original_harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p17_oracle/original_harness_exit_code.txt"
+          tail -n 115 "$GITHUB_WORKSPACE/p17_oracle/original_harness_stdout.log"
+          echo "P17_ORIGINAL_HARNESS_EXIT_CODE=$rc; green job not task truth"
+          exit "$rc"
+      - name: Extract original parsed F2P/P2P evidence; missing oracle remains UNKNOWN
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,shutil
+          iid=os.environ['INSTANCE_ID']
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          out=pathlib.Path('p17_oracle')
+          rows=[]
+          for path in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(path):continue
+              try:
+                  rec=json.loads(path.read_text())
+                  if isinstance(rec,dict) and iid in rec:rows.append((path,rec[iid]))
+              except (ValueError,OSError):continue
+          code=root/'swebench/harness/run_evaluation.py'
+          started=out/'oracle_started_at_utc.txt'
+          result={
+           'episode_id':'pytorch__torchtune-2139__CPU_SOURCE_FIRST_ATTEMPT',
+           'head_sha':os.environ['CANDIDATE_SHA'],
+           'oracle_type':'heldout_harness',
+           'oracle_code_sha256':hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else '',
+           'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+           'started_at':started.read_text().strip() if started.exists() else '',
+           'oracle_test_manifest_frozen_before_decision':True,
+           'oracle_independent_of_visible_receipts':True,
+           'oracle_unmodified_by_agent':True,
+           'status':'error','f2p_total':0,'f2p_passed':0,'p2p_failed':0,'tests_executed':0,
+           'matched_reports':len(rows),
+           'original_harness_commit':os.environ['OFFICIAL_HARNESS_SHA'],
+           'original_dataset_rev':os.environ['DATASET_REV'],
+           'full_two_GPU_reproducer_executed':False,
+           'CPU_visible_tests_not_full_task_verifier':True,
+           'agent_authorship_independently_attested':False
+          }
+          if len(rows)==1:
+              fp,d=rows[0]
+              shutil.copyfile(fp,out/'original_report.json')
+              f=d.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              p=d.get('tests_status',{}).get('PASS_TO_PASS',{})
+              v=[f.get('success',[]),f.get('failure',[]),p.get('success',[]),p.get('failure',[])]
+              t=fp.parent/'test_output.txt'
+              if t.is_file():shutil.copyfile(t,out/'original_test_output.txt')
+              if t.is_file() and all(isinstance(x,list) for x in v) and sum(map(len,v))>0 and len(v[0])+len(v[1])>0:
+                  result.update({
+                    'status':'complete','f2p_total':len(v[0])+len(v[1]),
+                    'f2p_passed':len(v[0]),'p2p_failed':len(v[3]),
+                    'tests_executed':sum(map(len,v)),
+                    'official_resolved':d.get('resolved'),
+                    'original_test_output_sha256':hashlib.sha256(t.read_bytes()).hexdigest()})
+              else:result['nonadmission_reason']='no_unique_original_executed_test_log'
+              log=fp.parent/'run_instance.log'
+              if log.is_file():shutil.copyfile(log,out/'run_instance.log')
+          else:result['nonadmission_reason']='missing_or_ambiguous_original_report_or_image_infeasibility'
+          (out/'postseal_oracle.jsonl').write_text(json.dumps(result,sort_keys=True)+'\n')
+          print('P17_POSTSEAL_ORACLE_EVIDENCE '+json.dumps(result,sort_keys=True))
+          PY
+          python3 scripts/p9_reveal.py \
+            --sealed-dir pilot/torchtune/sealed \
+            --oracle p17_oracle/postseal_oracle.jsonl \
+            --out p17_oracle/postseal_P9_comparison.json
+          df -h / > p17_oracle/disk_after.txt || true
+          docker image ls --digests > p17_oracle/docker_images.txt || true
+      - name: Preserve original harness logs, reports, patch and nonadmission reason
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p17-torchtune-original-pinned-oracle
+          path: p17_oracle/
+          retention-days: 60
+          if-no-files-found: error
