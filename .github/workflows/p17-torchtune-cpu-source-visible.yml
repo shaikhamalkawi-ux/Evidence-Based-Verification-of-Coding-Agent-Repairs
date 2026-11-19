@@ -1,0 +1,144 @@
+name: P17 historical DoRALinear real-source AST CPU baseline and candidate (NO ORACLE)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p17-torchtune-cpu-source-visible.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-source-cpu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    env:
+      BASE_SHA: f2bd4bc25b24587aef40f486087412b9da8f1d94
+      DORA_BLOB: 6f097da6d039738c320e8775ad61950c56fe0108
+      CUDA_VISIBLE_DEVICES: '-1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout P17 preregistration, frozen tests and candidate recipe
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify original fixed task and explicitly limited CPU source experiment
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p17_visible_output
+          python3 - <<'PY'
+          import json,os,hashlib,pathlib
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          reg=json.loads(pathlib.Path('pilot/torchtune/P17_PREREGISTRATION_20261120.json').read_text())
+          assert len(frame['selected'])==10
+          assert frame['selected'][4]['instance_id']==reg['fixed_cohort']['instance_id']=='pytorch__torchtune-2139'
+          assert frame['selected'][4]['repo']==reg['fixed_cohort']['original_repo']
+          assert reg['fixed_cohort']['original_base_sha']==os.environ['BASE_SHA']
+          assert reg['fixed_cohort']['source_git_blob_sha']==os.environ['DORA_BLOB']
+          assert reg['visible_test_protocol']['locked_before_patch'] is True
+          assert reg['policy_boundary']['original_P9_unchanged'] is True
+          t=pathlib.Path('pilot/torchtune/p17_visible_original_dora_cpu.py')
+          p=pathlib.Path('pilot/torchtune/p17_candidate_initial.py')
+          for label,x in [('frozen_test',t),('candidate_recipe',p)]:
+              print('P17_PREORACLE_'+label.upper()+'_SHA256='+hashlib.sha256(x.read_bytes()).hexdigest())
+          print('P17_NO_GOLD_OR_TEST_PATCH_AND_NO_ORIGINAL_ORACLE')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retrieve EXACT original public source and lock git blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" remote add origin https://github.com/meta-pytorch/torchtune.git
+          git -C "$RUNNER_TEMP/torchtune_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/torchtune_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" hash-object torchtune/modules/peft/dora.py)" = "$DORA_BLOB"
+          echo "$BASE_SHA" > p17_visible_output/source_base_sha.txt
+      - name: Install CPU PyTorch 2.10 exact package only, no models or training
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check \
+            torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu \
+            > p17_visible_output/install_torch_cpu.log 2>&1 || {
+              tail -n 100 p17_visible_output/install_torch_cpu.log
+              exit 1
+            }
+          python3 -m pip check > p17_visible_output/pip_check.txt
+          python3 -m pip freeze > p17_visible_output/python_environment.txt
+      - name: Run predeclared tests on original historical DoRALinear SOURCE AST
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p17_run_visible_cpu.py \
+            --repo "$RUNNER_TEMP/torchtune_src" \
+            --phase base \
+            --out p17_visible_output/original_source.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('p17_visible_output/original_source.json'))
+          assert r['tests_executed']==6
+          assert r['source_git_blob']=='6f097da6d039738c320e8775ad61950c56fe0108'
+          assert r['original_task_oracle_executed'] is False
+          print('P17_ORIGINAL_HISTORICAL_SOURCE_COUNT='+str(r['tests_executed']))
+          PY
+      - name: Apply narrow hypothesis-informed DoRA source candidate to original base
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/torchtune/p17_candidate_initial.py --repo "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" diff --check
+          git -C "$RUNNER_TEMP/torchtune_src" diff -- torchtune/modules/peft/dora.py \
+            > p17_visible_output/initial_patch.diff
+          test -s p17_visible_output/initial_patch.diff
+          sha256sum pilot/torchtune/p17_visible_original_dora_cpu.py \
+            pilot/torchtune/p17_candidate_initial.py p17_visible_output/initial_patch.diff \
+            > p17_visible_output/sha256_manifest.txt
+          export GIT_AUTHOR_DATE="2026-11-20T03:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:00:00Z"
+          git -C "$RUNNER_TEMP/torchtune_src" add torchtune/modules/peft/dora.py
+          git -C "$RUNNER_TEMP/torchtune_src" \
+            -c user.name="GPT-6 P17 research-generated (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P17 initial: materialize stale DoRA meta magnitude only when necessary"
+          git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD \
+            > p17_visible_output/candidate_commit_sha.txt
+          echo "P17_INITIAL_CANDIDATE_SHA=$(cat p17_visible_output/candidate_commit_sha.txt)"
+          echo "P17_ACTOR_INDEPENDENTLY_ATTESTED=FALSE"
+      - name: Execute SAME frozen original class source CPU checks on candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p17_run_visible_cpu.py \
+            --repo "$RUNNER_TEMP/torchtune_src" \
+            --phase initial_candidate \
+            --out p17_visible_output/candidate_source.json
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          d=pathlib.Path('p17_visible_output')
+          b=json.loads((d/'original_source.json').read_text())
+          p=json.loads((d/'candidate_source.json').read_text())
+          assert b['tests_executed']==p['tests_executed']==6
+          assert b['visible_tests_sha256']==p['visible_tests_sha256']
+          assert p['head_sha']==(d/'candidate_commit_sha.txt').read_text().strip()
+          assert b['original_task_oracle_executed'] is False
+          assert p['original_task_oracle_executed'] is False
+          print('P17_AUTHENTIC_ORIGINAL_SOURCE_BASE_PASSES='+str(b['passes']))
+          print('P17_AUTHENTIC_ORIGINAL_SOURCE_PATCH_PASSES='+str(p['passes']))
+          print('P17_P17_FIRST_PATCH_SHA256='+hashlib.sha256((d/'initial_patch.diff').read_bytes()).hexdigest())
+          print('P17_FROZEN_CPU_TESTS_SHA256='+b['visible_tests_sha256'])
+          PY
+      - name: Archive original source, exact patch and CPU visible receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p17-torchtune-historical-source-cpu-visible
+          path: p17_visible_output/
+          retention-days: 60
+          if-no-files-found: warn
