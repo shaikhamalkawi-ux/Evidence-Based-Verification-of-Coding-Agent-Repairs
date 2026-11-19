@@ -18,7 +18,7 @@ class P15ResourceGateTests(unittest.TestCase):
 
     def test_one_gpu_insufficient_for_original_two_ranks(self):
         self.assertEqual(p15.determine_status(1,1,["/dev/nvidia0"],True),
-                         "UNKNOWN_GPU_ACCESS_PRESERVE_TASK")
+                         "RESOURCE_HOLD_FULL_TWO_GPU_REPRO")
         self.assertEqual(p15.determine_status(1,0,[],True),
                          "RESOURCE_HOLD_FULL_TWO_GPU_REPRO")
 
