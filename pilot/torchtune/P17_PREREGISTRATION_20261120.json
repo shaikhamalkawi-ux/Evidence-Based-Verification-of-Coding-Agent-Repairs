@@ -1,0 +1,69 @@
+{
+  "protocol_id": "99llm-X1-P17-SOURCE-GROUNDED-DORA-CANDIDATE-20261120",
+  "declared_at_phase": "BEFORE ANY ORIGINAL TORCHTUNE SOURCE PATCH OR BENCHMARK GOLD ACCESS",
+  "version_type": "PROSPECTIVE SOURCE CANDIDATE WITH PRIOR P16 EXPLORATORY CPU HYPOTHESIS",
+  "hypothesis_origin": "P16 isolated meta-Parameter copy experiment was previously observed and disclosed; P17 is not discovery-blind to this mechanism, but original SWE-bench-Live hidden tests and gold remain unseen.",
+  "fixed_cohort": {
+    "frozen_frame": "pilot/frozen_task_frame_20261117.json",
+    "size": 10,
+    "case_index_one_based": 5,
+    "instance_id": "pytorch__torchtune-2139",
+    "original_repo": "pytorch/torchtune",
+    "canonical_current_repo": "meta-pytorch/torchtune",
+    "original_base_sha": "f2bd4bc25b24587aef40f486087412b9da8f1d94",
+    "source_git_blob_sha": "6f097da6d039738c320e8775ad61950c56fe0108",
+    "source_path": "torchtune/modules/peft/dora.py",
+    "p16_meta_probe_run_id": 44607950785
+  },
+  "question": "Does a conditional materialization of a DoRA magnitude that remains on meta after base/adapter weights load avoid noop copy while preserving already materialized nn.Parameter identity and gradients?",
+  "proposed_candidate_only_after_visible_test_freeze": {
+    "target": "DoRALinear.initialize_dora_magnitude in historically pinned original dora.py",
+    "source_statement": "self.magnitude.copy_(weight_norm)",
+    "change_principle": "If magnitude is meta while weight_norm is a real tensor, rebind a trainable Parameter from detached computed norm; otherwise use original copy_ to preserve parameter identity and existing CPU flow.",
+    "expected_benefit": "on original-source DoRALinear small CPU diagnostic with induced stale meta magnitude, meta parameter is replaced by actual calculated magnitude",
+    "potential_risk": "Full FSDP/DTensor magnitude sharding semantics may break when replacing a Parameter after sharding; this is NOT proved safe on a two-GPU distributed model",
+    "no_claim_of_equivalence": "one-rank CPU original DoRALinear test is neither two-GPU/8B training nor original distributed integration validation"
+  },
+  "visible_test_protocol": {
+    "original_source_ast_extract_file": "pilot/torchtune/p17_visible_original_dora_cpu.py",
+    "locked_before_patch": true,
+    "runtime": "PyTorch CPU 2.10.0 on standard GitHub Actions, no checkpoint downloads",
+    "use_original_source": "Compile the unchanged historical Python class AST and helper functions from checked exact source, with import-only stubs for unrelated torchao/torchtune optional dependencies. Quantized branches not tested.",
+    "planned_behavior": [
+      "Baseline original source leaves induced meta magnitude on meta after initialize_dora_magnitude",
+      "After scoped patch, small real-source class materializes induced meta magnitude with expected weight norms",
+      "Normal CPU existing magnitude preserves Parameter object identity and expected values",
+      "Post-initialization forward/backward maintains trainable finite gradient on magnitude",
+      "DoRA single-device scalar normal initialization remains valid",
+      "Non-meta state_dict contains CPU magnitude and preserves load/assignment semantics for unsharded model"
+    ],
+    "no_hidden_oracle_fields": true
+  },
+  "resource": {
+    "P15_status": "RESOURCE_HOLD_FULL_TWO_GPU_REPRO on that GitHub Actions runner only",
+    "required_original_visible_reproducer": "one node two GPU ranks, Llama3 8B DoRA, checkpoint assets",
+    "local_cpu_proxy_separate": true,
+    "does_not_impute_gpu_success": true
+  },
+  "benchmark_oracle_if_run": {
+    "original_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "original_harness": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "prereq": "A candidate patch, Git exact SHA, time-locked original P9 decisions and resource/actor evidence frozen BEFORE hidden task access",
+    "note": "An original Docker benchmark result may be available without completing the two-GPU visible reproducer; report these axes separately; do not fabricate complete 8B training.",
+    "output_missingness": "Original tests not runnable, zero parsed tests or no Docker image => UNKNOWN_INFRA, not task failure"
+  },
+  "policy_boundary": {
+    "original_P9_unchanged": true,
+    "policy_version": "X1-P9-alpha-1-20261116",
+    "actor_attestation": "The synthetic Git commit author has no independent agent attestation. Never claim source-linked ACCEPT from actor reconstruction.",
+    "future_process_gate": "If introduced later, name separately and prospectively lock before its own unseen outcomes."
+  },
+  "source_use_boundary": [
+    "No original SWE-bench gold/test_patch/source solution access before source candidate and decision seal",
+    "No selecting another frozen task based on outcome",
+    "MR30, P9–P16 files unchanged",
+    "P17 is AI-assisted code generation, not a human coder or human developer intervention",
+    "CPU test is engineering mechanism evidence only"
+  ],
+  "evidence_status": "REGISTERED_PRE_PATCH_NO_TESTS_EXECUTED_NO_CANDIDATE"
+}
