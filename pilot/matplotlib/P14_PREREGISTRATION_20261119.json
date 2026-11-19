@@ -1,0 +1,79 @@
+{
+  "protocol_id": "99llm-X1-P14-MATPLOTLIB-28933-20261119",
+  "date_utc": "2026-11-19",
+  "stage": "REGISTERED_BEFORE_INITIAL_CANDIDATE_AND_ANY_HIDDEN_ORACLE",
+  "study_type": "single pre-frozen task two-stage synthetic feedback feasibility; not human-participant experiment or agent efficacy estimation",
+  "preexisting_frozen_frame": "pilot/frozen_task_frame_20261117.json",
+  "task": {
+    "index_one_based": 3,
+    "instance_id": "matplotlib__matplotlib-28933",
+    "source_repo": "matplotlib/matplotlib",
+    "base_commit": "cf84d9a6410dec07f57916905c9f54bf00d22b2e",
+    "source_file": "lib/matplotlib/lines.py",
+    "source_blob_sha": "9629a821368cc66ddf98f31371ef7c0672642ead",
+    "visible_problem_sha256": "65ab5500ac0f3a3b127df97b5288af7fee2d1847670748e22c960faf9c768bd0",
+    "visible_problem_summary": "AxLine.set_xy1 and set_xy2 should support single xy coordinate pair; preserve compatibility for existing two-coordinate call form and Artist.set(xy1=...,xy2=...)."
+  },
+  "benchmark": {
+    "dataset": "SWE-bench-Live/SWE-bench-Live",
+    "split": "lite",
+    "dataset_sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "official_harness_repo": "microsoft/SWE-bench-Live",
+    "official_harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "docker_namespace": "starryzhang"
+  },
+  "source_eligibility": {
+    "next_untouched_index": 3,
+    "replacement_allowed": false,
+    "original_sample_size": 10,
+    "prior_evaluated_kedro": true,
+    "prior_evaluated_pdm": true,
+    "prior_evaluated_babel": true,
+    "prior_evaluated_faker": true,
+    "task_exposed_to_original_test_patch": false
+  },
+  "visible_tests": {
+    "path": "pilot/matplotlib/visible_tests.py",
+    "frozen_before_first_patch": true,
+    "external_oracle": false,
+    "expected_behavior": [
+      "Single-coordinate-tuple positional set_xy1 and set_xy2",
+      "Old two-scalar coordinate setter still works",
+      "Artist.set(xy1=(...),xy2=(...)) works",
+      "Direct set_xy1(xy=(...)) and set_xy2(xy=(...)) works",
+      "Slope mode forbids xy2 reassignment",
+      "Updated AxLine renders in Agg without error"
+    ],
+    "run_baseline_and_stage1_and_stage2": true,
+    "no_oracle_fields": true
+  },
+  "phase_rule": [
+    "Register task, tests and source SHA first",
+    "Implement one minimal, source-limited initial coding candidate using only task, pinned source and frozen visible tests",
+    "Run historical Matplotlib against initial candidate (real library/runtime; any infra failure is not code failure)",
+    "If a specific visible test fails with attributable behavior, issue one documented scripted AI-generated developer-style feedback referencing observed failing test; do not call it a human review",
+    "Implement exactly one scoped follow-up correction; preserve initial artifact unchanged",
+    "Execute same originally frozen visible suite after second patch; record both exact Git SHAs and patch hashes",
+    "Seal ORIGINAL P9 three policy decisions (self report, local test, source linked) and original inputs publicly in Git with actual UTC timestamp BEFORE retrieving benchmark task gold or held-out tests",
+    "Only after seal and separate commit, execute original fixed SWE-bench-Live oracle on final candidate exact SHA in Docker",
+    "Return explicit HOLD for missing oracle, zero tests, mismatched SHA or bad test manifest; keep all ten selected tasks in fixed denominator"
+  ],
+  "scripted_feedback_condition": "If stage1 visible suite has a genuine code-level failure, ask for a narrow fix and quote its already frozen visible test name/message; if all pass, do not manufacture a failure or second patch.",
+  "scripted_feedback_author": "AI-generated simulated developer-style instruction, not a human collaborator or independently observed developer message",
+  "author_identity": "Research-generated GPT-6 patch; artificial git commit author/reproducible SHA is NOT independently authenticated coding agent identity. Hence source_linked policy must HOLD if it requires independent actor proof.",
+  "pre_oracle_gate": "scripts/p9_decide.py original fixed policy; use identical input for all three rules; no oracle result fields before sealing",
+  "no_leakage": [
+    "Never read benchmark gold patch/test_patch/F2P/P2P before decisions are sealed",
+    "Do not review original issue closure PR or solutions",
+    "Do not use original hidden oracle to select first patch or subsequent correction",
+    "Do not overwrite prior P11/P12/P13 results, MR30 or the ten-task frozen frame"
+  ],
+  "claim_boundary": [
+    "No human second coder",
+    "No real human developer feedback",
+    "No post hoc substitution",
+    "One-task result not a rate or causal policy improvement",
+    "Successful GitHub Actions workflow is not proof of task truth",
+    "Any post-oracle changes to same task labeled explicitly POST-REVEAL"
+  ]
+}
