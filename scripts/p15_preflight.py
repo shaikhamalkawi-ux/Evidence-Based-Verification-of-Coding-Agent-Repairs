@@ -38,7 +38,11 @@ def determine_status(nvidia_count, torch_count, nvidia_devices, smi_installed):
         raise ValueError("NVIDIA node list must be a list")
     if any(not isinstance(node, str) or not node.startswith("/dev/nvidia") for node in nvidia_devices):
         raise ValueError("Unexpected GPU device node")
-    if len(nvidia_devices) == 0 and (not counts or max(counts) < 2):
+    # Trust a consistent observed 0/1 GPU count even when one /dev node exists.
+    # Conflicting hardware signals remain UNKNOWN rather than forced FAIL.
+    if counts and max(counts) < 2 and len(nvidia_devices) <= max(counts):
+        return "RESOURCE_HOLD_FULL_TWO_GPU_REPRO"
+    if len(nvidia_devices) == 0 and not counts:
         return "RESOURCE_HOLD_FULL_TWO_GPU_REPRO"
     if counts and min(counts) >= 2:
         return "TWO_GPU_HARDWARE_OBSERVED_NOT_FULL_TASK_ADMISSION"
