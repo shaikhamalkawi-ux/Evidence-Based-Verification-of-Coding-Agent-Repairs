@@ -29,7 +29,7 @@ class TestP18LiteralOnlyPostReveal(unittest.TestCase):
         self.assertEqual(p["old_literal"].replace("DoRA magnitude norm is still on meta device",
                                                   "Cannot initialize DoRA magnitude: computed norm is still on meta device"),
                          p["new_literal"])
-        self.assertTrue(p["no_new_algorithmic_code"])
+        self.assertIn("Do NOT change conditions", p["scope_of_source_ablation"])
 
     def test_original_f2p_failure_is_well_bounded_after_reveal(self):
         d=read("data/audits/P18_TORCHTUNE_POSTREVEAL_ERROR_TAXONOMY_20261120.json")
