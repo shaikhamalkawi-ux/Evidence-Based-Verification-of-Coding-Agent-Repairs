@@ -1,0 +1,43 @@
+{
+  "capped_error_lines_not_hidden_test_source": [
+    "E               RuntimeError: DoRA magnitude norm is still on meta device",
+    "E       AssertionError: Regex pattern did not match.",
+    "E        Regex: 'Cannot initialize DoRA magnitude'",
+    "E        Input: 'DoRA magnitude norm is still on meta device'",
+    "FAILED tests/torchtune/modules/peft/test_dora.py::TestDoRALinear::test_dora_meta_device_init_error"
+  ],
+  "diagnostic_keyword_occurrences": {
+    "assertion": 2,
+    "cuda_or_gpu": 2,
+    "device_mismatch": 0,
+    "meta_device": 3,
+    "missing_dependency": 0
+  },
+  "error_types_observed_in_original_test_output": [
+    "AssertionError",
+    "RuntimeError"
+  ],
+  "f2p_passed": 0,
+  "f2p_total": 1,
+  "failed_f2p_test_ids": [
+    "tests/torchtune/modules/peft/test_dora.py::TestDoRALinear::test_dora_meta_device_init_error"
+  ],
+  "full_GPU_reproduction_status": "NOT_RUN_ON_THIS_RUNNER",
+  "historical_task": "pytorch__torchtune-2139",
+  "new_independent_benchmark_task": false,
+  "new_model_test_decision": false,
+  "original_evaluator_run_id": 44613016409,
+  "original_raw_test_log_lines": 2775,
+  "original_resolved": false,
+  "original_test_output_sha256": "864bb5edf03e1810a348ead57862d7a057c852df95bf56f33a4b9403f5ca1282",
+  "p2p_failed": 0,
+  "schema": "99llm_X1_P18_postreveal_failure_summary_v1",
+  "source_patch_changed": false,
+  "study": "POSTREVEAL_PUBLIC_SOURCE_DIAGNOSIS_NOT_BLIND",
+  "original_run_source": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44613016409",
+  "postreveal_analysis_source": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44614541023",
+  "postreveal_artifact_id": 14575070008,
+  "claim_interpretation": "The original benchmark's single F2P mismatch was a regex assertion on the exception wording. This does not imply the source correction is complete or that full two-GPU DoRA training works; it demonstrates that the original benchmark label is sensitive to exact error wording in this case.",
+  "no_oracle_redecisions": true,
+  "future_exact_message_source_changes_are_postreveal": true
+}
