@@ -34,6 +34,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p p17_oracle
+          # Pre-oracle source-byte audit: original P9 decisions use compact canonical JSONL; input SHA binds original spaced JSONL.
+          sha256sum pilot/torchtune/sealed/P17_DECISION_INPUT.jsonl pilot/torchtune/sealed/P9_DECISIONS_SEALED.jsonl
           python3 - <<'PY'
           import hashlib,json,pathlib,os
           p=pathlib.Path('pilot/torchtune')
