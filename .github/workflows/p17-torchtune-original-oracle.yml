@@ -1,3 +1,4 @@
+# P17 pre-oracle canonical JSONL re-materialization erratum: original oracle run 44612325881 stopped at SHA gate, no hidden data read.
 name: P17 torchtune ORIGINAL pinned SWE-bench-Live task oracle AFTER public seal
 
 on:
