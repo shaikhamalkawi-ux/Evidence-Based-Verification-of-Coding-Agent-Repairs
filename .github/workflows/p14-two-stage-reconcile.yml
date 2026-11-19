@@ -1,0 +1,67 @@
+name: P14 reproduce two-stage science ledger from published original task oracle receipts
+
+on:
+  push:
+    paths: ['.github/workflows/p14-two-stage-reconcile.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-source-reconciliation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout P14 original pre-oracle seals and immutable results
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify full software suite and negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -v
+      - name: Recompute P14 with the unchanged original P9 decision and oracle-label code
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p14_reconciled
+          python3 scripts/p14_two_stage_reconcile.py \
+            --oracle-jsonl data/audits/P14_MATPLOTLIB_TWO_STAGE_ORIGINAL_ORACLE_20261119.jsonl \
+            --out p14_reconciled/P14_TWO_STAGE_RECONCILED.json \
+            > p14_reconciled/reproduction_stdout.log
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          f=pathlib.Path('p14_reconciled/P14_TWO_STAGE_RECONCILED.json')
+          r=json.loads(f.read_text())
+          assert r['task_count_in_this_experiment']==1
+          assert r['candidate_stage_count']==2
+          assert r['hidden_original_oracle_admitted_stage_count']==2
+          assert r['transition']=='NEITHER_CANDIDATE_RESOLVES_TASK'
+          assert [v['f2p_passed'] for v in r['stages']]==[0,0]
+          assert [v['f2p_total'] for v in r['stages']]==[1,1]
+          assert [v['p2p_failed'] for v in r['stages']]==[0,0]
+          assert [v['tests_executed'] for v in r['stages']]==[8228,8228]
+          p=r['original_p9_score']['policies']
+          assert p['self_report']['false_accept']==1
+          assert p['local_pass']['false_accept']==1
+          assert p['source_linked']['false_accept']==0
+          assert p['source_linked']['all_accept']==0
+          assert p['source_linked']['false_accept_among_accepted'] is None
+          assert r['human_developer_feedback'] is False
+          assert r['agent_authorship_independently_attested'] is False
+          (f.parent/'sha256.txt').write_text(
+            hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name+'\n',encoding='utf-8')
+          print('P14_RECONCILED_DATA_SHA256 '+hashlib.sha256(f.read_bytes()).hexdigest())
+          print('P14_RECONCILED_MACHINE_JSON='+json.dumps(r,ensure_ascii=False,sort_keys=True))
+          print('P14_QA_PASS_ONE_TASK_TWO_CORRELATED_STAGES_NOT_TWO_INDEPENDENT_TASKS')
+          PY
+      - name: Preserve exact published source readback and reproduced score
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p14-matplotlib-reconciled-evidence
+          path: p14_reconciled/
+          retention-days: 60
+          if-no-files-found: error

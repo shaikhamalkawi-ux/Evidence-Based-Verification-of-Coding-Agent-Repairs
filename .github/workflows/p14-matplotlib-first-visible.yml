@@ -1,0 +1,170 @@
+name: P14 Matplotlib historical baseline and first AI patch (VISIBLE TESTS ONLY)
+
+on:
+  push:
+    paths: ['.github/workflows/p14-matplotlib-first-visible.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visible-first:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      INSTANCE_ID: matplotlib__matplotlib-28933
+      BASE_SHA: cf84d9a6410dec07f57916905c9f54bf00d22b2e
+      MPLBACKEND: Agg
+      OPENBLAS_NUM_THREADS: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout pre-frozen protocol, test fixture and first patch recipe
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Strict source/task admission without any benchmark oracle fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p14_visible
+          python3 - <<'PY'
+          import json,os,pathlib,hashlib
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          p=json.loads(pathlib.Path('pilot/matplotlib/P14_PREREGISTRATION_20261119.json').read_text())
+          selected=frame['selected'][2]
+          assert len(frame['selected'])==10
+          assert selected['instance_id']==os.environ['INSTANCE_ID']==p['task']['instance_id']
+          assert selected['repo']==p['task']['source_repo']=='matplotlib/matplotlib'
+          assert p['task']['base_commit']==os.environ['BASE_SHA']
+          assert p['benchmark']['dataset_sha']==frame['dataset_revision_sha']
+          assert p['stage']=='REGISTERED_BEFORE_INITIAL_CANDIDATE_AND_ANY_HIDDEN_ORACLE'
+          assert p['visible_tests']['frozen_before_first_patch']
+          out=pathlib.Path('p14_visible')
+          (out/'source_lock.json').write_text(json.dumps({
+            'case':selected,'base_sha':os.environ['BASE_SHA'],
+            'frozen_tests_sha256':hashlib.sha256(pathlib.Path('pilot/matplotlib/visible_tests.py').read_bytes()).hexdigest(),
+            'preregister_sha256':hashlib.sha256(pathlib.Path('pilot/matplotlib/P14_PREREGISTRATION_20261119.json').read_bytes()).hexdigest(),
+            'hidden_oracle_seen':False},indent=2)+'\n')
+          print('P14_SOURCE_FRAME_LOCKED_AND_NO_HIDDEN_ORACLE')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact Matplotlib historical commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/mpl_src"
+          git -C "$RUNNER_TEMP/mpl_src" remote add origin https://github.com/matplotlib/matplotlib.git
+          git -C "$RUNNER_TEMP/mpl_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/mpl_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD)" = "$BASE_SHA"
+          git -C "$RUNNER_TEMP/mpl_src" hash-object lib/matplotlib/lines.py > p14_visible/original_lines_blob.txt
+          grep -Fx 9629a821368cc66ddf98f31371ef7c0672642ead p14_visible/original_lines_blob.txt
+      - name: Build and install editable historical Matplotlib and pytest (NO ORACLE)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Infrastructure-only repair after run 44592112859: editable Meson
+          # must not retain header paths inside a deleted pip build-isolation env.
+          python3 -m pip install --upgrade pip setuptools wheel \
+            'numpy>=2.0,<2.3' 'pybind11>=2.6,!=2.13.3' \
+            'meson-python>=0.13.1' 'setuptools_scm>=7' ninja meson 'pytest>=8,<9' \
+            > p14_visible/pip_bootstrap.log 2>&1
+          python3 -m pip install --no-build-isolation -e "$RUNNER_TEMP/mpl_src" \
+            > p14_visible/install_mpl.log 2>&1 || {
+              tail -n 170 p14_visible/install_mpl.log
+              exit 1
+            }
+          python3 -m pip check > p14_visible/pip_check.log 2>&1
+          python3 -m pip freeze > p14_visible/python_environment.txt
+          python3 - <<'PY'
+          import matplotlib,pathlib,os
+          p=pathlib.Path(matplotlib.__file__).resolve()
+          print("HISTORICAL_MPL_IMPORT="+str(p))
+          assert str(pathlib.Path(os.environ['RUNNER_TEMP'])/'mpl_src') in str(p) or str(p).startswith('/opt/')
+          PY
+      - name: Run preregistered visible suite on ORIGINAL upstream, retain failures
+        shell: bash
+        run: |
+          set +e
+          python3 -m pytest pilot/matplotlib/visible_tests.py -q -ra \
+            --junitxml=p14_visible/base_junit.xml \
+            > p14_visible/base_visible.log 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > p14_visible/base_exit.txt
+          tail -n 125 p14_visible/base_visible.log
+          echo "P14_UPSTREAM_VISIBLE_EXIT=$rc (expected that new interface is absent)"
+          exit 0
+      - name: Apply first P14 candidate and reproduce exact Git commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/matplotlib/ai_candidate_initial.py --repo "$RUNNER_TEMP/mpl_src"
+          git -C "$RUNNER_TEMP/mpl_src" diff -- lib/matplotlib/lines.py > p14_visible/first_patch.diff
+          test -s p14_visible/first_patch.diff
+          sha256sum p14_visible/first_patch.diff pilot/matplotlib/visible_tests.py \
+            pilot/matplotlib/ai_candidate_initial.py > p14_visible/first_sha256.txt
+          export GIT_AUTHOR_DATE="2026-11-18T02:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-18T02:00:00Z"
+          git -C "$RUNNER_TEMP/mpl_src" add lib/matplotlib/lines.py
+          git -C "$RUNNER_TEMP/mpl_src" -c user.name="GPT-6 research candidate (unattested)" \
+            -c user.email="ai-research@example.invalid" commit -m "P14 first attempt: accept pair or two separate coordinates"
+          git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD > p14_visible/initial_sha.txt
+          echo "P14_INITIAL_SHA=$(cat p14_visible/initial_sha.txt)"
+          echo "SYNTHETIC_GIT_AUTHOR_IS_NOT_INDEPENDENT_AGENT_ATTESTATION"
+      - name: Run SAME originally frozen visible suite on first candidate
+        shell: bash
+        run: |
+          set +e
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p14_visible/first_started_at.txt
+          python3 -m pytest pilot/matplotlib/visible_tests.py -q -ra \
+            --junitxml=p14_visible/initial_junit.xml \
+            > p14_visible/initial_visible.log 2>&1
+          rc=$?
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p14_visible/first_finished_at.txt
+          printf '%s\n' "$rc" > p14_visible/initial_exit.txt
+          tail -n 160 p14_visible/initial_visible.log
+          echo "P14_INITIAL_VISIBLE_EXIT=$rc"
+          exit 0
+      - name: Machine-readable visible-only baseline/first candidate evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib,hashlib,xml.etree.ElementTree as ET
+          d=pathlib.Path('p14_visible')
+          def summarize(prefix):
+              f=d/(prefix+'_junit.xml')
+              if not f.exists():return {'status':'SETUP_OR_COLLECTION_ERROR','n':0}
+              root=ET.parse(f).getroot()
+              suite=root if root.tag=='testsuite' else root.find('.//testsuite')
+              assert suite is not None
+              n=int(suite.attrib.get('tests','0'))
+              fail=int(suite.attrib.get('failures','0'))
+              err=int(suite.attrib.get('errors','0'))
+              skip=int(suite.attrib.get('skipped','0'))
+              return {'tests':n,'failed':fail,'errors':err,'skipped':skip,
+                'passed':n-fail-err-skip,'exit_code':int((d/(prefix+'_exit.txt')).read_text())}
+          receipt={'episode_id':os.environ['INSTANCE_ID']+'__FIRST_STAGE',
+             'base_sha':os.environ['BASE_SHA'],
+             'head_sha':(d/'initial_sha.txt').read_text().strip(),
+             'first_patch_sha256':hashlib.sha256((d/'first_patch.diff').read_bytes()).hexdigest(),
+             'frozen_visible_tests_sha256':json.loads((d/'source_lock.json').read_text())['frozen_tests_sha256'],
+             'base':summarize('base'),
+             'first':summarize('initial'),
+             'first_completed_at_utc':(d/'first_finished_at.txt').read_text().strip(),
+             'hidden_oracle_seen':False,'synthetic_agent_author_not_independently_verified':True}
+          (d/'stage1_receipt.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print('P14_STAGE1_VISIBLE_RECEIPT '+json.dumps(receipt,sort_keys=True))
+          PY
+      - name: Archive full visible-stage logs and patches
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p14-matplotlib-first-visible
+          path: p14_visible/
+          retention-days: 60
+          if-no-files-found: warn

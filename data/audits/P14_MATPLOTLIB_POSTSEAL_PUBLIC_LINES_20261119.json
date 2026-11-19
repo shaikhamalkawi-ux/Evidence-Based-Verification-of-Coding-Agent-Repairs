@@ -1,0 +1,45 @@
+{
+  "base": {
+    "errors": 0,
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 30,
+    "skipped": 12,
+    "tests": 42
+  },
+  "excluded_from_frozen_policy_decisions": true,
+  "not_original_hidden_oracle": true,
+  "protocol": "P14_POSTSEAL_PUBLIC_REGRESSION_DIAGNOSTIC",
+  "same_historical_test_source_for_all_three": true,
+  "stage1": {
+    "errors": 0,
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 30,
+    "skipped": 12,
+    "tests": 42
+  },
+  "stage2": {
+    "errors": 0,
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 30,
+    "skipped": 12,
+    "tests": 42
+  },
+  "stage2_is_independent_task": false,
+  "historical_source_repo": "matplotlib/matplotlib",
+  "historical_source_base_sha": "cf84d9a6410dec07f57916905c9f54bf00d22b2e",
+  "original_public_test_file": "lib/matplotlib/tests/test_lines.py",
+  "public_execution_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44596318868",
+  "github_actions_artifact_id": 14565107273,
+  "source_unit": "ONE frozen task with three source states, not three independent tasks",
+  "candidate_shas": {
+    "base": "cf84d9a6410dec07f57916905c9f54bf00d22b2e",
+    "stage1": "ad65fe2531ce297d5770257370b469b80731a614",
+    "stage2": "1c9cb477367e56439fc71e08a4da0661cd105843"
+  },
+  "infrastructure_erratum": "Initial postseal public suite run 44595858417 encountered common pyparsing deprecation collection error on all three source states; reran with warning filter only; code and tests unchanged",
+  "interpretation": "30 public tests passed and 12 were skipped for each source state; no new failure detected in this original source suite. Skipped tests are not counted as passed. This suite is not the independent task oracle.",
+  "claim_boundary": "Publication policy decisions were sealed before these postseal public-source tests were executed and cannot be retroactively revised."
+}

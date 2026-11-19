@@ -1,0 +1,275 @@
+name: P14 Matplotlib ORIGINAL heldout task oracle after immutable two-stage decision seal
+
+on:
+  push:
+    paths:
+      - '.github/workflows/p14-matplotlib-original-oracle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-stage-original-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 48
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: [stage1, stage2]
+    env:
+      STAGE: "${{ matrix.stage }}"
+      INSTANCE_ID: matplotlib__matplotlib-28933
+      BASE_SHA: cf84d9a6410dec07f57916905c9f54bf00d22b2e
+      FIRST_SHA: ad65fe2531ce297d5770257370b469b80731a614
+      FINAL_SHA: 1c9cb477367e56439fc71e08a4da0661cd105843
+      FIRST_PATCH_SHA256: 38d8adc4b7de66735b1318afde6e6e38b0b1bd3f6508157634f11407d7ce6050
+      FINAL_PATCH_SHA256: f29d98f8cfe6ef1cf29a9852ce02f3af7fd03e48171ca627a411813dab2c5512
+      OFFICIAL_HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout publicly committed, immutable pre-oracle P14 decisions
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify BOTH original sealed decisions before any hidden task data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p14_original_oracle_output
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          r=pathlib.Path('pilot/matplotlib')
+          reg=json.loads((r/'P14_PREORACLE_EVALUATION_REGISTER.json').read_text())
+          s=json.loads((r/'sealed/P9_DECISION_SEAL.json').read_text())
+          dec=(r/'sealed/P9_DECISIONS_SEALED.jsonl').read_bytes()
+          inp=(r/'sealed/P14_DECISION_INPUT.jsonl').read_bytes()
+          assert reg['task']==os.environ['INSTANCE_ID']
+          assert reg['upstream_base_sha']==os.environ['BASE_SHA']
+          assert reg['dataset_revision_sha']==os.environ['DATASET_REV']
+          assert reg['harness_sha']==os.environ['OFFICIAL_HARNESS_SHA']
+          assert reg['preoracle_git_seal_commit']=='3aced6a089fa27e7802e8220404afb2ab9f21e28'
+          assert reg['preoracle_decisions_sha256']==s['decisions_sha256']==hashlib.sha256(dec).hexdigest()
+          assert reg['preoracle_input_sha256']==s['input_sha256']==hashlib.sha256(inp).hexdigest()
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==s['script_sha256']
+          assert reg['preoracle_timestamp_utc']=='2026-11-19T19:00:29Z'
+          frozen=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert len(frozen['selected'])==10
+          assert frozen['selected'][2]['instance_id']==os.environ['INSTANCE_ID']
+          assert frozen['dataset_revision_sha']==os.environ['DATASET_REV']
+          decisions=[json.loads(line) for line in dec.decode().splitlines() if line.strip()]
+          assert len(decisions)==s['episode_count']==2
+          rows={d['episode_id']:d for d in decisions}
+          assert all(d['t_decision']==reg['preoracle_timestamp_utc'] for d in decisions)
+          for stage,claim in [('stage1',{'self_report':'HOLD','local_pass':'HOLD','source_linked':'HOLD'}),
+                              ('stage2',{'self_report':'ACCEPT','local_pass':'ACCEPT','source_linked':'HOLD'})]:
+              unit=reg[stage]
+              assert rows[unit['episode_id']]['head_sha']==unit['candidate_sha']
+              assert rows[unit['episode_id']]['decisions']==claim
+          assert reg['stage1_stage2_statistical_independence'] is False
+          assert reg['feedback_real_human'] is False
+          assert reg['agent_authorship_independently_attested'] is False
+          print('P14_PRESERVED_BOTH_PREORACLE_DECISIONS_SHA256='+s['decisions_sha256'])
+          print('P14_PREORACLE_GITHUB_SEAL_COMMIT='+reg['preoracle_git_seal_commit'])
+          print('P14_ORACLE_NOT_READ_DURING_SEAL_VALIDATION')
+          PY
+          df -h /
+          docker version
+      - name: Rebuild exact original source and first candidate, before hidden data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/mpl_src"
+          git -C "$RUNNER_TEMP/mpl_src" remote add origin https://github.com/matplotlib/matplotlib.git
+          git -C "$RUNNER_TEMP/mpl_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/mpl_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD)" = "$BASE_SHA"
+          python3 pilot/matplotlib/ai_candidate_initial.py --repo "$RUNNER_TEMP/mpl_src"
+          git -C "$RUNNER_TEMP/mpl_src" diff --check
+          git -C "$RUNNER_TEMP/mpl_src" diff -- lib/matplotlib/lines.py > p14_original_oracle_output/first_patch.diff
+          test "$(sha256sum p14_original_oracle_output/first_patch.diff | awk '{print $1}')" = "$FIRST_PATCH_SHA256"
+          export GIT_AUTHOR_DATE="2026-11-18T02:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-18T02:00:00Z"
+          git -C "$RUNNER_TEMP/mpl_src" add lib/matplotlib/lines.py
+          git -C "$RUNNER_TEMP/mpl_src" -c user.name="GPT-6 research candidate (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P14 first attempt: accept pair or two separate coordinates"
+          test "$(git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD)" = "$FIRST_SHA"
+      - name: Rebuild second corrective stage from exact first, if stage2
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$STAGE" = stage2 ]; then
+            python3 pilot/matplotlib/ai_candidate_after_feedback.py --repo "$RUNNER_TEMP/mpl_src"
+            git -C "$RUNNER_TEMP/mpl_src" diff --check
+            export GIT_AUTHOR_DATE="2026-11-18T02:01:00Z"
+            export GIT_COMMITTER_DATE="2026-11-18T02:01:00Z"
+            git -C "$RUNNER_TEMP/mpl_src" add lib/matplotlib/lines.py
+            git -C "$RUNNER_TEMP/mpl_src" -c user.name="GPT-6 research candidate (unattested)" \
+              -c user.email="ai-research@example.invalid" commit \
+              -m "P14 stage-2: support named xy coordinate and preserve old positional calls"
+            test "$(git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD)" = "$FINAL_SHA"
+            expected="$FINAL_PATCH_SHA256"
+          else
+            test "$STAGE" = stage1
+            expected="$FIRST_PATCH_SHA256"
+          fi
+          git -C "$RUNNER_TEMP/mpl_src" diff "$BASE_SHA" HEAD -- lib/matplotlib/lines.py \
+            > p14_original_oracle_output/agent_patch.diff
+          actual="$(sha256sum p14_original_oracle_output/agent_patch.diff | awk '{print $1}')"
+          test "$actual" = "$expected"
+          git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD > p14_original_oracle_output/candidate_head_sha.txt
+          sha256sum p14_original_oracle_output/agent_patch.diff > p14_original_oracle_output/patch_sha256.txt
+          export EXPECTED_PATCH_SHA="$expected"
+          python3 - <<'PY'
+          import json,os,pathlib
+          reg=json.loads(pathlib.Path('pilot/matplotlib/P14_PREORACLE_EVALUATION_REGISTER.json').read_text())
+          unit=reg[os.environ['STAGE']]
+          sha=pathlib.Path('p14_original_oracle_output/candidate_head_sha.txt').read_text().strip()
+          assert sha==unit['candidate_sha']
+          assert unit['base_to_candidate_patch_sha256']==os.environ['EXPECTED_PATCH_SHA']
+          patch=pathlib.Path('p14_original_oracle_output/agent_patch.diff').read_text()
+          pred={'instance_id':os.environ['INSTANCE_ID'],
+                'model_name_or_path':'gpt6_p14_research_synthetic_feedback_NOT_AGENT_ATTESTED',
+                'model_patch':patch}
+          pathlib.Path('p14_original_oracle_output/predictions.jsonl').write_text(json.dumps(pred)+'\n')
+          print('P14_EXACT_STAGE='+os.environ['STAGE']+' CANDIDATE_SHA='+sha)
+          print('P14_HIDDEN_ORACLE_NOT_YET_DOWNLOADED')
+          PY
+      - name: Python 3.12 for official pinned oracle
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install untouched official SWE-bench-Live original evaluator
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$OFFICIAL_HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$OFFICIAL_HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$OFFICIAL_HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > p14_original_oracle_output/environment.txt
+      - name: Fetch original, pinned hidden task only AFTER seal and patch SHA verified
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/heldout_oracle"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          ds=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['DATASET_REV'])
+          found=[dict(x) for x in ds if x['instance_id']==os.environ['INSTANCE_ID']]
+          assert len(found)==1
+          path=pathlib.Path(os.environ['RUNNER_TEMP'])/'heldout_oracle'/'instance.jsonl'
+          path.write_text(json.dumps(found[0],default=str,ensure_ascii=False)+'\n')
+          print('P14_PINNED_ORACLE_RETRIEVED_AFTER_PUBLIC_LOCK: '+os.environ['STAGE'])
+          PY
+      - name: Execute untouched original task oracle on exact stage patch
+        id: official
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p14_original_oracle_output/oracle_started_at_utc.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/heldout_oracle/instance.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/p14_original_oracle_output/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "evcar-p14-$STAGE-20261119" \
+            > "$GITHUB_WORKSPACE/p14_original_oracle_output/harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p14_original_oracle_output/harness_exit_code.txt"
+          tail -n 100 "$GITHUB_WORKSPACE/p14_original_oracle_output/harness_stdout.log"
+          exit "$rc"
+      - name: Admit only original positive executed tests; compare immutable policy decisions
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,shutil
+          iid=os.environ['INSTANCE_ID']
+          stage=os.environ['STAGE']
+          reg=json.loads(pathlib.Path('pilot/matplotlib/P14_PREORACLE_EVALUATION_REGISTER.json').read_text())
+          unit=reg[stage]
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          out=pathlib.Path('p14_original_oracle_output')
+          matches=[]
+          for fp in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(fp):continue
+              try:
+                  data=json.loads(fp.read_text())
+                  if isinstance(data,dict) and iid in data:matches.append((fp,data[iid]))
+              except (ValueError,OSError):continue
+          code=root/'swebench/harness/run_evaluation.py'
+          started=out/'oracle_started_at_utc.txt'
+          sha=(out/'candidate_head_sha.txt').read_text().strip() if (out/'candidate_head_sha.txt').exists() else ''
+          assert sha==unit['candidate_sha']
+          result={
+            'episode_id':unit['episode_id'],
+            'head_sha':sha,
+            'oracle_type':'heldout_harness',
+            'oracle_code_sha256':hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else '',
+            'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+            'started_at':started.read_text().strip() if started.exists() else '',
+            'oracle_test_manifest_frozen_before_decision':True,
+            'oracle_independent_of_visible_receipts':True,
+            'oracle_unmodified_by_agent':True,
+            'status':'error',
+            'f2p_total':0,'f2p_passed':0,'p2p_failed':0,'tests_executed':0,
+            'scientific_scope':'TWO_CORRELATED_STAGE_CANDIDATES_FROM_ONE_SYNTHETIC_FEEDBACK_TASK',
+            'original_harness_commit':os.environ['OFFICIAL_HARNESS_SHA'],
+            'dataset_revision':os.environ['DATASET_REV'],
+            'matched_reports':len(matches),
+            'stage':stage,
+            'human_developer_feedback':False,
+            'agent_authorship_independently_attested':False}
+          if len(matches)==1:
+              fp,d=matches[0]
+              shutil.copyfile(fp,out/'original_report.json')
+              f=d.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              p=d.get('tests_status',{}).get('PASS_TO_PASS',{})
+              v=[f.get('success',[]),f.get('failure',[]),p.get('success',[]),p.get('failure',[])]
+              test=fp.parent/'test_output.txt'
+              if test.is_file():shutil.copyfile(test,out/'original_test_output.txt')
+              if test.is_file() and all(isinstance(x,list) for x in v) and sum(map(len,v))>0 and len(v[0])+len(v[1])>0:
+                  result.update({
+                    'status':'complete',
+                    'f2p_total':len(v[0])+len(v[1]),
+                    'f2p_passed':len(v[0]),
+                    'p2p_failed':len(v[3]),
+                    'tests_executed':sum(map(len,v)),
+                    'official_resolved':d.get('resolved'),
+                    'original_test_output_sha256':hashlib.sha256(test.read_bytes()).hexdigest()})
+              else:result['nonadmission_reason']='missing_or_empty_original_test_output'
+              runlog=fp.parent/'run_instance.log'
+              if runlog.is_file():shutil.copyfile(runlog,out/'run_instance.log')
+          else:result['nonadmission_reason']='missing_or_ambiguous_original_report'
+          (out/'postseal_oracle.jsonl').write_text(json.dumps(result,sort_keys=True)+'\n')
+          print('P14_POSTSEAL_ORACLE_EVIDENCE '+json.dumps(result,sort_keys=True))
+          PY
+          python3 scripts/p9_reveal.py \
+            --sealed-dir pilot/matplotlib/sealed \
+            --oracle p14_original_oracle_output/postseal_oracle.jsonl \
+            --out p14_original_oracle_output/partial_stage_postseal_comparison.json
+          df -h / > p14_original_oracle_output/disk_after.txt || true
+          docker image ls --digests > p14_original_oracle_output/docker_images.txt || true
+      - name: Preserve raw output, original task logs and source receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p14-matplotlib-original-oracle-${{ matrix.stage }}
+          path: p14_original_oracle_output/
+          retention-days: 60
+          if-no-files-found: error

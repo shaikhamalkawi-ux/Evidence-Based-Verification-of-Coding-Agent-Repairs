@@ -1,0 +1,163 @@
+name: P14 historical Matplotlib existing test_lines regression across presealed patches (POSTSEAL)
+
+on:
+  push:
+    paths: ['.github/workflows/p14-matplotlib-postseal-public-regression.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-public-lines:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      BASE_SHA: cf84d9a6410dec07f57916905c9f54bf00d22b2e
+      FIRST_SHA: ad65fe2531ce297d5770257370b469b80731a614
+      SECOND_SHA: 1c9cb477367e56439fc71e08a4da0661cd105843
+      MPLBACKEND: Agg
+      OPENBLAS_NUM_THREADS: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout already timestamped decision records and original visible tests
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify postseal only, no new gate decision or hidden benchmark data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p14_public
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          s=json.loads(pathlib.Path('pilot/matplotlib/sealed/P9_DECISION_SEAL.json').read_text())
+          r=json.loads(pathlib.Path('pilot/matplotlib/P14_PREORACLE_EVALUATION_REGISTER.json').read_text())
+          assert hashlib.sha256(pathlib.Path('pilot/matplotlib/sealed/P9_DECISIONS_SEALED.jsonl').read_bytes()).hexdigest()==s['decisions_sha256']==r['preoracle_decisions_sha256']
+          assert r['stage1_stage2_statistical_independence'] is False
+          assert r['feedback_real_human'] is False
+          print('P14_POSTSEAL_PUBLIC_ONLY; DO_NOT_CHANGE_ORACLE_BLIND_DECISIONS')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build historical Matplotlib with persistent headers (not an oracle)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/mpl_src"
+          git -C "$RUNNER_TEMP/mpl_src" remote add origin https://github.com/matplotlib/matplotlib.git
+          git -C "$RUNNER_TEMP/mpl_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/mpl_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD)" = "$BASE_SHA"
+          python3 -m pip install -U pip setuptools wheel 'numpy>=2,<2.3' \
+            'pybind11>=2.6,!=2.13.3' 'meson-python>=0.13.1' 'setuptools_scm>=7' \
+            ninja meson 'pytest>=8,<9' > p14_public/bootstrap.log 2>&1
+          python3 -m pip install --no-build-isolation -e "$RUNNER_TEMP/mpl_src" \
+            > p14_public/build.log 2>&1 || { tail -n 120 p14_public/build.log; exit 1; }
+          python3 -m pip check > p14_public/pip_check.txt 2>&1
+          python3 -m pip freeze > p14_public/environment.txt
+      - name: Execute unmodified public test_lines.py on base historical Matplotlib
+        shell: bash
+        run: |
+          set +e
+          cd "$RUNNER_TEMP/mpl_src"
+          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra -W ignore::pyparsing.warnings.PyparsingDeprecationWarning \
+            --junitxml="$GITHUB_WORKSPACE/p14_public/base_junit.xml" \
+            > "$GITHUB_WORKSPACE/p14_public/base_public_test_lines.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p14_public/base_exit.txt"
+          tail -n 70 "$GITHUB_WORKSPACE/p14_public/base_public_test_lines.log"
+          echo "P14_PUBLIC_BASE_EXIT=$rc"
+          exit 0
+      - name: Rebuild first presealed candidate exactly
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/matplotlib/ai_candidate_initial.py --repo "$RUNNER_TEMP/mpl_src"
+          export GIT_AUTHOR_DATE="2026-11-18T02:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-18T02:00:00Z"
+          git -C "$RUNNER_TEMP/mpl_src" add lib/matplotlib/lines.py
+          git -C "$RUNNER_TEMP/mpl_src" -c user.name="GPT-6 research candidate (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P14 first attempt: accept pair or two separate coordinates"
+          test "$(git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD)" = "$FIRST_SHA"
+          echo "P14_POSTSEAL_FIRST_SHA=$FIRST_SHA"
+      - name: Run same ORIGINAL public test_lines.py on first candidate
+        shell: bash
+        run: |
+          set +e
+          cd "$RUNNER_TEMP/mpl_src"
+          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra -W ignore::pyparsing.warnings.PyparsingDeprecationWarning \
+            --junitxml="$GITHUB_WORKSPACE/p14_public/stage1_junit.xml" \
+            > "$GITHUB_WORKSPACE/p14_public/stage1_public_test_lines.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p14_public/stage1_exit.txt"
+          tail -n 70 "$GITHUB_WORKSPACE/p14_public/stage1_public_test_lines.log"
+          echo "P14_PUBLIC_FIRST_EXIT=$rc"
+          exit 0
+      - name: Apply exact already sealed second stage after genuine visible feedback
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/matplotlib/ai_candidate_after_feedback.py --repo "$RUNNER_TEMP/mpl_src"
+          export GIT_AUTHOR_DATE="2026-11-18T02:01:00Z"
+          export GIT_COMMITTER_DATE="2026-11-18T02:01:00Z"
+          git -C "$RUNNER_TEMP/mpl_src" add lib/matplotlib/lines.py
+          git -C "$RUNNER_TEMP/mpl_src" -c user.name="GPT-6 research candidate (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P14 stage-2: support named xy coordinate and preserve old positional calls"
+          test "$(git -C "$RUNNER_TEMP/mpl_src" rev-parse HEAD)" = "$SECOND_SHA"
+          echo "P14_POSTSEAL_SECOND_SHA=$SECOND_SHA"
+      - name: Run same ORIGINAL public test_lines.py on second candidate
+        shell: bash
+        run: |
+          set +e
+          cd "$RUNNER_TEMP/mpl_src"
+          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra -W ignore::pyparsing.warnings.PyparsingDeprecationWarning \
+            --junitxml="$GITHUB_WORKSPACE/p14_public/stage2_junit.xml" \
+            > "$GITHUB_WORKSPACE/p14_public/stage2_public_test_lines.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p14_public/stage2_exit.txt"
+          tail -n 70 "$GITHUB_WORKSPACE/p14_public/stage2_public_test_lines.log"
+          echo "P14_PUBLIC_SECOND_EXIT=$rc"
+          exit 0
+      - name: Summarize each public suite without treating it as hidden oracle
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib,xml.etree.ElementTree as ET,json
+          p=pathlib.Path('p14_public')
+          summary={'protocol':'P14_POSTSEAL_PUBLIC_REGRESSION_DIAGNOSTIC',
+                   'not_original_hidden_oracle':True,
+                   'excluded_from_frozen_policy_decisions':True,
+                   'same_historical_test_source_for_all_three':True,
+                   'stage2_is_independent_task':False}
+          for stage in ('base','stage1','stage2'):
+              f=p/(stage+'_junit.xml')
+              if not f.exists():
+                  summary[stage]={'status':'SETUP_OR_COLLECTION_ERROR','test_count':0}
+                  continue
+              xml=ET.parse(f).getroot()
+              t=xml if xml.tag=='testsuite' else xml.find('.//testsuite')
+              assert t is not None
+              n=int(t.attrib['tests'])
+              fail=int(t.attrib.get('failures','0'))
+              err=int(t.attrib.get('errors','0'))
+              skip=int(t.attrib.get('skipped','0'))
+              summary[stage]={'tests':n,'passed':n-fail-err-skip,'failed':fail,'errors':err,
+                              'skipped':skip,'exit_code':int((p/(stage+'_exit.txt')).read_text())}
+          (p/'public_regression_summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          print('P14_ORIGINAL_PUBLIC_LINE_TEST_SUMMARY='+json.dumps(summary,sort_keys=True))
+          PY
+      - name: Archive public-source test output separately from original hidden oracle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p14-matplotlib-postseal-original-public-lines
+          path: p14_public/
+          retention-days: 60
+          if-no-files-found: warn
