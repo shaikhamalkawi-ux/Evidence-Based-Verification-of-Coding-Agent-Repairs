@@ -67,8 +67,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pip install --upgrade pip setuptools wheel > p14_visible/pip_bootstrap.log 2>&1
-          python3 -m pip install -e "$RUNNER_TEMP/mpl_src" 'pytest>=8,<9' \
+          # Infrastructure-only repair after run 44592112859: editable Meson
+          # must not retain header paths inside a deleted pip build-isolation env.
+          python3 -m pip install --upgrade pip setuptools wheel \
+            'numpy>=2.0,<2.3' 'pybind11>=2.6,!=2.13.3' \
+            'meson-python>=0.13.1' 'setuptools_scm>=7' ninja meson 'pytest>=8,<9' \
+            > p14_visible/pip_bootstrap.log 2>&1
+          python3 -m pip install --no-build-isolation -e "$RUNNER_TEMP/mpl_src" \
             > p14_visible/install_mpl.log 2>&1 || {
               tail -n 170 p14_visible/install_mpl.log
               exit 1
