@@ -1,0 +1,86 @@
+name: P17 seal DoRA source-candidate decisions BEFORE original task oracle
+
+on:
+  push:
+    paths:
+      - .github/workflows/p17-seal-candidate-before-oracle.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p17-preoracle-seal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout immutable source tests and P9 decision script
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify exact previously frozen test, source and results without oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p17_seal
+          python3 - <<'PY'
+          import json,hashlib,pathlib,datetime
+          p=pathlib.Path('pilot/torchtune')
+          src=json.loads((p/'P17_PREREGISTRATION_20261120.json').read_text())
+          row=json.loads((p/'P17_DECISION_INPUT_WITHOUT_TIME.jsonl').read_text())
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert frame['selected'][4]['instance_id']==src['fixed_cohort']['instance_id']=='pytorch__torchtune-2139'
+          assert len(frame['selected'])==10
+          assert src['fixed_cohort']['original_base_sha']=='f2bd4bc25b24587aef40f486087412b9da8f1d94'
+          assert src['policy_boundary']['original_P9_unchanged'] is True
+          assert row['head_sha']==row['receipts'][0]['head_sha']=='57f45fdd5552908d4b5d42cccd7359ccb4de2560'
+          assert row['agent_claimed_fixed'] is False
+          assert row['target_agent_is_commit_author'] is False
+          assert row['source_verification']['full_two_gpu_dora_recipe_success_not_observed'] is True
+          assert row['source_verification']['original_hidden_benchmark_not_yet_accessed'] is True
+          assert row['source_verification']['candidate_patch_sha256']=='c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801'
+          sha=hashlib.sha256((p/'p17_visible_original_dora_cpu.py').read_bytes()).hexdigest()
+          assert sha==row['source_verification']['frozen_visible_tests_sha256']
+          assert row['receipts'][0]['test_count']==row['source_verification']['candidate_visible_total']==6
+          assert row['receipts'][0]['status']=='success'
+          assert row['receipts'][0]['test_scope_prespecified'] is True
+          assert row['source_verification']['original_baseline_visible_passed']==2
+          forbidden={'oracle','oracle_status','oracle_result','future_ci','future_test','heldout_result','label','resolved','task_outcome','test_patch','FAIL_TO_PASS','PASS_TO_PASS'}
+          assert not forbidden.intersection(row)
+          now=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
+          assert now>row['receipts'][0]['completed_at']
+          row['t_decision']=now
+          (pathlib.Path('p17_seal')/'P17_DECISION_INPUT.jsonl').write_text(json.dumps(row,sort_keys=True)+'\n',encoding='utf-8')
+          print('P17_TIME_LOCK='+now)
+          print('P17_ORIGINAL_TASK_ORACLE_NOT_ACCESSED')
+          PY
+      - name: Seal unchanged original P9 rules without original SWE-bench labels
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p9_decide.py \
+            --input p17_seal/P17_DECISION_INPUT.jsonl \
+            --out p17_seal/locked
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          root=pathlib.Path('p17_seal')
+          d=json.loads((root/'locked/P9_DECISIONS_SEALED.jsonl').read_text())
+          s=json.loads((root/'locked/P9_DECISION_SEAL.json').read_text())
+          assert d['episode_id']=='pytorch__torchtune-2139__CPU_SOURCE_FIRST_ATTEMPT'
+          assert d['decisions']=={'self_report':'HOLD','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert hashlib.sha256((root/'locked/P9_DECISIONS_SEALED.jsonl').read_bytes()).hexdigest()==s['decisions_sha256']
+          assert hashlib.sha256((root/'P17_DECISION_INPUT.jsonl').read_bytes()).hexdigest()==s['input_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==s['script_sha256']
+          print('P17_LOCKED_INPUT='+json.dumps(json.loads((root/'P17_DECISION_INPUT.jsonl').read_text()),sort_keys=True))
+          print('P17_LOCKED_DECISION='+json.dumps(d,sort_keys=True))
+          print('P17_LOCKED_MANIFEST='+json.dumps(s,sort_keys=True))
+          print('P17_SEAL_COMPLETE_BEFORE_ANY_ORIGINAL_TASK_ORACLE')
+          PY
+      - name: Preserve timestamped pre-oracle P9 seal artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p17-torchtune-preoracle-lock
+          path: p17_seal/
+          retention-days: 60
+          if-no-files-found: error

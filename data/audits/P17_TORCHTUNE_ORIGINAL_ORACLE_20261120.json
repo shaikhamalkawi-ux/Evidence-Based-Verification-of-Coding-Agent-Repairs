@@ -1,0 +1,64 @@
+{
+  "schema": "99llm_X1_P17_historical_DoRA_source_and_independent_task_oracle_v1",
+  "source_status": "EXECUTED_ORIGINAL_PINNED_HARNESS_RESULT_TASK_UNRESOLVED",
+  "source_task_pinned_index": 5,
+  "task_count_added_to_unique_original_oracle_panel": 1,
+  "original_harness_task_result": {
+    "CPU_visible_tests_not_full_task_verifier": true,
+    "agent_authorship_independently_attested": false,
+    "episode_id": "pytorch__torchtune-2139__CPU_SOURCE_FIRST_ATTEMPT",
+    "f2p_passed": 0,
+    "f2p_total": 1,
+    "full_two_GPU_reproducer_executed": false,
+    "head_sha": "57f45fdd5552908d4b5d42cccd7359ccb4de2560",
+    "matched_reports": 1,
+    "official_resolved": false,
+    "oracle_code_sha256": "9a9361d7c53f64d573ef546325b6f13d5b593fa78b4ddcbaa380efa0cd0aac04",
+    "oracle_independent_of_visible_receipts": true,
+    "oracle_test_manifest_frozen_before_decision": true,
+    "oracle_type": "heldout_harness",
+    "oracle_unmodified_by_agent": true,
+    "original_dataset_rev": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "original_harness_commit": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "original_test_output_sha256": "864bb5edf03e1810a348ead57862d7a057c852df95bf56f33a4b9403f5ca1282",
+    "p2p_failed": 0,
+    "source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44613016409",
+    "started_at": "2026-11-19T20:52:56Z",
+    "status": "complete",
+    "tests_executed": 651
+  },
+  "original_harness_run_id": 44613016409,
+  "original_harness_artifact_id": 14574041643,
+  "original_source_cpu_visible_run_id": 44611483239,
+  "original_cpu_source_visible_result": {
+    "base_passed": 2,
+    "base_total": 6,
+    "candidate_passed": 6,
+    "candidate_total": 6
+  },
+  "exact_candidate_patch_sha256": "c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801",
+  "original_preoracle_p9_sha256": "c62f5bffce085577ad1f5b0e4da05ec0a3a76b133e0eebd1f626bb4b2261ed35",
+  "original_preoracle_utc": "2026-11-19T20:45:51Z",
+  "actual_original_evaluator_started_utc": "2026-11-19T20:52:56Z",
+  "original_decisions": {
+    "self_report": "HOLD",
+    "local_pass": "ACCEPT",
+    "source_linked": "HOLD"
+  },
+  "local_pass_is_original_task_false_accept": true,
+  "no_full_two_gpu_training_evidence": true,
+  "no_human_coder_or_developer_review": true,
+  "source_author_attestation_missing": true,
+  "byte_materialization_erratum": "pilot/torchtune/P17_PREORACLE_CANONICAL_BYTE_ERRATUM.md",
+  "preoracle_packaging_attempts_stopped_before_hidden_data": [
+    44612325881,
+    44612710001
+  ],
+  "manuscript_boundaries": [
+    "Original benchmark F2P 0/1 P2P 0, not resolved",
+    "Candidate CPU AST source test 6/6 not equivalent to complete DoRA+FSDP training",
+    "CPU source tests used import-only stubs, not production installed torchtune package",
+    "P17 source code already exposed to original benchmark truth after this stage; subsequent refinements are POSTREVEAL",
+    "P9 and all previous scientific results remain frozen"
+  ]
+}
