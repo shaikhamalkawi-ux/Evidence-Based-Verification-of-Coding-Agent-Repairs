@@ -63,7 +63,7 @@ jobs:
         run: |
           set +e
           cd "$RUNNER_TEMP/mpl_src"
-          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra \
+          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra -W ignore::pyparsing.warnings.PyparsingDeprecationWarning \
             --junitxml="$GITHUB_WORKSPACE/p14_public/base_junit.xml" \
             > "$GITHUB_WORKSPACE/p14_public/base_public_test_lines.log" 2>&1
           rc=$?
@@ -89,7 +89,7 @@ jobs:
         run: |
           set +e
           cd "$RUNNER_TEMP/mpl_src"
-          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra \
+          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra -W ignore::pyparsing.warnings.PyparsingDeprecationWarning \
             --junitxml="$GITHUB_WORKSPACE/p14_public/stage1_junit.xml" \
             > "$GITHUB_WORKSPACE/p14_public/stage1_public_test_lines.log" 2>&1
           rc=$?
@@ -115,7 +115,7 @@ jobs:
         run: |
           set +e
           cd "$RUNNER_TEMP/mpl_src"
-          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra \
+          python3 -m pytest lib/matplotlib/tests/test_lines.py -q -ra -W ignore::pyparsing.warnings.PyparsingDeprecationWarning \
             --junitxml="$GITHUB_WORKSPACE/p14_public/stage2_junit.xml" \
             > "$GITHUB_WORKSPACE/p14_public/stage2_public_test_lines.log" 2>&1
           rc=$?
