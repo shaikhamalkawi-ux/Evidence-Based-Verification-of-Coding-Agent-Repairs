@@ -1,0 +1,159 @@
+{
+  "schema": "99llm_X1_P15_mixed_stage_five_task_nonvacuity_audit_v1",
+  "date_utc": "2026-11-19",
+  "status": "DESCRIPTIVE_POSTHOC_CROSS_CASE_AUDIT_NOT_NEW_PROSPECTIVE_BENCHMARK",
+  "current_locked_policy": "X1-P9-alpha-1-20261116",
+  "frozen_original_task_frame": "pilot/frozen_task_frame_20261117.json",
+  "original_task_count_prespecified": 10,
+  "unique_distinct_tasks_with_original_harness_outcome": 5,
+  "remaining_without_executed_original_harness": 5,
+  "count_passed_oracle": 2,
+  "count_failed_oracle": 3,
+  "task_records": [
+    {
+      "task": "kedro-org__kedro-4406",
+      "stage": "INITIAL",
+      "head": "355ae83abe163ab9bbe2aaf7a59cc055f220d13e",
+      "f2p_passed": 1,
+      "f2p_total": 1,
+      "p2p_failed": 25,
+      "tests": 1592,
+      "truth": false,
+      "policy": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44159300952,
+      "source_ref": "main",
+      "decision_path": "pilot/kedro/locked/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44159300952",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/main/pilot/kedro/locked/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "python-babel__babel-1163",
+      "stage": "INITIAL",
+      "head": "e73fbf2b9f4be33af74a29c84bec6814998abe46",
+      "f2p_passed": 8,
+      "f2p_total": 8,
+      "p2p_failed": 0,
+      "tests": 7272,
+      "truth": true,
+      "policy": {
+        "self_report": "HOLD",
+        "local_pass": "HOLD",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44161755692,
+      "source_ref": "main",
+      "decision_path": "pilot/babel/locked/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44161755692",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/main/pilot/babel/locked/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "joke2k__faker-2155",
+      "stage": "INITIAL",
+      "head": "b9c8202d097f88fd43150681edbe14c085bbe1c3",
+      "f2p_passed": 1,
+      "f2p_total": 1,
+      "p2p_failed": 0,
+      "tests": 2051,
+      "truth": true,
+      "policy": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44166705455,
+      "source_ref": "main",
+      "decision_path": "pilot/faker/locked/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44166705455",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/main/pilot/faker/locked/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "pdm-project__pdm-3419",
+      "stage": "INITIAL",
+      "head": "5c5ea31661c70a7bd7ec7b661f32f380b45c1d40",
+      "f2p_passed": 0,
+      "f2p_total": 3,
+      "p2p_failed": 2,
+      "tests": 939,
+      "truth": false,
+      "policy": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44237374542,
+      "source_ref": "p12-pdm-two-stage-blind-pilot-20261118",
+      "decision_path": "pilot/pdm/locked/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44237374542",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/p12-pdm-two-stage-blind-pilot-20261118/pilot/pdm/locked/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "matplotlib__matplotlib-28933",
+      "stage": "POST_SYNTHETIC_FEEDBACK_FINAL",
+      "head": "1c9cb477367e56439fc71e08a4da0661cd105843",
+      "f2p_passed": 0,
+      "f2p_total": 1,
+      "p2p_failed": 0,
+      "tests": 8228,
+      "truth": false,
+      "policy": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44594455715,
+      "source_ref": "p14-matplotlib-two-stage-visible-20261119",
+      "decision_path": "pilot/matplotlib/sealed/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44594455715",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/p14-matplotlib-two-stage-visible-20261119/pilot/matplotlib/sealed/P9_DECISIONS_SEALED.jsonl"
+    }
+  ],
+  "policy_descriptive_counts": {
+    "self_report": {
+      "n_tasks": 5,
+      "n_accepted": 4,
+      "n_hold": 1,
+      "n_correct_accepted": 1,
+      "n_false_accepted": 3,
+      "n_unnecessary_hold": 1,
+      "false_accept_fraction_among_accepted": "3/4",
+      "false_accept_rate_defined": true,
+      "coverage_fraction": "4/5"
+    },
+    "local_pass": {
+      "n_tasks": 5,
+      "n_accepted": 4,
+      "n_hold": 1,
+      "n_correct_accepted": 1,
+      "n_false_accepted": 3,
+      "n_unnecessary_hold": 1,
+      "false_accept_fraction_among_accepted": "3/4",
+      "false_accept_rate_defined": true,
+      "coverage_fraction": "4/5"
+    },
+    "source_linked": {
+      "n_tasks": 5,
+      "n_accepted": 0,
+      "n_hold": 5,
+      "n_correct_accepted": 0,
+      "n_false_accepted": 0,
+      "n_unnecessary_hold": 2,
+      "false_accept_fraction_among_accepted": null,
+      "false_accept_rate_defined": false,
+      "coverage_fraction": "0/5"
+    }
+  },
+  "comparability_limits": [
+    "Four initial attempts and one final post-synthetic-feedback attempt; this is a mixed-stage feasibility synthesis, not a single homogeneous prospective population estimand.",
+    "Matplotlib stage1 and stage2 are not independent; only stage2 is represented in the five task-level summary, without replacing original stage1 evidence.",
+    "The original P9 policies and all task-level oracle records are UNCHANGED.",
+    "GitHub Actions initial and hidden tests are different evidence tiers; original task oracle is the correctness reference.",
+    "Source-linked acceptance count is 0: false acceptance among accepted is UNDEFINED, not 0; the source-linked HOLD may arise from missing independently verified agent provenance.",
+    "No prospective policy comparison, confidence interval, causal conclusion, or benchmark leaderboard-valid agent rollout claim.",
+    "P10 naturalistic Copilot PRs and P13 post-reveal PDM diagnostic are separate; no imputed cases.",
+    "P15 torchtune resource-hold not included in the five with original task oracle outcomes."
+  ]
+}

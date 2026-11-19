@@ -1,0 +1,75 @@
+name: P15 torchtune two-GPU resource preflight ONLY (NO PATCH/ORACLE)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p15-torchtune-gpu-preflight.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-task-resource-admission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout original frozen task and P15 preregistration
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify P15 does not read benchmark gold or change P9
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          reg=json.loads(pathlib.Path('protocol/P15_TORCHTUNE_RESOURCE_AND_ACTOR_FEASIBILITY_20261119.json').read_text())
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert frame['selected'][4]['instance_id']==reg['next_frozen_case']['instance_id']=='pytorch__torchtune-2139'
+          assert frame['selected'][4]['repo']==reg['next_frozen_case']['original_repo_identifier']
+          assert reg['source_dataset_rev']==frame['dataset_revision_sha']
+          assert reg['next_frozen_case']['original_base_sha']=='f2bd4bc25b24587aef40f486087412b9da8f1d94'
+          assert reg['policy_lock']['P9_version']=='X1-P9-alpha-1-20261116'
+          assert reg['experimental_gates']['gate_C_coding_attempt']['no_candidate_written_in_P15'] is True
+          assert reg['experimental_gates']['gate_D_independent_original_oracle']['result']=='pending'
+          print('P15_ORIGINAL_FROZEN_FRAME_AND_PREORACLE_STATUS_VERIFIED')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Execute real GitHub runner GPU capability audit; no dataset downloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p15_feasibility
+          python3 scripts/p15_preflight.py \
+            --out p15_feasibility/P15_TORCHTUNE_RUNNER_RESOURCES.json
+          echo 'P15_NVIDIA_SMI_VERSION_BEGIN'
+          if command -v nvidia-smi >/dev/null 2>&1; then
+            nvidia-smi --query-gpu=name,memory.total --format=csv,noheader || true
+          else
+            echo 'nvidia-smi not installed'
+          fi
+          echo 'P15_NVIDIA_SMI_VERSION_END'
+          printf 'NVIDIA_CHAR_DEVICE_NODES:\n'
+          find /dev -maxdepth 1 -name 'nvidia[0-9]*' -print || true
+          printf 'HARDWARE_ONLY_SYSTEM_INVENTORY:\n'
+          uname -a
+          lscpu | grep -E 'Architecture|CPU\(s\)|Model name' | head -8 || true
+          free -h || true
+          df -h / || true
+      - name: Software unit and negative controls, not an issue-repair test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -v
+      - name: Persist exact resource admission only, never task-success label
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p15-torchtune-two-gpu-resource-preflight
+          path: p15_feasibility/
+          retention-days: 60
+          if-no-files-found: warn

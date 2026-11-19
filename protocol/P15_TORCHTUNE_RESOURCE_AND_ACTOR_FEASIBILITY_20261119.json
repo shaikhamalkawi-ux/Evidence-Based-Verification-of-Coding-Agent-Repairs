@@ -1,0 +1,98 @@
+{
+  "protocol_id": "99llm-X1-P15-FEASIBILITY-20261119",
+  "created_date_utc": "2026-11-19",
+  "version_type": "PRE-CANDIDATE_RESOURCE_AND_EVIDENCE_IDENTIFIABILITY_AUDIT",
+  "research_question": "Can verification policy efficacy be identified when actor attestation makes the strict original P9 rule always abstain, and what evidence is required to evaluate the next untested task without conflating resource infeasibility with task failure?",
+  "original_frozen_frame": "pilot/frozen_task_frame_20261117.json",
+  "source_dataset_rev": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "next_frozen_case": {
+    "index_one_based": 5,
+    "instance_id": "pytorch__torchtune-2139",
+    "original_repo_identifier": "pytorch/torchtune",
+    "canonical_repo_current": "meta-pytorch/torchtune",
+    "github_stable_repository_id": "707869465",
+    "original_base_sha": "f2bd4bc25b24587aef40f486087412b9da8f1d94",
+    "frozen_visible_problem_sha256": "31a8dfd18349fa14a79aa3958c6f166a475dd8f8cd4a48a098bf38a16e3b1cdf",
+    "originally_visible_reproducer": "tune run --nnodes 1 --nproc_per_node 2 lora_finetune_distributed --config llama3/8B_dora",
+    "originally_visible_error": "Unexpected param or buffer ... on meta device",
+    "originally_visible_requested_test": "Add DoRA to tests/recipes/test_lora_finetune_distributed.py",
+    "source_files_read_at_exact_base": {
+      "recipe": "recipes/lora_finetune_distributed.py",
+      "recipe_blob_sha": "e95fbb40c60c0d7f18e694aeb8dabac5a70e664b",
+      "dora_module": "torchtune/modules/peft/dora.py",
+      "dora_blob_sha": "6f097da6d039738c320e8775ad61950c56fe0108",
+      "distributed_test": "tests/recipes/test_lora_finetune_distributed.py",
+      "test_blob_sha": "5ffa07abb394d539d99d6adcacaa07aba130e720",
+      "requirements": "pyproject.toml",
+      "requirements_blob_sha": "87ed1fb89e7b1e406bebcb3c5a0e6a3e065d2c2a"
+    }
+  },
+  "evidence_from_visible_source": {
+    "source_provenance": "Frozen public task statement and exact historical GitHub source only. No benchmark gold patch/test_patch or hidden result retrieved.",
+    "distributed_recipe_has_meta_initialization": true,
+    "distributed_recipe_requires_distributed_accelerators": true,
+    "historical_integration_test_marker": "@gpu_test(gpu_count=2)",
+    "historical_contributing_guidance": "Unit tests do not require remote access; recipe and regression tests commonly require external assets and GPU",
+    "no_claim_of_exact_bug_cause": "The observed meta-device exception suggests DoRA magnitude initialization; no candidate or source-level remediation has yet been tested."
+  },
+  "experimental_gates": {
+    "gate_A_resource_preflight": {
+      "hardware": "Check GPU device count and accessible accelerators in actual GitHub Actions runner; run no test/gold/solution access.",
+      "data": "Check source and allowed artifact route, not license-restricted weights or hidden oracle.",
+      "status_labels": [
+        "FULL_REPRO_RESOURCE_AVAILABLE",
+        "CPU_PROXY_ONLY",
+        "RESOURCE_HOLD",
+        "UNKNOWN"
+      ],
+      "no_imputation": "GPU unavailability cannot be counted as a failed code repair; CPU/micro model tests cannot be claimed equivalent to two-GPU original reproduction."
+    },
+    "gate_B_actor_provenance": {
+      "original_P9_required": "target_agent_is_commit_author needs independent actor evidence; replayed synthetic Git author is not independent attestation",
+      "separate_observed_dimensions": [
+        "patch_sha_verified",
+        "test_receipt_sha_verified",
+        "runner_workflow_identity_verified",
+        "model_agent_actor_independently_attested"
+      ],
+      "no_conflation": "GitHub Actions attest the workflow/run context, not that a particular LLM authored the patch. A trusted external API/tool-call transcript plus verifiable model output-to-patch binding may be needed for actor verification.",
+      "missing_actor_evidence": "SOURCE_LINKED_HOLD_NOT_BUG_DETECTOR"
+    },
+    "gate_C_coding_attempt": {
+      "required_before_start": "Resource study and locked exact task candidate protocol; freeze visible checks; preserve whole original task frame.",
+      "allow_cpu_proxies": "Only as labeled diagnostic; do not use as full original distributed task success.",
+      "no_candidate_written_in_P15": true
+    },
+    "gate_D_independent_original_oracle": {
+      "test_manifest": "SWE-bench-Live lite pinned revision and original evaluator SHA ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+      "run_after_seal_only": true,
+      "zero_tests_or_infra_error": "UNKNOWN / HOLD, not 0 success or 1 failure",
+      "resource_failure": "RESOURCE_HOLD, not code defect",
+      "result": "pending"
+    }
+  },
+  "policy_lock": {
+    "P9_version": "X1-P9-alpha-1-20261116",
+    "status": "FROZEN_HISTORICAL_DO_NOT_REWRITE",
+    "forward_revision_separate": "If actor-agnostic SHA/test receipt rule is studied, label as P15-v2 prospectively and freeze before inspecting new task oracle; do not relabel P9 or past outcomes",
+    "proposed_forward_measures": [
+      "task_eligibility",
+      "actor_attestation_coverage",
+      "policy_accepted_count",
+      "false_accepts_among_accepted_with_defined_denominator",
+      "unnecessary_holds_among_verified_successes",
+      "matched test-scope coverage",
+      "explicit rate-unidentifiable status if no accepted cases"
+    ]
+  },
+  "scientific_boundaries": [
+    "P10 naturalistic Copilot pull requests separate from SWE-bench controlled task denominator",
+    "P11/P12/P13/P14 results remain frozen, no posthoc score changes",
+    "Five distinct original-frozen tasks have had an official benchmark outcome, not ten",
+    "Source-linked policy has zero accepts in benchmark pilot, so its positive prediction precision is not estimable",
+    "Cannot attribute success/failure to synthetic human developer messages",
+    "No human coder required, but AI review is not human agreement",
+    "No additional benchmark task is substituted based on computational difficulty",
+    "No hidden task oracle labels, gold patches, or reference commits are used for the preflight"
+  ]
+}
