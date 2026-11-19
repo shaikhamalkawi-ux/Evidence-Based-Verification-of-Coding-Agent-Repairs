@@ -1,0 +1,233 @@
+name: P18 POSTREVEAL original DoRA task oracle literal-only sensitivity (NOT BLIND)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p18-postreveal-original-oracle-retest.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-exposed-task-retest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 42
+    env:
+      INSTANCE_ID: pytorch__torchtune-2139
+      BASE_SHA: f2bd4bc25b24587aef40f486087412b9da8f1d94
+      P17_SHA: 57f45fdd5552908d4b5d42cccd7359ccb4de2560
+      P17_PATCH_SHA256: c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801
+      P18_SHA: 6c029466df2fdca0b28273b58eaab46ef6460075
+      P18_DORA_BLOB: 0c0aeef1bb24336dff8904dd61d6ad33d4233dee
+      ORIGINAL_HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout explicit post-reveal sensitivity protocol, no blinded policy update
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify P17 original failure, P18 source variant and no new policy trial
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p18_original_retest
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          p=pathlib.Path('pilot/torchtune')
+          prior=json.loads(pathlib.Path('data/audits/P17_TORCHTUNE_ORIGINAL_ORACLE_20261120.json').read_text())
+          diagnostic=json.loads(pathlib.Path('data/audits/P18_TORCHTUNE_POSTREVEAL_ERROR_TAXONOMY_20261120.json').read_text())
+          reg=json.loads((p/'P18_POSTREVEAL_ORIGINAL_TASK_RETEST_REGISTER.json').read_text())
+          assert reg['status']=='PREREGISTERED_POSTREVEAL_ORACLE_RETEST_NOT_BLIND'
+          assert reg['original_task']==os.environ['INSTANCE_ID']
+          assert reg['original_base_sha']==os.environ['BASE_SHA']
+          assert reg['preexisting_P17_original_candidate_sha']==os.environ['P17_SHA']
+          assert reg['new_P18_postreveal_candidate_sha']==os.environ['P18_SHA']
+          assert reg['new_P18_source_git_blob_sha']==os.environ['P18_DORA_BLOB']
+          assert prior['original_harness_task_result']['official_resolved'] is False
+          assert prior['original_harness_task_result']['f2p_passed']==0
+          assert prior['original_harness_task_result']['f2p_total']==1
+          assert diagnostic['failed_f2p_test_ids']==['tests/torchtune/modules/peft/test_dora.py::TestDoRALinear::test_dora_meta_device_init_error']
+          assert reg['no_new_P9_decisions'] is True
+          assert reg['original_six_task_population_denominator_unchanged'] is True
+          assert reg['text_diff_only'] is True
+          assert reg['original_GPU_training_unverified'] is True
+          print('P18_POSTREVEAL_NO_NEW_BLIND_EVIDENCE')
+          print('P18_EXPECTED_ISSUE_OUTCOME_UNCHANGED_UNTIL_ORIGINAL_HARNESS_REPORT')
+          PY
+          docker version
+      - name: Rebuild EXACT original P17 patch, then only the P18 message literal
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" remote add origin https://github.com/meta-pytorch/torchtune.git
+          git -C "$RUNNER_TEMP/torchtune_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/torchtune_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" hash-object torchtune/modules/peft/dora.py)" = 6f097da6d039738c320e8775ad61950c56fe0108
+          python3 pilot/torchtune/p17_candidate_initial.py --repo "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" diff -- torchtune/modules/peft/dora.py \
+            > p18_original_retest/P17_base_to_first.diff
+          test "$(sha256sum p18_original_retest/P17_base_to_first.diff | awk '{print $1}')" = "$P17_PATCH_SHA256"
+          export GIT_AUTHOR_DATE="2026-11-20T03:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:00:00Z"
+          git -C "$RUNNER_TEMP/torchtune_src" add torchtune/modules/peft/dora.py
+          git -C "$RUNNER_TEMP/torchtune_src" \
+            -c user.name="GPT-6 P17 research-generated (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P17 initial: materialize stale DoRA meta magnitude only when necessary"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD)" = "$P17_SHA"
+          python3 pilot/torchtune/p18_postreveal_message_ablation.py --repo "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" diff -- torchtune/modules/peft/dora.py \
+            > p18_original_retest/P18_only_error_message.diff
+          export GIT_AUTHOR_DATE="2026-11-19T21:02:00Z"
+          export GIT_COMMITTER_DATE="2026-11-19T21:02:00Z"
+          git -C "$RUNNER_TEMP/torchtune_src" add torchtune/modules/peft/dora.py
+          git -C "$RUNNER_TEMP/torchtune_src" \
+            -c user.name="GPT-6 P18 POSTREVEAL (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P18 postreveal: clarify explicit meta magnitude RuntimeError text"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD)" = "$P18_SHA"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" hash-object torchtune/modules/peft/dora.py)" = "$P18_DORA_BLOB"
+          python3 - <<'PY'
+          from pathlib import Path
+          patch=Path('p18_original_retest/P18_only_error_message.diff').read_text()
+          neg=[line for line in patch.splitlines() if line.startswith('-') and not line.startswith('---')]
+          pos=[line for line in patch.splitlines() if line.startswith('+') and not line.startswith('+++')]
+          assert len(neg)==len(pos)==1,(neg,pos)
+          assert 'DoRA magnitude norm is still on meta device' in neg[0]
+          assert 'Cannot initialize DoRA magnitude: computed norm is still on meta device' in pos[0]
+          assert neg[0].replace('DoRA magnitude norm is still on meta device','Cannot initialize DoRA magnitude: computed norm is still on meta device')==pos[0]
+          print('P18_EXACTLY_ONE_EXCEPTION_STRING_CHANGED_NO_EXECUTABLE_LOGIC_DELTA')
+          PY
+          git -C "$RUNNER_TEMP/torchtune_src" diff "$BASE_SHA" HEAD -- torchtune/modules/peft/dora.py \
+            > p18_original_retest/agent_patch.diff
+          sha256sum p18_original_retest/P18_only_error_message.diff p18_original_retest/agent_patch.diff \
+            > p18_original_retest/patches_sha256.txt
+          python3 - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path('p18_original_retest/agent_patch.diff').read_text()
+          item={'instance_id':os.environ['INSTANCE_ID'],
+                'model_name_or_path':'P18_POSTREVEAL_MESSAGE_ONLY_NOT_BLIND',
+                'model_patch':p}
+          pathlib.Path('p18_original_retest/predictions.jsonl').write_text(json.dumps(item)+'\n')
+          print('P18_POSTREVEAL_CANDIDATE_SHA='+os.environ['P18_SHA'])
+          PY
+      - name: Python 3.12 for unmodified original SWE-bench-Live task oracle
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original pinned evaluator code
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$ORIGINAL_HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$ORIGINAL_HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$ORIGINAL_HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > p18_original_retest/environment.txt
+      - name: Load SAME original task into evaluator (ALREADY REVEALED; not independent)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/original_task_retest"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          ds=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['DATASET_REV'])
+          rows=[dict(x) for x in ds if x['instance_id']==os.environ['INSTANCE_ID']]
+          assert len(rows)==1
+          path=pathlib.Path(os.environ['RUNNER_TEMP'])/'original_task_retest/instance.jsonl'
+          path.write_text(json.dumps(rows[0],default=str,ensure_ascii=False)+'\n')
+          print('P18_ORIGINAL_TASK_WAS_ALREADY_EXPOSED_IN_P17')
+          PY
+      - name: Run original pinned harness on POSTREVEAL message-only variant
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p18_original_retest/oracle_started_at_utc.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/original_task_retest/instance.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/p18_original_retest/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "evcar-p18-postreveal-literal-sensitivity-20261120" \
+            > "$GITHUB_WORKSPACE/p18_original_retest/original_harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p18_original_retest/original_harness_exit_code.txt"
+          tail -n 100 "$GITHUB_WORKSPACE/p18_original_retest/original_harness_stdout.log"
+          echo "P18_ORIGINAL_HARNESS_EXIT=$rc; this is a postreveal diagnostic, not a new blinded success"
+          exit "$rc"
+      - name: Extract comparable original counts and preserve postreveal boundary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,shutil
+          iid=os.environ['INSTANCE_ID']
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          out=pathlib.Path('p18_original_retest')
+          matches=[]
+          for f in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(f):continue
+              try:
+                  row=json.loads(f.read_text())
+                  if isinstance(row,dict) and iid in row: matches.append((f,row[iid]))
+              except (ValueError,OSError):continue
+          result={
+            'schema':'99llm_X1_P18_postreveal_literal_only_original_task_oracle_v1',
+            'stage':'POSTREVEAL_NOT_BLIND',
+            'task':iid,'candidate_sha':os.environ['P18_SHA'],
+            'original_p17_heldout_task_run':44613016409,
+            'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+            'dataset_rev':os.environ['DATASET_REV'],
+            'original_harness_sha':os.environ['ORIGINAL_HARNESS_SHA'],
+            'matched_reports':len(matches),
+            'status':'NOT_ADMITTED',
+            'f2p_total':None,'f2p_passed':None,'p2p_failed':None,'tests_executed':None,
+            'original_resolved':None,
+            'agent_policy_decision_rescored':False,
+            'original_task_population_increased':False,
+            'human_feedback_or_authentic_agent_attestation':False,
+            'full_two_GPU_DORA_training_reproduced':False}
+          if len(matches)==1:
+              path,rec=matches[0]
+              shutil.copyfile(path,out/'original_report.json')
+              f=rec.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              p=rec.get('tests_status',{}).get('PASS_TO_PASS',{})
+              v=[f.get('success',[]),f.get('failure',[]),p.get('success',[]),p.get('failure',[])]
+              t=path.parent/'test_output.txt'
+              if t.is_file():shutil.copyfile(t,out/'original_test_output.txt')
+              if t.is_file() and all(isinstance(x,list) for x in v) and sum(map(len,v))>0 and sum(map(len,v[:2]))>0:
+                  result.update({'status':'COMPLETE_POSTREVEAL','f2p_total':len(v[0])+len(v[1]),
+                      'f2p_passed':len(v[0]),'p2p_failed':len(v[3]),
+                      'tests_executed':sum(map(len,v)),
+                      'original_resolved':rec.get('resolved'),
+                      'original_test_output_sha256':hashlib.sha256(t.read_bytes()).hexdigest()})
+              lg=path.parent/'run_instance.log'
+              if lg.is_file():shutil.copyfile(lg,out/'run_instance.log')
+          (out/'P18_POSTREVEAL_ORIGINAL_TASK_RETEST.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print('P18_POSTREVEAL_ORIGINAL_TASK_EVIDENCE '+json.dumps(result,sort_keys=True))
+          PY
+          docker image ls --digests > p18_original_retest/docker_images.txt || true
+      - name: Archive full postreveal evaluation without adding P9 decision or original task
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p18-torchtune-postreveal-original-task-retest
+          path: p18_original_retest/
+          retention-days: 60
+          if-no-files-found: error
