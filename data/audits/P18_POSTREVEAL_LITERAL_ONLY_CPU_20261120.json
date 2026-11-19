@@ -1,0 +1,30 @@
+{
+  "schema": "99llm_X1_P18_postreveal_CPU_literal_comparison_v1",
+  "status": "EXECUTED_POSTREVEAL_NOT_BLIND",
+  "task": "pytorch__torchtune-2139",
+  "original_source_base_sha": "f2bd4bc25b24587aef40f486087412b9da8f1d94",
+  "initial_p17_candidate_sha": "57f45fdd5552908d4b5d42cccd7359ccb4de2560",
+  "postreveal_candidate_sha": "6c029466df2fdca0b28273b58eaab46ef6460075",
+  "postreveal_candidate_source_blob_sha": "0c0aeef1bb24336dff8904dd61d6ad33d4233dee",
+  "source_change": "Only RuntimeError error message literal under weight_norm.is_meta in historical DoRALinear.initialize_dora_magnitude",
+  "previously_observed_hidden_f2p_regex": "Cannot initialize DoRA magnitude",
+  "P17_on_new_postreveal_message_test": "FAIL",
+  "P18_on_new_postreveal_message_test": "PASS",
+  "original_six_CPU_source_tests_on_P18": {
+    "passed": 6,
+    "total": 6
+  },
+  "literal_test_authored_after_original_hidden_result": true,
+  "original_P17_hidden_oracle_result_unchanged": {
+    "f2p_passed": 0,
+    "f2p_total": 1,
+    "p2p_failed": 0
+  },
+  "source_run_id": 44615105523,
+  "source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44615105523",
+  "source_artifact_id": 14574342622,
+  "no_new_original_task": true,
+  "no_full_gpu_training": true,
+  "no_new_agent_policy_decision": true,
+  "no_independent_agent_authorship": true
+}
