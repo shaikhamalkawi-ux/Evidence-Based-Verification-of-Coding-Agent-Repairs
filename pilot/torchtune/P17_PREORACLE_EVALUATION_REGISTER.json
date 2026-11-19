@@ -1,0 +1,58 @@
+{
+  "id": "99llm-X1-P17-TORCHTUNE-ORIGINAL-ORACLE-PREEXEC-20261120",
+  "status": "REGISTERED_AFTER_GITHUB_P9_SEAL_BEFORE_ANY_ORIGINAL_BENCHMARK_HIDDEN_TEST",
+  "stage": "INITIAL_SOURCE_CANDIDATE_CPU_PROXY_ONLY",
+  "original_task": "pytorch__torchtune-2139",
+  "original_frozen_index_one_based": 5,
+  "upstream_repo_at_issue": "pytorch/torchtune",
+  "canonical_repo_now": "meta-pytorch/torchtune",
+  "original_base_sha": "f2bd4bc25b24587aef40f486087412b9da8f1d94",
+  "original_source_blob_sha": "6f097da6d039738c320e8775ad61950c56fe0108",
+  "candidate_sha": "57f45fdd5552908d4b5d42cccd7359ccb4de2560",
+  "full_patch_sha256": "c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801",
+  "synthetic_git_author_date": "2026-11-20T03:00:00Z",
+  "synthetic_author_timestamp_notice": "This is a deterministic synthetic Git metadata field, not the actual wall-clock time of model creation. The candidate was produced by GitHub Actions 44611483239 before the public pre-oracle seal and the Actions log times establish chronology.",
+  "source_recipe": "pilot/torchtune/p17_candidate_initial.py",
+  "frozen_cpu_test_sha256": "4a91adf73f993650fcecfcd571b4610290e3bf6a2098f8ecae9e55fe0a8010b5",
+  "source_test_run_id": 44611483239,
+  "cpu_source_baseline": {
+    "passed": 2,
+    "total": 6
+  },
+  "cpu_source_candidate": {
+    "passed": 6,
+    "total": 6
+  },
+  "original_two_gpu_distributed_reproducer": "RESOURCE_HOLD_FULL_TWO_GPU_REPRO on standard GitHub Actions runner 44603543854; do not conflate with original hidden task benchmark feasibility",
+  "preoracle_timestamp_utc": "2026-11-19T20:45:51Z",
+  "original_P9_policy_sha256": "c62f5bffce085577ad1f5b0e4da05ec0a3a76b133e0eebd1f626bb4b2261ed35",
+  "original_P9_input_sha256": "11b729b8384ba928b3462072faf696c5629fcb23e6ac79338b5abae20171a31a",
+  "original_P9_script_sha256": "baea708bacf643bdf6110d5c0ba3a584d8ad0783f993bfe481f96ce8149ae6fd",
+  "public_github_preoracle_seal_commit": "6f95206a3a6d9ee8266c433e21de1085fe4119ea",
+  "sealed_policies": {
+    "self_report": "HOLD",
+    "local_pass": "ACCEPT",
+    "source_linked": "HOLD"
+  },
+  "source_test_scope": "historical DoRALinear AST exact source at pinned Git blob, import-only standins, CPU nonquantized, not FSDP full recipe",
+  "official_dataset": {
+    "name": "SWE-bench-Live/SWE-bench-Live",
+    "split": "lite",
+    "revision": "babb27e45e072219195db7a744bbf0d3c1a36e56"
+  },
+  "official_harness": {
+    "repo": "microsoft/SWE-bench-Live",
+    "commit": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "docker_namespace": "starryzhang"
+  },
+  "official_oracle_precondition": "Only after verifying original public seal, input SHA, decision SHA, exact source baseline, candidate patch hash & Git SHA, may original task test patch be fetched inside the evaluator.",
+  "official_oracle_nonadmission": "Missing image, CUDA/GPU infeasibility, no original parsed tests, no unique report, mismatched SHA => UNKNOWN/RESOURCE_HOLD, never a proven failed code repair.",
+  "no_gold_access_before_this_record": true,
+  "independent_agent_authorship_attested": false,
+  "real_human_developer_feedback": false,
+  "not_claimed_task_fixed": true,
+  "outcome_pending": true,
+  "original_benchmark_trial_count_added_if_valid": 1,
+  "P13_postrevealed_not_pooled": true,
+  "MR30_P9_P10_to_P16_unchanged": true
+}
