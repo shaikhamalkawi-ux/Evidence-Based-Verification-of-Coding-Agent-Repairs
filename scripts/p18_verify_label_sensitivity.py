@@ -17,6 +17,7 @@ P18=ROOT/"data/audits/P18_TORCHTUNE_POSTREVEAL_ORACLE_LITERAL_RETEST_20261120.js
 SEAL=ROOT/"pilot/torchtune/sealed/P9_DECISIONS_SEALED.jsonl"
 DIAGNOSTIC=ROOT/"data/audits/P18_TORCHTUNE_POSTREVEAL_ERROR_TAXONOMY_20261120.json"
 PROTO=ROOT/"protocol/P18_POSTREVEAL_LITERAL_SENSITIVITY_REGISTER_20261120.json"
+RETEST=ROOT/"pilot/torchtune/P18_POSTREVEAL_ORIGINAL_TASK_RETEST_REGISTER.json"
 FROZEN=ROOT/"pilot/frozen_task_frame_20261117.json"
 
 def read(path):
@@ -26,6 +27,7 @@ def validate(ledger=None):
     d=read(P18) if ledger is None else ledger
     old=read(ORIGINAL)
     p=read(PROTO)
+    retest=read(RETEST)
     diag=read(DIAGNOSTIC)
     frame=read(FROZEN)
     assert len(frame["selected"])==10
@@ -47,15 +49,15 @@ def validate(ledger=None):
     assert result["stage"]=="POSTREVEAL_NOT_BLIND"
     assert result["status"]=="COMPLETE_POSTREVEAL"
     assert result["candidate_sha"]=="6c029466df2fdca0b28273b58eaab46ef6460075"
-    assert result["candidate_sha"]==p["new_P18_postreveal_candidate_sha"]
+    assert result["candidate_sha"]==retest["new_P18_postreveal_candidate_sha"]
     assert result["original_p17_heldout_task_run"]==44613016409
     assert result["f2p_passed"]==result["f2p_total"]==1
     assert result["p2p_failed"]==0
     assert result["tests_executed"]==651
     assert result["original_resolved"] is True
     assert result["matched_reports"]==1
-    assert result["original_harness_sha"]==d["original_harness_sha"]==p["original_harness_sha"]
-    assert result["dataset_rev"]==d["original_dataset_sha"]==p["original_dataset_revision"]
+    assert result["original_harness_sha"]==d["original_harness_sha"]==retest["original_harness_sha"]
+    assert result["dataset_rev"]==d["original_dataset_sha"]==retest["original_dataset_revision"]
     assert result["original_test_output_sha256"]=="3d0c13446d3e5548c8dd718a3c0c3a722b6b803a974f13401deee0f24b25044e"
     assert result["source_git_blob_sha"]=="0c0aeef1bb24336dff8904dd61d6ad33d4233dee"
     assert result["agent_policy_decision_rescored"] is False
