@@ -40,3 +40,17 @@ First execute the read-only actual GitHub-hosted GPU preflight. If two accessibl
 Keep P12–P14 negative results in a transparent technical evidence paper. HOLD superiority of X1, validated agent authenticity, genuine human developer interaction, population risk estimates and proof that an improved visible suite resolves the original issue. No human coder or intercoder experiment required. Do not overwrite frozen MR30.
 
 Relevant public references: https://swe-bench-live.github.io/ (August 2026 trajectory requirement and anti-leakage); https://github.com/meta-pytorch/torchtune/blob/f2bd4bc25b24587aef40f486087412b9da8f1d94/CONTRIBUTING.md (resource/test tiers); https://arxiv.org/abs/2609.08149 (task verifier/reward hacking concerns). These are conceptual precedents, not X1 validation.
+
+## Executed P15 resource-admission outcome (19 November 2026)
+
+Real GitHub Actions execution: https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44603543854
+
+The standard ubuntu-24.04 runner exposed NO NVIDIA GPU device nodes, did not contain nvidia-smi, and did not have torch installed. The original published reproducer requests TWO local worker ranks. Under the preregistered resource rule, this is RESOURCE_HOLD_FULL_TWO_GPU_REPRO FOR THIS RUNNER ONLY. It is not proof that other cloud computers lack GPUs and NOT a judgement on the repair or the independently scored original benchmark task. No candidate patch was submitted and no gold/test_patch was read.
+
+Exact machine-readable receipt: data/audits/P15_TORCHTUNE_ORIGINAL_RESOURCE_PREFLIGHT_20261119.json. Runner result original GitHub Actions artifact ID: 14568278992. Source software/negative controls passed 52/52 in https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44604485698 .
+
+Cloud next step: use a same-node 2-GPU runner with adequate VRAM and model/checkpoint permissions if a full original distributed DoRA reproduction is required. GitHub's published larger GPU runner reference lists ONE Tesla T4 (16GB) per GPU runner, which is not equivalent to a same-node two-GPU machine: https://docs.github.com/en/actions/reference/runners/larger-runners . A self-hosted two-GPU runner or a separately approved cloud VM can satisfy the hardware requirement. Verify actual hardware/driver/device counts before any repair experiment, without claiming that two available GPUs alone prove the 8B workload has enough memory or downloaded assets.
+
+Crucial benchmark boundary: The SWE-bench-Live website's August 2026 update requires original agent rollout trajectories for leaderboard submission integrity: https://swe-bench-live.github.io/ . Prior P12/P14 executed the pinned original harness and obtained F2P/P2P outcomes, but do NOT describe those as independently authenticated leaderboard submissions. Deterministic research-generated patch scripts do not constitute provider-signed agent rollout evidence. This is another reason for a prospective workflow-trace/actor-proof protocol.
+
+Author recommendation after resource preflight: Keep task index 5 frozen, record the full-reproduction resource hold, and prioritize a genuinely verifiable model/tool-to-patch execution chain plus non-vacuous acceptance coverage in the next study. MR30 and original P9 scientific results remain unchanged.
