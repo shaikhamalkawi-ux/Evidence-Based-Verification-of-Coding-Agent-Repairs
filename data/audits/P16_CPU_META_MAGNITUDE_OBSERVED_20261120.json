@@ -1,0 +1,53 @@
+{
+  "code_repair_success_claim": false,
+  "cuda_devices_visible_in_this_cpu_microprobe": 0,
+  "historical_dora_blob_sha": "6f097da6d039738c320e8775ad61950c56fe0108",
+  "historical_recipe_blob_sha": "e95fbb40c60c0d7f18e694aeb8dabac5a70e664b",
+  "historical_visible_operation": "self.magnitude.copy_(weight_norm)",
+  "label": "MECHANISM_CANDIDATE_NOT_ROOT_CAUSE_PROOF",
+  "original_distributed_lora_recipe_executed": false,
+  "original_independent_task_oracle_executed": false,
+  "original_torchtune_do_r_a_class_imported": false,
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "recorded_at_utc": "2026-11-19T20:22:29Z",
+  "schema": "99llm_X1_P16_meta_copy_cpu_microprobe_v1",
+  "scientific_scope": "Only copy_ and to_empty behavior on an isolated toy meta Parameter; original FSDP/DTensor and full DoRA module not tested.",
+  "source_base_sha": "f2bd4bc25b24587aef40f486087412b9da8f1d94",
+  "source_candidate_patch_generated": false,
+  "source_linked_agent_authorship_attested": false,
+  "source_repo": "meta-pytorch/torchtune",
+  "source_task": "pytorch__torchtune-2139",
+  "status": "COMPLETE_ISOLATED_CPU_SEMANTICS_ONLY",
+  "test_copy_preserves_meta_storage_without_materialization": true,
+  "test_explicit_materialization_then_copy": true,
+  "tests_declared": 2,
+  "tests_passed": 2,
+  "torch_version": "2.10.0+cpu",
+  "toy_copy_into_meta_raised": null,
+  "toy_device_after_copy": "meta",
+  "toy_expected_cpu_values": [
+    2,
+    3,
+    4
+  ],
+  "toy_explicitly_materialized_to_cpu": "cpu",
+  "toy_is_meta_after_materialization": false,
+  "toy_magnitude_elements": 3,
+  "toy_originally_meta": true,
+  "toy_still_meta_after_copy": true,
+  "toy_values_after_materialization_and_copy": [
+    2,
+    3,
+    4
+  ],
+  "training_model_8b_loaded": false,
+  "two_gpu_training_reproduced": false,
+  "provenance": {
+    "github_actions_run_id": 44607950785,
+    "github_actions_job_id": 135856570141,
+    "github_actions_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44607950785",
+    "artifact_id": 14570827656,
+    "observed_record_source": "P16_CPU_META_MICROPROBE terminal line emitted by scripts/p16_meta_magnitude_cpu_probe.py under runner",
+    "mechanism_scope": "CPU toy only, not original torchtune source code execution"
+  }
+}

@@ -1,0 +1,91 @@
+name: P16 isolated CPU PyTorch meta-device copy semantics (NOT DoRA/GPU repair)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p16-cpu-meta-magnitude-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  no-gpu-meta-operation-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      CUDA_VISIBLE_DEVICES: '-1'
+    steps:
+      - name: Checkout P16 CPU-only source and original frame, no oracle
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Enforce no torch/DoRA production patch and no benchmark gold
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p16_cpu_probe
+          python3 - <<'PY'
+          import json,pathlib
+          p=json.loads(pathlib.Path("protocol/P16_CPU_META_SEMANTICS_BOUNDARIES_20261120.json").read_text())
+          f=json.loads(pathlib.Path("pilot/frozen_task_frame_20261117.json").read_text())
+          assert f["selected"][4]["instance_id"]==p["source_task"]["instance_id"]=="pytorch__torchtune-2139"
+          assert p["source_task"]["base_sha"]=="f2bd4bc25b24587aef40f486087412b9da8f1d94"
+          assert p["source_task"]["dora_git_blob_sha"]=="6f097da6d039738c320e8775ad61950c56fe0108"
+          assert p["no_oracle_use"] is True
+          assert p["no_source_patch_submitted"] is True
+          assert p["not_task_success"] is True
+          assert p["status"].startswith("EXPLORATORY_CPU_DIAGNOSTIC")
+          print("P16_SCOPE_LOCKED_CPU_TOY_ONLY_NO_ORACLE_NO_AGENT_PATCH")
+          PY
+      - name: Python 3.12 for PyTorch CPU wheel
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned CPU PyTorch (no GPU, no model checkpoint or hidden test)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check \
+            torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu \
+            > p16_cpu_probe/torch_install.log 2>&1 || {
+              tail -n 80 p16_cpu_probe/torch_install.log
+              exit 1
+            }
+          python3 -m pip freeze > p16_cpu_probe/requirements.txt
+          python3 -m pip check > p16_cpu_probe/pip_check.txt
+      - name: Execute isolated toy meta Parameter copy vs materialization operations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p16_meta_magnitude_cpu_probe.py \
+            --out p16_cpu_probe/P16_OBSERVED_META_CPU_PROBE.json
+          python3 - <<'PY'
+          import json,pathlib
+          r=json.loads(pathlib.Path("p16_cpu_probe/P16_OBSERVED_META_CPU_PROBE.json").read_text())
+          assert r["status"]=="COMPLETE_ISOLATED_CPU_SEMANTICS_ONLY"
+          assert r["tests_passed"]==r["tests_declared"]==2
+          assert r["toy_still_meta_after_copy"] is True
+          assert r["toy_is_meta_after_materialization"] is False
+          assert r["code_repair_success_claim"] is False
+          assert r["original_independent_task_oracle_executed"] is False
+          assert r["original_distributed_lora_recipe_executed"] is False
+          assert r["source_candidate_patch_generated"] is False
+          print("P16_TOY_PYTORCH_SEMANTICS_PASS_NOT_ISSUE_RESOLUTION")
+          PY
+          sha256sum p16_cpu_probe/P16_OBSERVED_META_CPU_PROBE.json \
+            > p16_cpu_probe/P16_OBSERVED_META_CPU_PROBE.sha256
+      - name: Run pure-Python protocol/software tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -v
+      - name: Preserve CPU probe, environment, package metadata and source
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p16-torchtune-cpu-meta-device-mechanism-only
+          path: p16_cpu_probe/
+          retention-days: 60
+          if-no-files-found: warn

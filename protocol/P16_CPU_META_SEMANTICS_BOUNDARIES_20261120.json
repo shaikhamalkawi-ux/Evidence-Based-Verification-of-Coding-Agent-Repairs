@@ -1,0 +1,41 @@
+{
+  "protocol_id": "99llm-X1-P16-CPU-META-SEMANTICS",
+  "status": "EXPLORATORY_CPU_DIAGNOSTIC_AFTER_UNREGISTERED_LOCAL_SANITY_CHECK_NOT_BLIND",
+  "purpose": "Test the isolated PyTorch meta-parameter copy semantics implicated by original visible torchtune DoRA issue; not validate a source patch, distributed GPU recipe, or independent SWE-bench-Live task resolution.",
+  "source_task": {
+    "instance_id": "pytorch__torchtune-2139",
+    "frozen_original_index_one_based": 5,
+    "original_repo_name": "pytorch/torchtune",
+    "canonical_repository": "meta-pytorch/torchtune",
+    "base_sha": "f2bd4bc25b24587aef40f486087412b9da8f1d94",
+    "historical_dora_path": "torchtune/modules/peft/dora.py",
+    "dora_git_blob_sha": "6f097da6d039738c320e8775ad61950c56fe0108",
+    "historical_recipe": "recipes/lora_finetune_distributed.py",
+    "historical_recipe_blob_sha": "e95fbb40c60c0d7f18e694aeb8dabac5a70e664b",
+    "original_visible_reproducer": "tune run --nnodes 1 --nproc_per_node 2 lora_finetune_distributed --config llama3/8B_dora"
+  },
+  "prior_resource_gate": {
+    "run_id": 44603543854,
+    "result": "RESOURCE_HOLD_FULL_TWO_GPU_REPRO",
+    "no_gpu_in_that_github_actions_runner": true
+  },
+  "inputs": "Only public historical source with no benchmark test_patch/gold, and installed CPU PyTorch; no model weights.",
+  "isolated_toy_design": "Define a minimal nn.Module whose magnitude is nn.Parameter(torch.empty(n,device='meta')) and whose initialize_dora_magnitude is exactly the source-visible copy_(weight_norm) pattern; compare before/after to_empty(device='cpu') on a toy 3-element tensor.",
+  "outcome_fields": [
+    "originally_meta",
+    "device_after_copy_without_materialization",
+    "copy_raises",
+    "device_after_explicit_to_empty",
+    "sample_cpu_value_equality",
+    "torch_version",
+    "cuda_device_count"
+  ],
+  "methodological_admission": "Mechanism demonstration only. Cannot certify actual torchtune FSDP parameter placement, two-rank DoRA finetuning, or full hidden benchmark issue correctness. Cannot claim to have executed original historical DoRALinear class without torchao/full source environment.",
+  "timeline_disclosure": "A quick unregistered local PyTorch sanity check preceded this document; no blind/preregistered experimental status may be attributed to P16. P15 earlier preflight remains prospective resource gate.",
+  "no_oracle_use": true,
+  "no_source_patch_submitted": true,
+  "not_task_success": true,
+  "no_human_coder": true,
+  "locked_policy_unchanged": "X1-P9-alpha-1-20261116",
+  "next_action": "Run reproducible CPU micro-probe and source static anchor checks, archive result with runtime version and SHA. Do not touch original benchmark oracle or original task sample."
+}
