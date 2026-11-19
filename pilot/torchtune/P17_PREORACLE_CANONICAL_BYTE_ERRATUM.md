@@ -1,22 +1,24 @@
-# P17 pre-oracle JSONL byte-serialization erratum
+# P17 pre-oracle P9 exact-byte materialization erratum
 
-**Scope:** packaging and byte-representation correction ONLY; performed before the original SWE-bench-Live task oracle was downloaded or executed.
+**Status: PREORACLE PACKAGING ONLY. No original SWE-bench-Live hidden task test has been downloaded or run during any of these corrections. No task code patch, source SHA, policy decision, decision timestamp or policy algorithm changed.**
 
-GitHub Actions [seal run 44611933226](https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44611933226) used the unchanged original P9 policy to generate the canonical decision record, its source input, and the SHA manifest on a runner, before any original benchmark gold access.
+The original unchanged `scripts/p9_decide.py` produces two *different* byte contracts:
 
-The initial transfer from that runner log to GitHub used Python `json.dumps(..., sort_keys=True)` with normal spacing rather than the P9 source's canonical compact `separators=(',', ':')` and `ensure_ascii=False`. The semantic contents, episode, timestamps, patch SHA and policy decisions were unchanged, but the resulting bytes did NOT match the original SHA manifest. Therefore the original first oracle launch [44612325881](https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44612325881) correctly STOPPED at the pre-oracle checksum gate; the hidden task row was never retrieved or evaluated in that run.
+1. The decision file is **canonical**: Python `json.dumps(decision, ensure_ascii=False, sort_keys=True, separators=(',', ':')) + '\n'`.
+2. The decision **input** is not normalized by P9; P9 SHA-256 seals its **raw incoming bytes**. In run 44611933226, the input was created using Python `json.dumps(input, sort_keys=True) + '\n'`, which includes ordinary `, ` and `: ` spaces.
 
-The following GitHub commits restored exactly the **original canonical sorted compact JSONL** with no decision re-evaluation or substantive edit:
+The GitHub transfer initially wrote the decision record with display formatting, breaking the decision SHA. [Attempt 44612325881](https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44612325881) STOPPED before original task download. P17 then restored the decision record to canonical compact JSONL at commit `00187bbe68422c8c465ba75ee805d6adf3c89f7b`.
 
-- Input byte repair commit: `a1661c061c80796d3b415f6c65f0901f746596ba`.
-- Decision byte repair commit: `00187bbe68422c8c465ba75ee805d6adf3c89f7b`.
+An intermediate attempted correction also compacted the input, incorrectly assuming both had the same byte contract. Because P9 binds **raw** input bytes, [attempt 44612710001](https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44612710001) passed the decision SHA guard but correctly failed the input SHA guard, still BEFORE any original hidden benchmark task download. Input was then restored to the **original spaces-preserved sorted JSONL bytes** at commit `3f171d7a7d754a4edcc2e1a16a4f08e1e1c86d5c` (1,956 bytes, the original unmodified input length). No policy re-decision.
 
-Expected original, unchanged recorded hashes:
+Original unchanged SHA-256 from the P9 runner seal 44611933226:
 
-- P9 decision SHA-256: `c62f5bffce085577ad1f5b0e4da05ec0a3a76b133e0eebd1f626bb4b2261ed35`
-- Decision-only input SHA-256: `11b729b8384ba928b3462072faf696c5629fcb23e6ac79338b5abae20171a31a`
-- P9 policy script SHA-256: `baea708bacf643bdf6110d5c0ba3a584d8ad0783f993bfe481f96ce8149ae6fd`
+- Decision bytes SHA-256: `c62f5bffce085577ad1f5b0e4da05ec0a3a76b133e0eebd1f626bb4b2261ed35`
+- Raw input bytes SHA-256: `11b729b8384ba928b3462072faf696c5629fcb23e6ac79338b5abae20171a31a`
+- Original policy source SHA-256: `baea708bacf643bdf6110d5c0ba3a584d8ad0783f993bfe481f96ce8149ae6fd`
 
-Scientific claim remains: this task is original frozen index five; source CPU tests improved from 2/6 to 6/6, **no original independent task outcome had been seen by the source author**, and the initial policy remains self-report HOLD, local ACCEPT, source-linked HOLD. The original `t_decision` is preserved as the runner decision time 2026-11-19T20:45:51Z, while the corrected verifiable public materialization time is the later GitHub commit timestamp. These times are intentionally not conflated.
+The scientific clock remains the **original P9 decision time 2026-11-19T20:45:51Z**. Verified public materialization commits occurred later and are separate evidence; do not falsely identify the original public Git commit 6f95206a3a6d9ee8266c433e21de1085fe4119ea as already containing both correct byte streams. The original P9 artifact and checksummed manifest were preserved by the seal runner; public exact-byte materialization is a packaging closure done **before original oracle access**.
 
-The next oracle workflow must verify that **both corrected source files hash to the previously generated immutable P9 seal**, and confirm it is executing the exact already-sealed candidate patch before downloading any original benchmark task record. If those checks fail, the task remains **UNKNOWN**. Do not count any failed infrastructure workflows as a code repair failure. Original P9, MR30, P10–P16 stay frozen.
+The original frozen fifth task, candidate `57f45fdd5552908d4b5d42cccd7359ccb4de2560`, source patch SHA-256 `c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801`, and unchanged P9 decisions **self-report HOLD, local ACCEPT, source-linked HOLD** remain untouched. The candidate is a CPU source-mechanism attempt, not a claimed complete two-GPU repair. The rerun must pass **both** original SHA checks plus source patch SHA before fetching any hidden benchmark data; otherwise classify original oracle UNKNOWN_INFRA.
+
+The artificial Git author/committer timestamp in P17 source recipe is deterministic metadata and not independently authenticated provenance of the model's wall-clock generation time. Original GitHub Actions source run timestamps establish the actual patch evidence order.
