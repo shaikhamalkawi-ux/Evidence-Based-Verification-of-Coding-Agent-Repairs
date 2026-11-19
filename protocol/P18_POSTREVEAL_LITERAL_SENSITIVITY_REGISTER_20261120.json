@@ -1,0 +1,44 @@
+{
+  "id": "99llm_X1_P18_original_task_oracle_literal_sensitivity_ablation_20261120",
+  "status": "PREREGISTERED_POSTREVEAL_NOT_BLINDED",
+  "original_task": "pytorch__torchtune-2139",
+  "original_historical_source_base": "f2bd4bc25b24587aef40f486087412b9da8f1d94",
+  "original_P17_candidate_sha": "57f45fdd5552908d4b5d42cccd7359ccb4de2560",
+  "original_P17_patch_sha256": "c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801",
+  "P17_original_oracle_run": 44613016409,
+  "original_P17_hidden_f2p": {
+    "passed": 0,
+    "total": 1,
+    "p2p_failed": 0,
+    "tests": 651,
+    "resolved": false
+  },
+  "P18_postreveal_diagnosis_run": 44614541023,
+  "P18_postreveal_diagnosis_file": "data/audits/P18_TORCHTUNE_POSTREVEAL_ERROR_TAXONOMY_20261120.json",
+  "observed_hidden_failure_id": "tests/torchtune/modules/peft/test_dora.py::TestDoRALinear::test_dora_meta_device_init_error",
+  "observed_expected_regex": "Cannot initialize DoRA magnitude",
+  "observed_P17_runtime_error": "DoRA magnitude norm is still on meta device",
+  "scope_of_source_ablation": "Replace only the RuntimeError string emitted when computed DoRA magnitude norm is still meta. Do NOT change conditions, number of parameters, tensor operations, FSDP code, tests or training recipe.",
+  "old_literal": "raise RuntimeError(\"DoRA magnitude norm is still on meta device\")",
+  "new_literal": "raise RuntimeError(\"Cannot initialize DoRA magnitude: computed norm is still on meta device\")",
+  "comparison_intent": "Demonstrate whether a single semantically compatible error-message wording change after exposure to the held-out assertion changes original benchmark PASS/FAIL despite no new algorithmic repair.",
+  "null_hypothesis": "Same logic and tensor values; possibly different literal assertion outcome.",
+  "postreveal_visible_tests": "The six original P17 nonquantized CPU source AST tests, plus a clearly NEW postreveal all-meta exception wording test.",
+  "original_oracle_protocol": {
+    "dataset": "SWE-bench-Live/SWE-bench-Live",
+    "revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "harness": "microsoft/SWE-bench-Live",
+    "sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "original_p17_candidate_result_unmodified": true
+  },
+  "no_claims": [
+    "Not a new blinded agent or coding model attempt",
+    "Not prospective evidence that the original actor/source gate works",
+    "Not a seventh independent benchmark task",
+    "Not proof the original 2-GPU DoRA training is working",
+    "Not a new error correctness criterion invented by us; the regex was observed only AFTER P17",
+    "No human coder, no developer message"
+  ],
+  "science_guard": "Keep P17 first independent outcome 0/1 F2P and all original P9 decisions frozen; label future 1/1 (if observed) as postreveal label sensitivity, not as independent repair success.",
+  "source_patch_untouched_at_registration": true
+}
