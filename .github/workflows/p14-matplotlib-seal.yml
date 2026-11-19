@@ -1,0 +1,97 @@
+name: P14 seal both Matplotlib stage decisions BEFORE hidden SWE-bench oracle
+
+on:
+  push:
+    paths: ['.github/workflows/p14-matplotlib-seal.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p14-preoracle-seal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout original unchanged P9 policy and P14 two-stage records
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Assert frozen frame, one genuine failure, one synthetic correction and source-only decisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p14_seal
+          python3 - <<'PY'
+          import json,pathlib,hashlib,datetime
+          root=pathlib.Path('pilot/matplotlib')
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          preg=json.loads((root/'P14_PREREGISTRATION_20261119.json').read_text())
+          feedback=json.loads((root/'P14_SCRIPTED_FEEDBACK_AFTER_FIRST.json').read_text())
+          rows=[json.loads(l) for l in (root/'P14_DECISIONS_INPUT_WITHOUT_TIME.jsonl').read_text().splitlines() if l.strip()]
+          assert len(rows)==2 and len(frame['selected'])==10
+          assert frame['selected'][2]['instance_id']=='matplotlib__matplotlib-28933'
+          assert preg['task']['base_commit']=='cf84d9a6410dec07f57916905c9f54bf00d22b2e'
+          assert rows[0]['episode_id'].endswith('__STAGE1_PRE_FEEDBACK')
+          assert rows[1]['episode_id'].endswith('__STAGE2_POST_SYNTHETIC_FEEDBACK')
+          assert rows[0]['head_sha']=='ad65fe2531ce297d5770257370b469b80731a614'
+          assert rows[1]['head_sha']=='1c9cb477367e56439fc71e08a4da0661cd105843'
+          assert rows[0]['receipts'][0]['status']=='failure'
+          assert rows[0]['source_verification']['visible_count_fail']==1
+          assert rows[1]['receipts'][0]['status']=='success'
+          assert rows[1]['source_verification']['visible_count_pass']==6
+          assert rows[0]['agent_claimed_fixed'] is False
+          assert rows[1]['agent_claimed_fixed'] is True
+          assert all(not x['target_agent_is_commit_author'] for x in rows)
+          assert feedback['synthetic_not_human'] and feedback['before_hidden_oracle']
+          assert feedback['observed_before_feedback']['first_visible_run_id']==44592478321
+          sha=hashlib.sha256((root/'visible_tests.py').read_bytes()).hexdigest()
+          assert sha=='d3767954e5018d2c7fde871fcce2d6850e48e0529224713666e08c918a14ded0'
+          assert all(x['source_verification']['frozen_visible_test_sha256']==sha for x in rows)
+          claim=(root/'P14_STAGE2_PREORACLE_AI_CLAIM.md').read_text()
+          assert 'This is an AI-generated completion claim, not ground truth' in claim
+          assert all(not {'oracle','test_patch','FAIL_TO_PASS','PASS_TO_PASS','resolved'}.intersection(x) for x in rows)
+          now=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
+          for x in rows:
+              assert now>x['receipts'][0]['completed_at']
+              x['t_decision']=now
+          path=pathlib.Path('p14_seal/decision_input.jsonl')
+          path.write_text(''.join(json.dumps(x,sort_keys=True)+'\n' for x in rows),encoding='utf-8')
+          print('P14_FROZEN_STAGE_COUNT=2; UNIQUE_TASK_COUNT=1')
+          print('P14_SEAL_TIMESTAMP_UTC='+now)
+          print('P14_ORIGINAL_HIDDEN_DATA_ACCESSED=FALSE')
+          PY
+      - name: Execute unchanged original P9 decision rule and SHA seal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p9_decide.py --input p14_seal/decision_input.jsonl --out p14_seal/locked
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          root=pathlib.Path('p14_seal')
+          rows=[json.loads(s) for s in (root/'locked/P9_DECISIONS_SEALED.jsonl').read_text().splitlines() if s.strip()]
+          assert len(rows)==2
+          dd={x['episode_id']:x for x in rows}
+          p=next(v for k,v in dd.items() if 'STAGE1_' in k)
+          q=next(v for k,v in dd.items() if 'STAGE2_' in k)
+          assert p['decisions']=={'self_report':'HOLD','local_pass':'HOLD','source_linked':'HOLD'}
+          assert q['decisions']=={'self_report':'ACCEPT','local_pass':'ACCEPT','source_linked':'HOLD'}
+          seal=json.loads((root/'locked/P9_DECISION_SEAL.json').read_text())
+          assert hashlib.sha256((root/'locked/P9_DECISIONS_SEALED.jsonl').read_bytes()).hexdigest()==seal['decisions_sha256']
+          assert hashlib.sha256((root/'decision_input.jsonl').read_bytes()).hexdigest()==seal['input_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==seal['script_sha256']
+          for line in (root/'decision_input.jsonl').read_text().splitlines():
+              print('P14_LOCKED_INPUT_ROW='+line)
+          for line in (root/'locked/P9_DECISIONS_SEALED.jsonl').read_text().splitlines():
+              print('P14_LOCKED_DECISIONS_ROW='+line)
+          print('P14_LOCKED_SEAL_MANIFEST='+json.dumps(seal,sort_keys=True))
+          print('NO_BENCHMARK_ORACLE_DOWNLOADED')
+          PY
+      - name: Preserve preoracle SHA seal artifact (also to be committed before evaluation)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p14-matplotlib-two-stage-preoracle-seal
+          path: p14_seal/
+          retention-days: 60
+          if-no-files-found: error
