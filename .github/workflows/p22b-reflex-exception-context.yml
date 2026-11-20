@@ -1,0 +1,70 @@
+name: P22B original Reflex Python 3.13 exception-context diagnosis (NO PATCH)
+
+on:
+  push:
+    paths: ['.github/workflows/p22b-reflex-exception-context.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-import-exception-chain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - name: Checkout frozen P22 source and postbaseline error investigation
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Freeze previous result and reject any source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib
+          p=json.loads(pathlib.Path('protocol/P22B_REFLEX_EXCEPTION_UNMASKING_20261120.json').read_text())
+          prior=json.loads(pathlib.Path('data/audits/P22_REFLEX_THREE_PYTHON_VISIBLE_SOURCE_COMPARISON_20261120.json').read_text())
+          assert p['status']=='POSTBASELINE_DIAGNOSTIC_NO_CODE_CANDIDATE'
+          assert prior['all_runs_same_exposed_exception']
+          assert p['original_commit']==prior['original_commit']=='2520c51aaf4c0a4af965026ae3a3fd5b03930288'
+          assert p['hidden_oracle_not_accessed'] and p['no_agent_candidate_patch']
+          print('P22B_FROZEN_ORIGINAL_BASELINE_NO_NEW_ORACLE')
+          PY
+      - name: Python 3.13 from original reporter environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install exact historic original source with no source changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p22b_diag
+          git init "$RUNNER_TEMP/reflex_src"
+          git -C "$RUNNER_TEMP/reflex_src" remote add origin https://github.com/reflex-dev/reflex.git
+          git -C "$RUNNER_TEMP/reflex_src" fetch --depth 1 origin 2520c51aaf4c0a4af965026ae3a3fd5b03930288
+          git -C "$RUNNER_TEMP/reflex_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/reflex_src" rev-parse HEAD)" = 2520c51aaf4c0a4af965026ae3a3fd5b03930288
+          python3 -m pip install -U pip wheel > p22b_diag/bootstrap.log 2>&1
+          python3 -m pip install "$RUNNER_TEMP/reflex_src" > p22b_diag/install.log 2>&1 || { tail -n 70 p22b_diag/install.log; exit 1; }
+          python3 -m pip freeze > p22b_diag/environment.txt
+      - name: Run only postbaseline exception context diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/reflex/p22b_exception_chain.py
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.loads(pathlib.Path('p22b_diag/P22B_CHAIN.json').read_text())
+          assert d['source_sha']=='2520c51aaf4c0a4af965026ae3a3fd5b03930288'
+          assert not d['source_modified'] and not d['benchmark_oracle_used']
+          print('P22B_CAUSAL_EXCEPTION_TYPES='+','.join(x['type'] for x in d['exception_chain']))
+          PY
+      - name: Preserve error chain and dependency set only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p22b-reflex-original-exception-chain-no-patch
+          path: p22b_diag/
+          retention-days: 60
+          if-no-files-found: warn

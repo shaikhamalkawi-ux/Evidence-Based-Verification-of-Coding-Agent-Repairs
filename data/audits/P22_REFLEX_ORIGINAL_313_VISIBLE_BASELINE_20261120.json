@@ -1,0 +1,48 @@
+{
+  "schema": "99llm_P22_original_reflex_user_visible_reproducer_v1",
+  "source_task": "reflex-dev__reflex-4510",
+  "source_task_rank": 9,
+  "original_source_sha": "2520c51aaf4c0a4af965026ae3a3fd5b03930288",
+  "run_id": 44672447015,
+  "original_visible_record": {
+    "agent_patch_submitted": false,
+    "completed_utc": "2026-11-20T04:09:26Z",
+    "exception_message": "generator didn't stop after throw()",
+    "exception_type": "RuntimeError",
+    "original_hidden_oracle_accessed": false,
+    "original_source_modified": false,
+    "original_test_patch_read": false,
+    "platform": "Linux-7.0.0-1014-aws-x86_64-with-glibc2.39",
+    "reported_original_issue_signature_matches": false,
+    "runner_python": "3.13.18",
+    "source_base_sha": "2520c51aaf4c0a4af965026ae3a3fd5b03930288",
+    "stage": "HISTORICAL_ORIGINAL_BASE_VISIBLE_ONLY",
+    "started_utc": "2026-11-20T04:09:26Z",
+    "status": "BASELINE_REPRODUCER_EXCEPTION",
+    "task": "reflex-dev__reflex-4510",
+    "traceback_file_names": [
+      "p22_original_issue_visible.py",
+      "p22_original_issue_visible.py",
+      "__init__.py",
+      "compat.py",
+      "contextlib.py"
+    ]
+  },
+  "runner_admission": {
+    "baseline_execution_exit": 0,
+    "baseline_status": "BASELINE_REPRODUCER_EXCEPTION",
+    "install_exit": 0,
+    "no_original_hidden_oracle": true,
+    "no_repair_success_failure_label": true,
+    "no_source_candidate": true,
+    "no_task_substitution": true,
+    "original_task": "reflex-dev__reflex-4510",
+    "reported_python": "3.13",
+    "source_base_sha": "2520c51aaf4c0a4af965026ae3a3fd5b03930288"
+  },
+  "scientific_admission": "VISIBLE_BASELINE_EXCEPTION_MISMATCH_HOLD",
+  "explanation": "Original source and requested Python 3.13 environment ran a visible reproduction and raised RuntimeError generator didn't stop after throw() rather than reported TypeError about annotation Any. This shows visible failure but not direct reproduction of specific reported symptom; possible exception masking from context manager. No diagnosis of root cause or code-repair label admitted.",
+  "no_original_hidden_oracle": true,
+  "no_agent_candidate": true,
+  "next_step": "Compare exact same source and user visible reproducer under Python 3.12 and 3.11 with no patch to isolate Python 3.13 error wrapping, then gate coding change."
+}

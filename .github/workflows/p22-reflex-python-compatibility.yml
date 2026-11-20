@@ -1,0 +1,109 @@
+name: P22 original Reflex Python-version compatibility comparison (no source patch)
+
+on:
+  push:
+    paths: ['.github/workflows/p22-reflex-python-compatibility.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-source-comparison:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.12']
+    steps:
+      - name: Checkout exact original task and frozen visible reproducer
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Validate task source and exclude benchmark gold
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p22_compare
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          p=json.loads(pathlib.Path('protocol/P22_REFLEX_ORIGINAL_FIELD_FOREACH_PREPATCH_20261120.json').read_text())
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert f['selected'][8]['instance_id']==p['selected_task']=='reflex-dev__reflex-4510'
+          assert p['base_sha']=='2520c51aaf4c0a4af965026ae3a3fd5b03930288'
+          assert p['no_reference_solution_or_test_patch_access']
+          print('P22_FROZEN_VISIBLE_REPRO_SHA='+hashlib.sha256(pathlib.Path('pilot/reflex/p22_original_issue_visible.py').read_bytes()).hexdigest())
+          PY
+      - name: Python version per matrix
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install exact historical original Reflex code with no source changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/reflex_src"
+          git -C "$RUNNER_TEMP/reflex_src" remote add origin https://github.com/reflex-dev/reflex.git
+          git -C "$RUNNER_TEMP/reflex_src" fetch --depth 1 origin 2520c51aaf4c0a4af965026ae3a3fd5b03930288
+          git -C "$RUNNER_TEMP/reflex_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/reflex_src" rev-parse HEAD)" = 2520c51aaf4c0a4af965026ae3a3fd5b03930288
+          python3 -m pip install --upgrade pip wheel > p22_compare/bootstrap.log 2>&1
+          set +e
+          python3 -m pip install "$RUNNER_TEMP/reflex_src" > p22_compare/install_reflex.log 2>&1
+          rc=$?
+          echo "$rc" > p22_compare/install_exit.txt
+          if [ "$rc" -ne 0 ]; then
+            tail -n 60 p22_compare/install_reflex.log
+            echo 'P22_SETUP_HOLD_NOT_CODE_FAILURE'
+          fi
+          python3 -m pip freeze > p22_compare/environment.txt
+          exit 0
+      - name: Run unchanged user-supplied bug report reproduction
+        shell: bash
+        run: |
+          set +e
+          if [ "$(cat p22_compare/install_exit.txt)" = 0 ]; then
+            python3 pilot/reflex/p22_original_issue_visible.py \
+              --out p22_compare/reproducer.json > p22_compare/reproducer.log 2>&1
+            rc=$?
+            cat p22_compare/reproducer.log
+          else
+            rc=99
+          fi
+          echo "$rc" > p22_compare/repro_exit.txt
+          exit 0
+      - name: Log task/evidence status without oracle or candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,sys
+          root=pathlib.Path('p22_compare')
+          source=root/'reproducer.json'
+          r=json.loads(source.read_text()) if source.exists() else {}
+          result={
+            'task':'reflex-dev__reflex-4510',
+            'historical_source':'2520c51aaf4c0a4af965026ae3a3fd5b03930288',
+            'python':sys.version.split()[0],
+            'original_reported_python':'3.13',
+            'install_exit':int((root/'install_exit.txt').read_text()),
+            'execution_exit':int((root/'repro_exit.txt').read_text()),
+            'status':r.get('status','SETUP_HOLD_NO_REPRODUCTION'),
+            'exception_type':r.get('exception_type'),
+            'exception_message':r.get('exception_message'),
+            'original_issue_signature_matches':r.get('reported_original_issue_signature_matches',False),
+            'no_hidden_oracle':True,
+            'no_source_patch':True,
+            'no_task_correctness_label':True}
+          (root/'P22_MINOR_VERSION_RECEIPT.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print('P22_MINOR_VERSION_RECEIPT '+json.dumps(result,sort_keys=True))
+          PY
+      - name: Archive environment and exact visible task outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p22-reflex-original-python-${{ matrix.python-version }}
+          path: p22_compare/
+          retention-days: 60
+          if-no-files-found: warn

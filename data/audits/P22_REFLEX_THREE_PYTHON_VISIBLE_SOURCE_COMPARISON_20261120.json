@@ -1,0 +1,44 @@
+{
+  "schema": "99llm_X1_P22_three_python_baselines_no_patch_v1",
+  "task": "reflex-dev__reflex-4510",
+  "frozen_index": 9,
+  "original_commit": "2520c51aaf4c0a4af965026ae3a3fd5b03930288",
+  "original_problem_sha256": "35b0b9b3dfa1a12bb7f400d8250d9e85039f99e12a4d75c70c01ca505d118767",
+  "observations": [
+    {
+      "python": "3.13.18",
+      "install_exit": 0,
+      "status": "BASELINE_REPRODUCER_EXCEPTION",
+      "exception_type": "RuntimeError",
+      "exception_message": "generator didn't stop after throw()",
+      "reported_issue_signature_matches": false,
+      "run_id": 44672447015
+    },
+    {
+      "python": "3.12.16",
+      "install_exit": 0,
+      "status": "BASELINE_REPRODUCER_EXCEPTION",
+      "exception_type": "RuntimeError",
+      "exception_message": "generator didn't stop after throw()",
+      "reported_issue_signature_matches": false,
+      "run_id": 44672659540
+    },
+    {
+      "python": "3.11.18",
+      "install_exit": 0,
+      "status": "BASELINE_REPRODUCER_EXCEPTION",
+      "exception_type": "RuntimeError",
+      "exception_message": "generator didn't stop after throw()",
+      "reported_issue_signature_matches": false,
+      "run_id": 44672659540
+    }
+  ],
+  "all_runs_same_exposed_exception": true,
+  "original_reported_typing_any_error_reproduced": false,
+  "suspected_masking_mechanism": "historical reflex/utils/compat.py pydantic_v1_patch contextmanager has yield inside try and second yield inside except (ImportError, AttributeError), which can create generator didn't stop after throw when an exception is raised inside with body.",
+  "diagnosis_provenance": "Static source mechanism; underlying import exception not yet recovered. This is a suspicion not proof of causal exception chain.",
+  "not_task_correction": true,
+  "no_original_heldout_oracle": true,
+  "no_source_candidate_submitted": true,
+  "task_truth_eligibility": "VISIBLE_REPRO_MISMATCH_HOLD"
+}
