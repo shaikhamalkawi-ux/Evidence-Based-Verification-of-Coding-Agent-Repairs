@@ -1,0 +1,74 @@
+{
+  "benchmark_oracle_used": false,
+  "exception_chain": [
+    {
+      "depth": 0,
+      "frames": [
+        {
+          "file": "p22b_exception_chain.py",
+          "func": "<module>",
+          "line": 42
+        },
+        {
+          "file": "p22b_exception_chain.py",
+          "func": "reproduce",
+          "line": 30
+        },
+        {
+          "file": "__init__.py",
+          "func": "<module>",
+          "line": 87
+        },
+        {
+          "file": "compat.py",
+          "func": "<module>",
+          "line": 73
+        },
+        {
+          "file": "contextlib.py",
+          "func": "__exit__",
+          "line": 198
+        }
+      ],
+      "message": "generator didn't stop after throw()",
+      "suppress_context": false,
+      "type": "RuntimeError"
+    },
+    {
+      "depth": 1,
+      "frames": [
+        {
+          "file": "compat.py",
+          "func": "pydantic_v1_patch",
+          "line": 59
+        },
+        {
+          "file": "compat.py",
+          "func": "<module>",
+          "line": 74
+        },
+        {
+          "file": "__init__.py",
+          "func": "<module>",
+          "line": 4
+        }
+      ],
+      "message": "cannot import name 'Discriminator' from 'pydantic.v1' (/opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/site-packages/pydantic/v1/__init__.py)",
+      "suppress_context": false,
+      "type": "ImportError"
+    }
+  ],
+  "is_repair_test": false,
+  "python": "3.13.18",
+  "schema": "P22B_original_compat_exception_context",
+  "source_modified": false,
+  "source_sha": "2520c51aaf4c0a4af965026ae3a3fd5b03930288",
+  "status": "EXCEPTION_CHAIN_IDENTIFIED",
+  "task": "reflex-dev__reflex-4510",
+  "time_utc": "2026-11-20T04:13:28Z",
+  "source_run_id": 44672900566,
+  "source_task_index": 9,
+  "explanation": "Historical reflex.utils.compat.pydantic_v1_patch() patched sys.modules['pydantic'] to pydantic.v1. The imported sqlmodel package attempted 'Discriminator' from pydantic.v1 and raised ImportError. The context manager then entered an except branch with a second yield, causing RuntimeError generator didn't stop after throw() which masked the ImportError. This is an observed import compatibility error on current dependency resolution, not successful reproduction of the original Field/foreach bug.",
+  "causal_source": "Original reflex/utils/compat.py at commit 2520c51..., code lines 31-76; exception frame pydantic_v1_patch line59, sqlmodel __init__ line4; original upstream source unchanged.",
+  "next": "Run controlled vintage sqlmodel dependency pins to bypass import wrapper before coding attempt; maintain separate environmental diagnostics and no hidden benchmark access."
+}
