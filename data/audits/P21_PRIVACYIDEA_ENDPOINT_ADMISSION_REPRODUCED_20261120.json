@@ -1,0 +1,32 @@
+{
+  "schema": "99llm_X1_P21_privacyidea_endpoint_admission_v1",
+  "task": "privacyidea__privacyidea-4251",
+  "original_frozen_task_index": 7,
+  "original_test_source_run_id": 44669546280,
+  "endpoint_qc_run_id": 44672006805,
+  "original_task_report_status": "COMPLETE_RAW_UNRESOLVED",
+  "original_task_report_f2p_passed": 0,
+  "original_task_report_f2p_total": 1,
+  "original_task_report_p2p_failed": 2022,
+  "original_task_report_tests_classified": 2023,
+  "original_output_lines": 56,
+  "original_test_output_sha256": "8fe0b9bfaccd2cc607abdc8cfbb7cf81d85d60aabb5664389e86c5c7e686efcb",
+  "postreveal_observed_error": "ModuleNotFoundError: No module named 'swe100_fixture_clock'",
+  "postreveal_source_run_id": 44671807202,
+  "endpoint_admission_for_code_correctness": "HOLD_SYSTEMIC_TEST_IMPORT_FAILURE",
+  "code_correctness_verified": null,
+  "original_p9_decisions": {
+    "self_report": "HOLD",
+    "local_pass": "ACCEPT",
+    "source_linked": "HOLD"
+  },
+  "original_p9_seal_sha256": "33edbd2833c0730d6fa280a42f2cd05fe6deb754dce8c29764be5d40786f3f3d",
+  "software_negative_controls_passed": 116,
+  "qc_replay_output_sha256": "316246d9491251f2d8c96fcbd19036cffc39e7fbc86a529491f752c63a1cdf73",
+  "original_raw_report_unchanged": true,
+  "no_new_patch": true,
+  "no_new_agent_trial": true,
+  "not_additional_task": true,
+  "interpretation": "The official original task report classified 2023 tests unsuccessful, but the 56-line original output includes a missing Python module. A shared import/collection problem undermines interpreting those labels as independent source-code regressions. Retain raw official unresolved as measured; hold causal code-correctness inference.",
+  "claim_limit": "This is a postreveal endpoint validity judgment, not proof that the repair works or is incorrect, and not a revised blind policy decision."
+}
