@@ -1,0 +1,20 @@
+{
+  "schema": "99llm_X1_P24B_bounded_postreveal_exceptions_and_rule_messages_v1",
+  "status": "POSTREVEAL_ANALYSIS_ONLY_NO_NEW_AGENT_ORIGINAL_TASK",
+  "original_task": "aws-cloudformation__cfn-lint-3779",
+  "original_report_run": 44738711010,
+  "original_artifact_id": 14630435763,
+  "original_test_output_sha256": "965babfbe839670397012b811098b2a307c5986d4272fcff5e4f29fd7c142650",
+  "goal": "Collect strictly bounded failure diagnostics (test IDs, error types, observed rule codes) for 4 P2P cases and distinguish schema E3510 regressions from environment/CLI output or unrelated tests. No gold code or full hidden test source published.",
+  "tests": [
+    "test/integration/test_good_templates.py::TestQuickStartTemplates::test_module_integration",
+    "test/integration/test_good_templates.py::TestQuickStartTemplates::test_templates",
+    "test/unit/module/override/test_exclude.py::TestExclude::test_success_run",
+    "test/unit/module/test_rules_collections.py::TestRulesCollection::test_success_run"
+  ],
+  "allowed_logging": "Selected error-message and rule-code lines capped at 250 chars, at most 40, without test code or hidden patch source",
+  "no_new_source_patch": true,
+  "no_P23_policy_redecision": true,
+  "original_task_report_unchanged": true,
+  "no_new_task_count": true
+}
