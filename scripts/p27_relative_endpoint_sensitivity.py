@@ -50,7 +50,7 @@ def compute(root=ROOT):
     assert cfn["f2p_passed"]==0 and cfn["f2p_total"]==1
     assert cfn["p2p_failed"]==4
     assert len(cfn["matched_failure_overlap_ids"])==4
-    assert cfn["candidate_only_failure_ids"]==cfn["control_only_failure_ids"]==[]
+    assert cfn["original_only_failure_ids"]==cfn["control_only_failure_ids"]==[]
     assert cfn["no_source_code_or_schema_change"] is True
 
     mapping={
