@@ -1,0 +1,52 @@
+name: P21 adjudicate already observed privacyIDEA original endpoint validity (not a new oracle)
+
+on:
+  push:
+    paths: ['.github/workflows/p21-endpoint-adjudication.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qc-not-source-repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact historical source records and P21 QC tests
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Run all software and original endpoint validity controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -v
+      - name: Emit original evidence admission without modifying benchmark result
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p21_qc
+          python3 scripts/p21_original_endpoint_qc.py \
+            --original data/audits/P20_PRIVACYIDEA_ORIGINAL_HARNESS_RAW_WITH_QC_HOLD_20261120.json \
+            --diagnostic data/audits/P21_PRIVACYIDEA_ORIGINAL_ORACLE_ENDPOINT_QC_CAUSE_20261120.json \
+            --out p21_qc/P21_ENDPOINT_ADMISSION.json
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          p=pathlib.Path('p21_qc/P21_ENDPOINT_ADMISSION.json')
+          v=json.loads(p.read_text())
+          assert v['endpoint_admission_for_code_correctness']=='HOLD_SYSTEMIC_TEST_IMPORT_FAILURE'
+          assert v['code_correctness_verified'] is None
+          assert v['original_p9_policy_decisions']=={'self_report':'HOLD','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert v['reported_p2p_failed']==2022 and v['reported_tests']==2023
+          print('P21_QC_PASS_ORIGINAL_REPORT_UNCHANGED_VALIDITY_HOLD')
+          print('P21_QC_RESULT_SHA256='+hashlib.sha256(p.read_bytes()).hexdigest())
+          PY
+      - name: Archive bounded QA decision only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p21-privacyidea-original-endpoint-qc
+          path: p21_qc/
+          retention-days: 60
+          if-no-files-found: warn
