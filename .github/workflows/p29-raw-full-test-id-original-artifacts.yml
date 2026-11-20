@@ -1,0 +1,91 @@
+name: P29 read ORIGINAL Kedro and cfn-lint raw full pytest node names (no new oracle)
+on:
+  push:
+    paths: ['.github/workflows/p29-raw-full-test-id-original-artifacts.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  existing-raw-full-id-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout locked source and read-only P29 audit script
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Historical Kedro original candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: kedro-gpt6-initial-heldout-oracle
+          run-id: 44159300952
+          github-token: ${{ github.token }}
+          path: p29_kedro_candidate
+      - name: Historical Kedro source-neutral control
+        uses: actions/download-artifact@v4
+        with:
+          name: kedro-noop-p2p-diagnostic
+          run-id: 44162955737
+          github-token: ${{ github.token }}
+          path: p29_kedro_control
+      - name: Historical cfn-lint original candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: p23-cfn-lint-original-independent-task-oracle
+          run-id: 44738711010
+          github-token: ${{ github.token }}
+          path: p29_cfn_candidate
+      - name: Historical cfn-lint source-neutral control
+        uses: actions/download-artifact@v4
+        with:
+          name: p25-cfnlint-original-null-control-postreveal
+          run-id: 44761416230
+          github-token: ${{ github.token }}
+          path: p29_cfn_control
+      - name: Reaggregate original raw full pytest names without new test execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p29_output
+          python3 scripts/p29_full_pytest_id_audit.py \
+            --kedro-candidate p29_kedro_candidate \
+            --kedro-control p29_kedro_control \
+            --cfn-candidate p29_cfn_candidate \
+            --cfn-control p29_cfn_control \
+            --out p29_output/P29_ORIGINAL_RAW_FULL_PYTEST_REPLAY.json
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          r=json.loads(pathlib.Path('p29_output/P29_ORIGINAL_RAW_FULL_PYTEST_REPLAY.json').read_text())
+          ref=json.loads(pathlib.Path('data/audits/P29_RAW_FULL_NODE_ID_MATCH_RESULT_20261120.json').read_text())
+          for k in ('kedro','cfn_lint'):
+              a=r['cases'][k]
+              b=ref['source_cases'][k]
+              assert a['raw_candidate_failed_full_ids']==b['candidate_summary_full_failed']
+              assert a['raw_neutral_failed_full_ids']==b['neutral_summary_full_failed']
+              assert a['raw_candidate_only_failed_full_ids']==0
+              assert a['raw_control_only_failed_full_ids']==1
+              assert a['candidate_failed_full_ids_sha256']==b['full_failed_id_digest_candidate']
+              assert a['neutral_failed_full_ids_sha256']==b['full_failed_id_digest_control']
+              assert a['official_report_truncated_p2p_ids']==b['scored_report_truncated_parameterized_p2p_failed_ids']
+          assert r['all_previous_P9_P26_P27_and_MR30_locked'] is True
+          out=pathlib.Path('p29_output/P29_ORIGINAL_RAW_FULL_PYTEST_REPLAY.json')
+          print('P29_RAW_FULL_ID_SHA256='+hashlib.sha256(out.read_bytes()).hexdigest())
+          print('P29_NO_AGENT_OR_DOCKER_REEVALUATION_ONLY_ORIGINAL_ARTIFACTS')
+          PY
+      - name: Run deterministic source corruption and parser controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_p29_raw_full_pytest_id_audit.py' -v
+          python3 -m unittest discover -s tests -v
+      - name: Preserve bounded full-name set counts and digests, NOT hidden test source
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p29-raw-complete-test-node-provenance-audit
+          path: p29_output/
+          retention-days: 60
+          if-no-files-found: warn
