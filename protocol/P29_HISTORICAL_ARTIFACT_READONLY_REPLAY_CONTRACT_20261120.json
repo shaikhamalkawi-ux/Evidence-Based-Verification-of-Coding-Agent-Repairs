@@ -1,0 +1,70 @@
+{
+  "schema": "P29_raw_original_artifact_replay_contract_v1",
+  "date": "2026-11-20",
+  "status": "POST_OUTCOME_BOUNDED_REPRODUCTION_NOT_PREREGISTERED_TRIAL",
+  "source_parent": "P28 head 9f519a5eb4798aa6ac9b696542167208751307a0",
+  "task_ids": [
+    "kedro-org__kedro-4406",
+    "aws-cloudformation__cfn-lint-3779"
+  ],
+  "run_ids": [
+    44159300952,
+    44162955737,
+    44738711010,
+    44761416230
+  ],
+  "artifact_ids": [
+    14363775392,
+    14364582406,
+    14630435763,
+    14642495330
+  ],
+  "dataset_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "original_harness": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "source_files": [
+    "original_test_output.txt",
+    "original_eval_report.json",
+    "official_report.json",
+    "original_report.json"
+  ],
+  "parser_contract": "Accept only literal PASSED/FAILED pytest result-summary lines beginning with test/ or tests/ followed by full node path. Preserve spaces within balanced brackets; ignore Kedro application ERROR logging; reject repeated and conflicting IDs. Do not use original whitespace splitting.",
+  "summary_unit": "One full pytest node ID within one historical candidate/control execution. Task is distinct sample unit; do not treat test nodes as independent observations.",
+  "locked_original_results": {
+    "MR30": "unchanged",
+    "P9": "unchanged",
+    "P26": "unchanged",
+    "P27": "unchanged",
+    "original_credited_resolved": "unchanged"
+  },
+  "external_prior_art": [
+    {
+      "issue": 113,
+      "date": "2026-11-11",
+      "scope": "Same exact Kedro #4406 and 25 P2P failures under original gold patch, different test source/harness contrast"
+    },
+    {
+      "issue": 102,
+      "date": "2026-10-23",
+      "scope": "Parameterized pytest node ID truncated under whitespace split"
+    },
+    {
+      "arxiv": "2611.10837",
+      "date": "2026-11-07",
+      "scope": "General five-dimensional evidence framework precedes P29"
+    }
+  ],
+  "preserved_claims": [
+    "Kedro and cfn-lint official resolved remains false",
+    "Both negative controls postreveal",
+    "P26 and P27 have different estimands",
+    "No new independently validated agent attribution"
+  ],
+  "not_performed": [
+    "new Docker task oracle",
+    "new coding agent rollout",
+    "gold-patch independent reexecution",
+    "source restoration of a 2026 update",
+    "prospective registration"
+  ],
+  "reproduction": "scripts/p29_full_pytest_id_audit.py plus .github/workflows/p29-raw-full-test-id-original-artifacts.yml"
+}
