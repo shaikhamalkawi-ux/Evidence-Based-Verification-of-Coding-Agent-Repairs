@@ -1,0 +1,47 @@
+{
+  "schema": "99llm_X1_P22_original_reflex_task_prepatch_baseline_v1",
+  "status": "FROZEN_BEFORE_ANY_P22_AGENT_CANDIDATE_OR_HIDDEN_ORACLE",
+  "time_context": "2026-11-20",
+  "frozen_frame": "pilot/frozen_task_frame_20261117.json",
+  "frozen_original_task_index": 9,
+  "selected_task": "reflex-dev__reflex-4510",
+  "original_repository": "reflex-dev/reflex",
+  "base_sha": "2520c51aaf4c0a4af965026ae3a3fd5b03930288",
+  "visible_problem_sha256": "35b0b9b3dfa1a12bb7f400d8250d9e85039f99e12a4d75c70c01ca505d118767",
+  "original_user_problem": "Pydantic v1 Field(default_factory=list) assigned to annotated Reflex State.tags: list[Tag] triggers TypeError during rx.foreach(State.tags, lambda tag: rx.text(tag.name)), complaining tag annotation Any; should not throw.",
+  "original_reproducer": [
+    "from pydantic.v1 import Field",
+    "import reflex as rx",
+    "class Tag(rx.Base): name: str = ''",
+    "class State(rx.State): tags: list[Tag] = Field(default_factory=list)",
+    "def index() -> rx.Component: return rx.container(rx.foreach(State.tags,lambda tag: rx.text(tag.name)))",
+    "app=rx.App(); app.add_page(index)"
+  ],
+  "upstream_reported_python": "3.13",
+  "historical_source_paths": [
+    "reflex/state.py",
+    "reflex/base.py",
+    "reflex/components/core/foreach.py",
+    "reflex/vars/base.py"
+  ],
+  "historical_state_source_git_blob_not_yet_recorded": true,
+  "historical_base_file_git_blob_not_yet_recorded": true,
+  "source_observed": "get_var_for_field dispatches result_var_type=_unwrap_field_type(f.outer_type_) at original historical state.py lines ~298-312. This is a candidate cause locus, not a proven bug explanation.",
+  "prepatch_steps": [
+    "Run exact historical original source at pinned base SHA on Python 3.13 if environment supports it",
+    "Run exact original reporter reproduction without manually changing decorator or source; log as a visible diagnostic",
+    "Run original public tests scoped to State/Field/foreach only if admitted without gold",
+    "If environment fails dependency install, classify SETUP_HOLD not source bug",
+    "Freeze a new exact scoped patch and local evidence BEFORE any original independent benchmark oracle"
+  ],
+  "official_benchmark_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "official_harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "original_P9_policy_version": "X1-P9-alpha-1-20261116",
+  "P9_original_decisions_not_recomputed": true,
+  "P10_to_P21_results_unchanged": true,
+  "evidence_gate": "Original P20 privacyIDEA reported 2023 failure codes but has missing swe100_fixture_clock module; that task remains endpoint-QC-HOLD. It is NOT replaced by Reflex.",
+  "no_blind_result_claim": true,
+  "actor_authentication_missing": true,
+  "no_human_coder": true,
+  "no_reference_solution_or_test_patch_access": true
+}
