@@ -58,7 +58,7 @@
   ],
   "source_AST_with_import_only_stubs": true,
   "no_production_Flask_HTTP_task_test_execution": true,
-  "original_benchmark_was_not_read_when_generating_these": false,
+  "original_benchmark_was_not_read_when_generating_these": true,
   "benchmark_gold_accessed_during_tests": false,
   "no_full_task_completion_claim": true,
   "note": "Do not conflate 10 local actions-property AST cases with original independent HTTP task oracle; AGPL historical code kept in original upstream."
