@@ -1,0 +1,247 @@
+name: P23 original SWE-bench-Live cfn-lint TASK ORACLE after public P9 seal
+
+on:
+  push:
+    paths: ['.github/workflows/p23-cfnlint-original-task-oracle.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-original-task-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      INSTANCE_ID: aws-cloudformation__cfn-lint-3779
+      BASE_SHA: de28d1e43777e3782a06b74d9091c3471636eb70
+      FIRST_SHA: 7ce6016f638058b44f471fee575a3b298c84b369
+      FINAL_SHA: a1bd25e330d96cf450a44809fecd060d795e24ab
+      ORIGINAL_SCHEMA_BLOB: 99f30247c838aea3910f891a54c9bbad1d67c88a
+      FIRST_SCHEMA_BLOB: 50b226c27628fdaab4c27226702f9b5674b10a52
+      FINAL_SCHEMA_BLOB: bbf877cd6815856f8714537465123ed5551b8e79
+      FINAL_PATCH_SHA256: f2aa236b6f72a006f920046be80b0a8cce272ef8a3dd9b118d091e2541a9a286
+      ORIGINAL_DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      OFFICIAL_HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout P23 immutable sealed original P9 rules/decisions and original source scripts
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify historical cohort, sealed original P9 hashes, and exact source BEFORE loading gold
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p23_original_oracle
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          root=pathlib.Path('pilot/cfnlint')
+          reg=json.loads((root/'P23_PREORACLE_ORIGINAL_TASK_EVALUATION_REGISTER_20261120.json').read_text())
+          manifest=json.loads((root/'sealed/P9_DECISION_SEAL.json').read_text())
+          ri=(root/'sealed/P23_DECISION_INPUT.jsonl').read_bytes()
+          rd=(root/'sealed/P9_DECISIONS_SEALED.jsonl').read_bytes()
+          inp=json.loads(ri)
+          dec=json.loads(rd)
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert len(frame['selected'])==10
+          assert frame['selected'][9]['instance_id']==reg['task']==os.environ['INSTANCE_ID']
+          assert frame['selected'][9]['repo']=='aws-cloudformation/cfn-lint'
+          assert frame['dataset_revision_sha']==reg['official_dataset_rev']==os.environ['ORIGINAL_DATASET_REV']
+          assert reg['original_task_source_sha']==os.environ['BASE_SHA']
+          assert reg['candidate_source_sha']==dec['head_sha']==inp['head_sha']==os.environ['FINAL_SHA']
+          assert reg['candidate_schema_blob']==os.environ['FINAL_SCHEMA_BLOB']
+          assert reg['cumulative_patch_sha256']==os.environ['FINAL_PATCH_SHA256']==inp['source_notes']['cumulative_patch_sha256']
+          assert reg['public_source_seal_commit']=='24737c32f904d7992037bb278a18bba3dd8c80c3'
+          assert reg['original_P9_time']==dec['t_decision']==inp['t_decision']=='2026-11-20T12:43:48Z'
+          assert reg['original_P9_script_sha256']==manifest['script_sha256']==hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()
+          assert reg['original_P9_input_sha256']==manifest['input_sha256']==hashlib.sha256(ri).hexdigest()
+          assert reg['original_P9_decision_sha256']==manifest['decisions_sha256']==hashlib.sha256(rd).hexdigest()
+          assert reg['original_P9_version']==manifest['policy_version']=='X1-P9-alpha-1-20261116'
+          assert dec['decisions']==reg['original_P9_decisions']=={'self_report':'ACCEPT','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert inp['target_agent_is_commit_author'] is False and inp['agent_claimed_fixed'] is True
+          assert reg['official_harness_test_patch_prior_access'] is False
+          assert reg['official_harness_commit']==os.environ['OFFICIAL_HARNESS_SHA']
+          print('P23_PREORACLE_ORIGINAL_P9_BYTE_HASHES_ALL_VERIFIED')
+          print('P23_ORIGINAL_P9_DECISION_HASH='+manifest['decisions_sha256'])
+          print('P23_NO_HELDOUT_BENCHMARK_TASK_DOWNLOADED_YET')
+          PY
+          docker version
+          df -h /
+      - name: Rebuild exact original historical source and final two-stage code patch (no gold)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/cfn_source"
+          git -C "$RUNNER_TEMP/cfn_source" remote add origin https://github.com/aws-cloudformation/cfn-lint.git
+          git -C "$RUNNER_TEMP/cfn_source" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/cfn_source" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/cfn_source" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/cfn_source" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$ORIGINAL_SCHEMA_BLOB"
+          python3 pilot/cfnlint/p23_candidate_initial.py \
+            --source "$RUNNER_TEMP/cfn_source" --out p23_original_oracle/first_mapping.json
+          test "$(git -C "$RUNNER_TEMP/cfn_source" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$FIRST_SCHEMA_BLOB"
+          export GIT_AUTHOR_DATE="2026-11-20T00:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:00:00Z"
+          git -C "$RUNNER_TEMP/cfn_source" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_source" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 first: anchor IAM set modifiers and IfExists/Numeric Condition operator names"
+          test "$(git -C "$RUNNER_TEMP/cfn_source" rev-parse HEAD)" = "$FIRST_SHA"
+          python3 pilot/cfnlint/p23_candidate_after_visible_date_feedback.py \
+            --source "$RUNNER_TEMP/cfn_source" --out p23_original_oracle/second_mapping.json
+          export GIT_AUTHOR_DATE="2026-11-20T00:01:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:01:00Z"
+          git -C "$RUNNER_TEMP/cfn_source" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_source" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 second: add IAM DateLessThan/GreaterThan and qualified suffix operators"
+          test "$(git -C "$RUNNER_TEMP/cfn_source" rev-parse HEAD)" = "$FINAL_SHA"
+          test "$(git -C "$RUNNER_TEMP/cfn_source" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$FINAL_SCHEMA_BLOB"
+          git -C "$RUNNER_TEMP/cfn_source" diff "$BASE_SHA" HEAD -- src/cfnlint/data/schemas/other/iam/policy.json \
+            > p23_original_oracle/agent_patch.diff
+          test "$(sha256sum p23_original_oracle/agent_patch.diff | awk '{print $1}')" = "$FINAL_PATCH_SHA256"
+          python3 - <<'PY'
+          import json,os,pathlib
+          out=pathlib.Path('p23_original_oracle')
+          item={'instance_id':os.environ['INSTANCE_ID'],
+                'model_name_or_path':'GPT6_P23_AI_research_generated_NOT_independent_actor_attestation',
+                'model_patch':(out/'agent_patch.diff').read_text()}
+          (out/'predictions.jsonl').write_text(json.dumps(item)+'\n')
+          print('P23_EXACT_SOURCE_GIT_SHA_AND_PATCH_SHA_VERIFIED_PREORACLE')
+          PY
+          sha256sum p23_original_oracle/agent_patch.diff > p23_original_oracle/agent_patch.sha256
+      - name: Python 3.12 required for historical official original evaluator
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install exact, unmodified original SWE-bench-Live official harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$OFFICIAL_HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$OFFICIAL_HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$OFFICIAL_HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > p23_original_oracle/evaluator_environment.txt
+      - name: Retrieve ORIGINAL heldout task row ONLY AFTER preoracle P9/source hash verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/heldout_task"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          ds=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['ORIGINAL_DATASET_REV'])
+          rows=[dict(x) for x in ds if x['instance_id']==os.environ['INSTANCE_ID']]
+          assert len(rows)==1
+          (pathlib.Path(os.environ['RUNNER_TEMP'])/'heldout_task/task.jsonl').write_text(
+             json.dumps(rows[0],ensure_ascii=False,default=str)+'\n')
+          print('P23_ORIGINAL_HIDDEN_TASK_RETRIEVED_ONLY_AFTER_SEALED_P9_AND_PATCH')
+          PY
+      - name: Execute unchanged original task Docker oracle on EXACT P23 final source patch
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p23_original_oracle/oracle_started_at_utc.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/heldout_task/task.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/p23_original_oracle/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "evcar-p23-cfnlint-final-20261120" \
+            > "$GITHUB_WORKSPACE/p23_original_oracle/original_harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p23_original_oracle/original_harness_exit_code.txt"
+          tail -n 110 "$GITHUB_WORKSPACE/p23_original_oracle/original_harness_stdout.log"
+          echo "P23_ORIGINAL_HARNESS_EXIT=$rc; official task correctness requires valid F2P/P2P"
+          exit "$rc"
+      - name: Parse exact original F2P/P2P on final source SHA; separate systemic test errors
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,re,shutil
+          iid=os.environ['INSTANCE_ID']
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          out=pathlib.Path('p23_original_oracle')
+          reports=[]
+          for fp in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(fp):continue
+              try:
+                  payload=json.loads(fp.read_text())
+                  if isinstance(payload,dict) and iid in payload:reports.append((fp,payload[iid]))
+              except (ValueError,OSError):continue
+          code=root/'swebench/harness/run_evaluation.py'
+          started=out/'oracle_started_at_utc.txt'
+          result={
+           'episode_id':'aws-cloudformation__cfn-lint-3779__FINAL_AFTER_LOCAL_DATE_VISIBLE_ITERATION',
+           'head_sha':os.environ['FINAL_SHA'],
+           'oracle_type':'heldout_harness',
+           'oracle_code_sha256':hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else '',
+           'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+           'started_at':started.read_text().strip() if started.exists() else '',
+           'oracle_test_manifest_frozen_before_decision':True,
+           'oracle_independent_of_visible_receipts':True,
+           'oracle_unmodified_by_agent':True,
+           'status':'error','f2p_total':0,'f2p_passed':0,'p2p_failed':0,'tests_executed':0,
+           'matched_reports':len(reports),
+           'original_harness_sha':os.environ['OFFICIAL_HARNESS_SHA'],
+           'dataset_revision':os.environ['ORIGINAL_DATASET_REV'],
+           'actor_independently_attested':False,
+           'original_user_600_line_template_not_run_as_separate_visible_test':True
+          }
+          if len(reports)==1:
+              fp,d=reports[0]
+              shutil.copyfile(fp,out/'original_report.json')
+              f=d.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              p=d.get('tests_status',{}).get('PASS_TO_PASS',{})
+              groups=[f.get('success',[]),f.get('failure',[]),p.get('success',[]),p.get('failure',[])]
+              raw=fp.parent/'test_output.txt'
+              if raw.is_file():shutil.copyfile(raw,out/'original_test_output.txt')
+              if raw.is_file() and all(isinstance(x,list) for x in groups) and sum(map(len,groups))>0 and len(groups[0])+len(groups[1])>0:
+                  result.update({
+                   'status':'complete','f2p_total':len(groups[0])+len(groups[1]),
+                   'f2p_passed':len(groups[0]),'p2p_failed':len(groups[3]),
+                   'tests_executed':sum(map(len,groups)),
+                   'official_resolved':d.get('resolved'),
+                   'original_test_output_sha256':hashlib.sha256(raw.read_bytes()).hexdigest()})
+                  lines=raw.read_text(errors='replace').splitlines()
+                  missing_imports=bool(re.search(r'ModuleNotFoundError|No module named|ImportError',raw.read_text(errors='replace')))
+                  shared_fail_hazard=(len(groups[2])==0 and len(groups[3])>=20 and missing_imports and len(lines)<sum(map(len,groups)))
+                  result['endpoint_quality_flag']='HOLD_SYSTEMIC_IMPORT_FAILURE' if shared_fail_hazard else 'PROVISIONALLY_ADMISSIBLE_REVIEW_RAW_LOG'
+                  result['original_test_output_line_count']=len(lines)
+              else:result['nonadmission_reason']='missing_or_zero_executed_original_test_output'
+              log=fp.parent/'run_instance.log'
+              if log.is_file():shutil.copyfile(log,out/'run_instance.log')
+          else:result['nonadmission_reason']='missing_or_ambiguous_original_task_report'
+          (out/'P23_ORIGINAL_POSTSEAL_ORACLE.jsonl').write_text(json.dumps(result,sort_keys=True)+'\n')
+          print('P23_ORIGINAL_POSTSEAL_ORACLE_EVIDENCE '+json.dumps(result,sort_keys=True))
+          PY
+          python3 scripts/p9_reveal.py \
+            --sealed-dir pilot/cfnlint/sealed \
+            --oracle p23_original_oracle/P23_ORIGINAL_POSTSEAL_ORACLE.jsonl \
+            --out p23_original_oracle/P23_ORIGINAL_P9_POSTSEAL_SCORE.json
+          df -h / > p23_original_oracle/disk_after.txt || true
+          docker image ls --digests > p23_original_oracle/docker_images.txt || true
+      - name: Preserve original harness, source and postseal raw task report without publishing benchmark gold
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p23-cfn-lint-original-independent-task-oracle
+          path: p23_original_oracle/
+          retention-days: 60
+          if-no-files-found: error
