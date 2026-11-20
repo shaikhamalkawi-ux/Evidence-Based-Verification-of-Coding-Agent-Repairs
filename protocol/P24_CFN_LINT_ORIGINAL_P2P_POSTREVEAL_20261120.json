@@ -1,0 +1,44 @@
+{
+  "schema": "99llm_X1_P24_cfnlint_postreveal_P2P_regression_source_admission_v1",
+  "status": "POSTREVEAL_DIAGNOSIS_ONLY_ORIGINAL_P23_TASK_FROZEN",
+  "original_frozen_task": "aws-cloudformation__cfn-lint-3779",
+  "original_frozen_task_rank": 10,
+  "historical_repo": "aws-cloudformation/cfn-lint",
+  "historical_base_sha": "de28d1e43777e3782a06b74d9091c3471636eb70",
+  "original_final_P23_candidate_sha": "a1bd25e330d96cf450a44809fecd060d795e24ab",
+  "final_patch_sha256": "f2aa236b6f72a006f920046be80b0a8cce272ef8a3dd9b118d091e2541a9a286",
+  "original_P23_original_oracle_run_id": 44738711010,
+  "original_P23_artifact_id": 14630435763,
+  "original_P23_original_output_sha256": "965babfbe839670397012b811098b2a307c5986d4272fcff5e4f29fd7c142650",
+  "original_P23_report": {
+    "f2p_passed": 1,
+    "f2p_total": 1,
+    "p2p_failed": 4,
+    "tests_executed": 1232,
+    "official_resolved": false
+  },
+  "original_P9_decisions": {
+    "self_report": "ACCEPT",
+    "local_pass": "ACCEPT",
+    "source_linked": "HOLD"
+  },
+  "original_P9_preoracle_decision_sha256": "01ba163c361473e2354589d038f86c321267035001e69cda92c03026172eac2c",
+  "diagnosis_intent": "Recover exact identity and failure family for four P2P tests on the unchanged original P23 task report. Distinguish genuine candidate regression from shared infrastructure or unrelated image effects. Do not read/republish hidden grader source code.",
+  "permitted_evidence": [
+    "Four failing P2P test identifiers from the original report",
+    "Test output SHA256 and bounded exception/error category counts",
+    "Noncode error-class summary for each relevant failure, if clearly attributable",
+    "Original F2P and P2P counts preserved"
+  ],
+  "prohibited": [
+    "No code patch before this P24 analysis",
+    "No reclassification of P23 first-attempt independent result",
+    "No new blind agent task count",
+    "No postreveal policy P9 redecision",
+    "No raw hidden test code or full output republished",
+    "No 4 separate tasks inferred from 4 P2P failures",
+    "No authenticated agent author claim"
+  ],
+  "sample_coverage_note": "P23 remains one of original 10 tasks. Its code correctness remains UNRESOLVED under original F2P+P2P adjudication, pending specificity of 4 P2P errors.",
+  "outcome_pending": true
+}
