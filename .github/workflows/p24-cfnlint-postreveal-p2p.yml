@@ -1,0 +1,123 @@
+name: P24 POSTREVEAL diagnose original four cfn-lint P2P failures (NO PATCH)
+
+on:
+  push:
+    paths: ['.github/workflows/p24-cfnlint-postreveal-p2p.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  p23-original-task-p2p-interpretation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout historical unchanged P23 original oracle and P24 diagnostic preregistration
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify original source SHA and first-attempt test result immutable
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p24_postreveal_qc
+          python3 - <<'PY'
+          import json,pathlib
+          p=json.loads(pathlib.Path('protocol/P24_CFN_LINT_ORIGINAL_P2P_POSTREVEAL_20261120.json').read_text())
+          r=json.loads(pathlib.Path('data/audits/P23_CFN_LINT_ORIGINAL_TASK_ORACLE_20261120.json').read_text())
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert p['status']=='POSTREVEAL_DIAGNOSIS_ONLY_ORIGINAL_P23_TASK_FROZEN'
+          assert f['selected'][9]['instance_id']==p['original_frozen_task']=='aws-cloudformation__cfn-lint-3779'
+          assert p['original_P23_original_oracle_run_id']==r['original_harness_run_id']==44738711010
+          assert p['original_P23_artifact_id']==r['original_harness_artifact_id']==14630435763
+          assert p['original_final_P23_candidate_sha']==r['original_harness_task_observation']['head_sha']
+          assert p['original_P23_original_output_sha256']==r['original_harness_task_observation']['original_test_output_sha256']
+          assert r['original_harness_task_observation']['official_resolved'] is False
+          assert r['original_harness_task_observation']['f2p_passed']==1 and r['original_harness_task_observation']['f2p_total']==1
+          assert r['original_harness_task_observation']['p2p_failed']==4
+          assert p['original_P9_decisions']==r['original_P9_decisions']
+          print('P24_ORIGINAL_FIRST_ATTEMPT_LOCKED_NO_RERUN_OR_SOURCE_CHANGE')
+          PY
+      - name: Retrieve exact original evaluator artifact from earlier P23 workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: p23-cfn-lint-original-independent-task-oracle
+          run-id: 44738711010
+          github-token: ${{ github.token }}
+          path: p24_prior_original_artifact
+      - name: Check exact original output SHA and classify F2P/P2P failure sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections,hashlib,json,pathlib,re
+          folder=pathlib.Path('p24_prior_original_artifact')
+          outputs=list(folder.rglob('original_test_output.txt'))
+          reports=list(folder.rglob('original_report.json'))
+          if len(outputs)!=1 or len(reports)!=1:
+              raise RuntimeError('Original report or test output missing/ambiguous')
+          raw=outputs[0].read_bytes()
+          digest=hashlib.sha256(raw).hexdigest()
+          expected='965babfbe839670397012b811098b2a307c5986d4272fcff5e4f29fd7c142650'
+          assert digest==expected, 'Original task output SHA differs from P23'
+          record=json.loads(reports[0].read_text())
+          iid='aws-cloudformation__cfn-lint-3779'
+          assert isinstance(record,dict) and iid in record
+          result=record[iid]
+          f=result.get('tests_status',{}).get('FAIL_TO_PASS',{})
+          p=result.get('tests_status',{}).get('PASS_TO_PASS',{})
+          sf,ff=f.get('success',[]),f.get('failure',[])
+          sp,fp=p.get('success',[]),p.get('failure',[])
+          assert len(sf)==1 and len(ff)==0, (sf,ff)
+          assert len(fp)==4, fp
+          assert len(sf)+len(ff)+len(sp)+len(fp)==1232
+          lines=raw.decode('utf8',errors='replace').splitlines()
+          errors=collections.Counter()
+          for line in lines:
+              errors.update(re.findall(r'\b([A-Za-z_][A-Za-z_0-9]*(?:Error|Exception))\b',line))
+          tokens=['AssertionError','RuntimeError','TypeError','ValueError','ImportError',
+                  'ModuleNotFoundError','E3510','FAILED ','ERROR ','Traceback (most recent call last)']
+          counts={key:sum(key in line for line in lines) for key in tokens}
+          failing_ids=[str(x)[:350] for x in fp]
+          markers={}
+          for f_id in failing_ids:
+              leaf=f_id.split('::')[-1].split('/')[-1]
+              markers[f_id]=sum(leaf in line for line in lines) if leaf else 0
+          summary={
+            'schema':'99llm_X1_P24_original_P23_p2p_postreveal_validation_v1',
+            'status':'POSTREVEAL_ONLY_NO_CODE_CHANGE',
+            'original_task':iid,
+            'original_P23_run_id':44738711010,
+            'source_artifact_id':14630435763,
+            'original_output_sha256':digest,
+            'original_report_sha256':hashlib.sha256(reports[0].read_bytes()).hexdigest(),
+            'original_f2p_passed':len(sf),'original_f2p_total':len(sf)+len(ff),
+            'original_p2p_passed':len(sp),'original_p2p_failed':len(fp),
+            'total_tests_classified':1232,
+            'original_official_resolved':result.get('resolved'),
+            'failing_p2p_test_ids':failing_ids,
+            'failing_test_name_occurrences_in_log':markers,
+            'error_family_counts':counts,
+            'exception_type_counts':dict(errors.most_common(18)),
+            'original_test_output_lines':len(lines),
+            'many_p2p_passed':len(sp)>=1000,
+            'source_patch_changed':False,
+            'original_p9_decisions_unchanged':True,
+            'new_independent_task':False,
+            'hidden_source_code_republished':False,
+            'source_test_file_revealed_to_original_agent':False
+          }
+          out=pathlib.Path('p24_postreveal_qc/P24_FOUR_ORIGINAL_P2P_FAILURE_CLASSES.json')
+          out.write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          print('P24_P2P_POSTREVEAL_SUMMARY '+json.dumps(summary,sort_keys=True))
+          PY
+      - name: Preserve bounded QC summary only; never publish raw hidden source
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p24-cfn-lint-four-P2P-postreveal-diagnostic
+          path: p24_postreveal_qc/
+          retention-days: 60
+          if-no-files-found: warn
