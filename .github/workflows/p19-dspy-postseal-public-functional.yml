@@ -61,6 +61,15 @@ jobs:
               tail -n 100 p19_public/install_dspy.log
               exit 1
             }
+          # Postseal infrastructure-only retry after run 44667385576: modern
+          # litellm removed the historical 'disk' cache type before test collection.
+          # Restore an era-compatible package; leave BOTH source trees/tests unchanged.
+          python3 -m pip install --disable-pip-version-check \
+            'litellm==1.48.0' 'openai>=1,<2' \
+            > p19_public/historical_litellm_pin.log 2>&1 || {
+              tail -n 120 p19_public/historical_litellm_pin.log
+              exit 1
+            }
           python3 -m pip freeze > p19_public/installed_packages.txt
           python3 -m pip check > p19_public/pip_check.txt 2>&1 || true
       - name: Run unchanged historical two public functional test files on ORIGINAL base
