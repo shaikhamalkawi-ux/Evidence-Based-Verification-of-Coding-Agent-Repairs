@@ -1,0 +1,42 @@
+{
+  "id": "99llm_X1_P23_first_cfnlint_iam_grammar_candidate_prereg_v1",
+  "status": "SOURCE_PREREGISTERED_AFTER_EXECUTED_ORIGINAL_VISIBLE_BASELINE_BEFORE_PATCH_OR_HIDDEN_ORACLE",
+  "task": "aws-cloudformation__cfn-lint-3779",
+  "original_frozen_index": 10,
+  "original_source_sha": "de28d1e43777e3782a06b74d9091c3471636eb70",
+  "original_schema_blob": "99f30247c838aea3910f891a54c9bbad1d67c88a",
+  "target_path": "src/cfnlint/data/schemas/other/iam/policy.json",
+  "original_E3510_rule_blob": "24a4edf0e85528a6080a58ee0c6d56571f9fc503",
+  "original_baseline_visible_run_id": 44736199545,
+  "original_baseline_frozen_case_count": 64,
+  "original_baseline_correct": 36,
+  "original_baseline_wrong": 28,
+  "frozen_visible_cases_path": "pilot/cfnlint/P23_FROZEN_VISIBLE_IAM_CASES_20261120.json",
+  "frozen_visible_cases_sha256": "ea14222bd3ef2fc472192800fde99b478e6598173e918d270204f79a81aa7095",
+  "research_hypothesis": "Fix anchored IAM Condition patternProperties to recognize documented ForAnyValue/ForAllValues, IfExists, and Numeric condition operators while preserving rejection of malformed operators.",
+  "patch_scope": "Rewrite only the existing IAM policy.json definitions.Condition.patternProperties regex keys. Retain their referenced value schemas (ConditionValue vs ConditionSetValue) and ALL other JSON schema fields byte-semantic-identical.",
+  "permitted_changes": [
+    "Move regex ^ anchor from after qualifier to start of full operator; enforce $ end.",
+    "Correct ForAnyValues to AWS-defined ForAnyValue singular.",
+    "Allow (IfExists)? suffix instead of (Exists)? on base condition operators, and allow optional IfExists suffix for set-qualified variants.",
+    "Correct Number operator family to AWS Numeric operator family, as documented.",
+    "Correct unintended optional 'e' in historical ForAnyValues:String(Not)?Like? pattern."
+  ],
+  "required_negative_controls": "All 19 invalid operator/value vectors in frozen tests must remain rejected. The 45 valid vectors should be accepted. Any new permissiveness not covered by the test set is a limitation and should be inspected.",
+  "user_reported_patterns": [
+    "StringEqualsIfExists",
+    "ForAnyValue:StringEquals",
+    "ForAllValues:StringEquals"
+  ],
+  "primary_endpoint": "Source-specific operator grammar and E3510 rule support. This is not the independently held-out original issue benchmark result.",
+  "root_source": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html",
+  "secondary_source": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_grammar.html",
+  "timeline": "Original frozen visible tests and execution results at 44736199545 precede creation of this initial candidate patch. No original hidden benchmark test patch/reference patch or gold result has been retrieved.",
+  "actor_source": "GPT-6 AI-assisted research-generated code; synthetic git author is not provider-signed independent agent attribution.",
+  "next": "Produce first single-file candidate, run unchanged frozen 64 schema cases plus real cfn-lint E3510 CLI if practical, time-seal unchanged P9 before original SWE-bench-Live lite task oracle.",
+  "original_p9_policy_locked": "X1-P9-alpha-1-20261116",
+  "original_prior_scientific_results_locked": true,
+  "no_hidden_gold_access": true,
+  "no_agent_success_claim": true,
+  "no_human_coder": true
+}
