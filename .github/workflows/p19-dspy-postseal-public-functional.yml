@@ -1,0 +1,147 @@
+name: P19 POSTSEAL original DSPy public functional regression test (NOT P9 gate)
+
+on:
+  push:
+    paths: ['.github/workflows/p19-dspy-postseal-public-functional.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-public-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      BASE_SHA: 16ceaba5f7126ca86e5b50b669975c926b9f8f55
+      CANDIDATE_SHA: 2a2938cbd2b616c684768902bdcc0bfc09e7b9a4
+      SOURCE_BLOB: 5a20dcff321e3aded9c32039d9c060aa79a5e1ea
+      PATCH_SHA256: e9771581fa04391b72b86f0da93495c0749e6f10f84452a83c4e8d2968a98a08
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout original fixed case and original P9+process seal
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Enforce postseal separate original-DSPy tests only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p19_public
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          r=json.loads(pathlib.Path('pilot/dspy/P19_PREORACLE_ORIGINAL_EVALUATION_REGISTER.json').read_text())
+          s=json.loads(pathlib.Path('pilot/dspy/sealed/P19_TWO_POLICY_SEAL_MANIFEST.json').read_text())
+          assert r['initial_candidate_sha']==os.environ['CANDIDATE_SHA']
+          assert r['initial_candidate_patch_sha256']==os.environ['PATCH_SHA256']
+          assert r['decision_sealed_timestamp_utc']==s['t_decision']
+          assert r['initial_visible_candidate']['passed']==9
+          assert hashlib.sha256(pathlib.Path('pilot/dspy/sealed/P9_DECISIONS_SEALED.jsonl').read_bytes()).hexdigest()==s['P9_original_decisions_sha256']
+          assert hashlib.sha256(pathlib.Path('pilot/dspy/sealed/P19_PROCESS_LINKED_V1_SEALED.jsonl').read_bytes()).hexdigest()==s['new_process_decision_sha256']
+          print('P19_PUBLIC_REGRESSION_RUN_IS_AFTER_FROZEN_DECISIONS_NOT_A_POLICY_INPUT')
+          PY
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch original source and install historical full package without external LM credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/dspy_src"
+          git -C "$RUNNER_TEMP/dspy_src" remote add origin https://github.com/stanfordnlp/dspy.git
+          git -C "$RUNNER_TEMP/dspy_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/dspy_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/dspy_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/dspy_src" hash-object dspy/adapters/chat_adapter.py)" = "$SOURCE_BLOB"
+          python3 -m pip install --disable-pip-version-check 'pydantic==2.9.2' 'pytest==8.3.3' \
+            > p19_public/setup_pinned.log 2>&1
+          python3 -m pip install --disable-pip-version-check -e "$RUNNER_TEMP/dspy_src" \
+            > p19_public/install_dspy.log 2>&1 || {
+              tail -n 100 p19_public/install_dspy.log
+              exit 1
+            }
+          python3 -m pip freeze > p19_public/installed_packages.txt
+          python3 -m pip check > p19_public/pip_check.txt 2>&1 || true
+      - name: Run unchanged historical two public functional test files on ORIGINAL base
+        shell: bash
+        run: |
+          set +e
+          cd "$RUNNER_TEMP/dspy_src"
+          python3 -m pytest tests/functional/test_functional.py \
+            tests/functional/test_signature_typed.py -q -ra \
+            --junitxml="$GITHUB_WORKSPACE/p19_public/base_junit.xml" \
+            > "$GITHUB_WORKSPACE/p19_public/base_tests.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p19_public/base_exit.txt"
+          tail -n 70 "$GITHUB_WORKSPACE/p19_public/base_tests.log"
+          exit 0
+      - name: Rebuild exactly sealed first patch, do not modify public tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/dspy/p19_candidate_initial.py --repo "$RUNNER_TEMP/dspy_src"
+          git -C "$RUNNER_TEMP/dspy_src" diff -- dspy/adapters/chat_adapter.py > p19_public/patch.diff
+          test "$(sha256sum p19_public/patch.diff | awk '{print $1}')" = "$PATCH_SHA256"
+          export GIT_AUTHOR_DATE="2026-11-20T03:22:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:22:00Z"
+          git -C "$RUNNER_TEMP/dspy_src" add dspy/adapters/chat_adapter.py
+          git -C "$RUNNER_TEMP/dspy_src" \
+            -c user.name="GPT-6 P19 research patch (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P19 first: encode typed list demonstrations as JSON for existing parser"
+          test "$(git -C "$RUNNER_TEMP/dspy_src" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          echo "P19_ORIGINAL_SOURCE_TESTS_UNCHANGED_ON_SEALED_CANDIDATE"
+      - name: Run SAME historical public functional tests on candidate, retain all errors
+        shell: bash
+        run: |
+          set +e
+          cd "$RUNNER_TEMP/dspy_src"
+          python3 -m pytest tests/functional/test_functional.py \
+            tests/functional/test_signature_typed.py -q -ra \
+            --junitxml="$GITHUB_WORKSPACE/p19_public/candidate_junit.xml" \
+            > "$GITHUB_WORKSPACE/p19_public/candidate_tests.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p19_public/candidate_exit.txt"
+          tail -n 85 "$GITHUB_WORKSPACE/p19_public/candidate_tests.log"
+          exit 0
+      - name: Read source-real test counts only, never infer from GitHub green status
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib,xml.etree.ElementTree as ET,json
+          p=pathlib.Path('p19_public')
+          out={'type':'P19_POSTSEAL_ORIGINAL_PUBLIC_SOURCE_REGRESSION',
+               'task':'stanfordnlp__dspy-1609',
+               'never_included_in_preoracle_P9_or_process_v1_decisions':True,
+               'original_test_files_unchanged':True,
+               'remote_Databricks_LM_not_called':True,
+               'original_independent_task_oracle':False}
+          for stage in ('base','candidate'):
+              file=p/(stage+'_junit.xml')
+              if not file.exists():
+                  out[stage]={'admission':'UNKNOWN_SETUP_OR_COLLECTION_ERROR','tests':0}
+                  continue
+              data=ET.parse(file).getroot()
+              suite=data if data.tag=='testsuite' else data.find('.//testsuite')
+              assert suite is not None
+              count=int(suite.attrib.get('tests','0'))
+              failed=int(suite.attrib.get('failures','0'))
+              errors=int(suite.attrib.get('errors','0'))
+              skip=int(suite.attrib.get('skipped','0'))
+              out[stage]={'tests':count,'passed':count-failed-errors-skip,
+                          'failed':failed,'errors':errors,'skipped':skip,
+                          'exit_code':int((p/(stage+'_exit.txt')).read_text())}
+          (p/'P19_POSTSEAL_PUBLIC_REGRESSION.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print('P19_POSTSEAL_PUBLIC_TEST_SUMMARY '+json.dumps(out,sort_keys=True))
+          PY
+      - name: Archive original public regression output and reproducible source env
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p19-dspy-postseal-original-public-functional-tests
+          path: p19_public/
+          retention-days: 60
+          if-no-files-found: warn
