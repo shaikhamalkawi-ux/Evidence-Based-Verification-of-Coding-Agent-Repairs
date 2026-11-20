@@ -1,0 +1,143 @@
+name: P23 real original cfn-lint E3510 CLI source integration pre-hidden oracle
+
+on:
+  push:
+    paths: ['.github/workflows/p23-cfnlint-cli-integration.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-rule-cli-positive-negative:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      BASE_SHA: de28d1e43777e3782a06b74d9091c3471636eb70
+      FIRST_SHA: 7ce6016f638058b44f471fee575a3b298c84b369
+      SECOND_SHA: a1bd25e330d96cf450a44809fecd060d795e24ab
+      ORIGINAL_BLOB: 99f30247c838aea3910f891a54c9bbad1d67c88a
+      FIRST_BLOB: 50b226c27628fdaab4c27226702f9b5674b10a52
+      SECOND_BLOB: bbf877cd6815856f8714537465123ed5551b8e79
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout complete pre-hidden P23 grammar source receipts
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify frozen original tenth task and source CLI scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p23_cli_result
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          case=pathlib.Path('pilot/cfnlint/P23_PUBLIC_CLI_E3510_CASES_20261120.json')
+          reg=json.loads(case.read_text())
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          prior=json.loads(pathlib.Path('data/audits/P23_SECOND_SOURCE_FIXED_64_CASES_20261120.json').read_text())
+          assert frame['selected'][9]['instance_id']==reg['source_task']=='aws-cloudformation__cfn-lint-3779'
+          assert reg['n_cases']==len(reg['cases'])==9
+          assert reg['valid_count']==6 and reg['invalid_count']==3
+          assert reg['second_candidate_sha']==prior['second_candidate_sha']==os.environ['SECOND_SHA']
+          assert reg['second_candidate_schema_blob']==prior['second_candidate_schema_blob']==os.environ['SECOND_BLOB']
+          assert prior['second_candidate']['classification_passed']==64
+          assert reg['original_hidden_gold_unseen']
+          print('P23_CLI_CASES_SHA256='+hashlib.sha256(case.read_bytes()).hexdigest())
+          print('P23_ADDITIONAL_CLI_TEST_IS_AFTER_SOURCE_PATCH_BUT_BEFORE_HIDDEN_ORACLE')
+          PY
+      - name: Python 3.11 for cfn-lint historical CLI
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install exact original source as editable cfn-lint with dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/cfn_original"
+          git -C "$RUNNER_TEMP/cfn_original" remote add origin https://github.com/aws-cloudformation/cfn-lint.git
+          git -C "$RUNNER_TEMP/cfn_original" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/cfn_original" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$ORIGINAL_BLOB"
+          python3 -m pip install -e "$RUNNER_TEMP/cfn_original" \
+            > p23_cli_result/original_editable_install.log 2>&1 || {
+              tail -n 120 p23_cli_result/original_editable_install.log
+              exit 1
+            }
+          cfn-lint --version
+          python3 - <<'PY'
+          import cfnlint,pathlib,os
+          path=pathlib.Path(cfnlint.__file__).resolve()
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'cfn_original'
+          print('P23_CLI_CFN_PACKAGE_PATH='+str(path))
+          assert path.is_relative_to(root), 'cfn-lint must import EXACT original checkout'
+          PY
+          python3 -m pip freeze > p23_cli_result/python_environment.txt
+      - name: Run nine identical declared public IAM E3510 CLI examples on historical base
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_run_public_cli.py \
+            --source "$RUNNER_TEMP/cfn_original" \
+            --stage historical_base \
+            --out p23_cli_result/base
+      - name: Rebuild first and second candidates EXACT git SHA without hidden data
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_candidate_initial.py \
+            --source "$RUNNER_TEMP/cfn_original" --out p23_cli_result/first_mapping.json
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$FIRST_BLOB"
+          export GIT_AUTHOR_DATE="2026-11-20T00:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:00:00Z"
+          git -C "$RUNNER_TEMP/cfn_original" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_original" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 first: anchor IAM set modifiers and IfExists/Numeric Condition operator names"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$FIRST_SHA"
+          python3 pilot/cfnlint/p23_candidate_after_visible_date_feedback.py \
+            --source "$RUNNER_TEMP/cfn_original" --out p23_cli_result/second_mapping.json
+          export GIT_AUTHOR_DATE="2026-11-20T00:01:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:01:00Z"
+          git -C "$RUNNER_TEMP/cfn_original" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_original" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 second: add IAM DateLessThan/GreaterThan and qualified suffix operators"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$SECOND_SHA"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$SECOND_BLOB"
+          git -C "$RUNNER_TEMP/cfn_original" diff "$BASE_SHA" HEAD -- src/cfnlint/data/schemas/other/iam/policy.json \
+            > p23_cli_result/P23_CUMULATIVE_SOURCE_PATCH.diff
+          sha256sum p23_cli_result/P23_CUMULATIVE_SOURCE_PATCH.diff \
+            > p23_cli_result/P23_CUMULATIVE_SOURCE_PATCH.sha256
+          echo 'P23_PUBLIC_SOURCE_SECOND_CANDIDATE='+$SECOND_SHA
+      - name: Run the SAME nine cfn-lint CLI examples on second candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_run_public_cli.py \
+            --source "$RUNNER_TEMP/cfn_original" \
+            --stage second_candidate \
+            --out p23_cli_result/second
+          python3 - <<'PY'
+          import json,pathlib
+          d=pathlib.Path('p23_cli_result')
+          b=json.loads((d/'base/P23_CLI_E3510_REPORT.json').read_text())
+          s=json.loads((d/'second/P23_CLI_E3510_REPORT.json').read_text())
+          assert b['cli_case_sha256']==s['cli_case_sha256']
+          assert b['n_cases']==s['n_cases']==9
+          print('P23_E3510_ORIGINAL_CLI_CORRECT='+str(b['matching_expectation'])+'/9')
+          print('P23_E3510_FIXED_CLI_CORRECT='+str(s['matching_expectation'])+'/9')
+          print('P23_E3510_FIXED_CLI_NEGATIVE_3='+str(s['invalid_expected_e3510_present'])+'/3')
+          print('P23_FULL_ORIGINAL_SWE_BENCH_ORACLE_NOT_ACCESSED')
+          PY
+      - name: Retain actual source CLI records and patch without original hidden oracle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p23-cfn-lint-cli-original-vs-candidate-e3510
+          path: p23_cli_result/
+          retention-days: 60
+          if-no-files-found: warn
