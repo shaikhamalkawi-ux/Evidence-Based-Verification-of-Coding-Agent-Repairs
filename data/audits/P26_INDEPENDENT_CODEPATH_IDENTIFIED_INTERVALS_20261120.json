@@ -1,0 +1,153 @@
+{
+  "schema": "99llm_X1_P26_JavaScript_independent_codepath_risk_bounds_v1",
+  "verification_level": "Independent JavaScript reaggregation of source JSON; compared to executable Python P26 Github Actions run 44769991402",
+  "source_paths": [
+    "data/audits/P25_TEN_FROZEN_TASKS_ENDPOINT_ADMISSION_RECONCILIATION_20261120.json",
+    "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+    "data/audits/P21_PRIVACYIDEA_ENDPOINT_ADMISSION_REPRODUCED_20261120.json",
+    "data/audits/P25_CFN_LINT_MATCHED_ORIGINAL_NULL_CONTROL_EXECUTED_20261120.json"
+  ],
+  "original_frozen_task_count": 10,
+  "source_decisions_count": 9,
+  "row_endpoint_classifications": [
+    {
+      "task": "kedro-org__kedro-4406",
+      "rank": 1,
+      "status": "UNKNOWN_UNATTRIBUTED_P2P",
+      "p9": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "pdm-project__pdm-3419",
+      "rank": 2,
+      "status": "DIRECT_F2P_FAIL",
+      "p9": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "matplotlib__matplotlib-28933",
+      "rank": 3,
+      "status": "DIRECT_F2P_FAIL",
+      "p9": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "python-babel__babel-1163",
+      "rank": 4,
+      "status": "ORACLE_PASS",
+      "p9": {
+        "self_report": "HOLD",
+        "local_pass": "HOLD",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "pytorch__torchtune-2139",
+      "rank": 5,
+      "status": "DIRECT_F2P_FAIL",
+      "p9": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "stanfordnlp__dspy-1609",
+      "rank": 6,
+      "status": "DIRECT_F2P_FAIL",
+      "p9": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "privacyidea__privacyidea-4251",
+      "rank": 7,
+      "status": "UNKNOWN_IMPORT",
+      "p9": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "joke2k__faker-2155",
+      "rank": 8,
+      "status": "ORACLE_PASS",
+      "p9": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "reflex-dev__reflex-4510",
+      "rank": 9,
+      "status": "NO_CANDIDATE",
+      "p9": {
+        "self_report": null,
+        "local_pass": null,
+        "source_linked": null
+      }
+    },
+    {
+      "task": "aws-cloudformation__cfn-lint-3779",
+      "rank": 10,
+      "status": "UNKNOWN_SHARED_P2P",
+      "p9": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    }
+  ],
+  "policy_counts": {
+    "self_report": {
+      "accepted": 5,
+      "denominator": 9,
+      "PASS": 1,
+      "FAIL": 2,
+      "UNKNOWN": 2,
+      "fail_count_lower": 2,
+      "fail_count_upper": 4,
+      "lower": 0.4,
+      "upper": 0.8
+    },
+    "local_pass": {
+      "accepted": 8,
+      "denominator": 9,
+      "PASS": 1,
+      "FAIL": 4,
+      "UNKNOWN": 3,
+      "fail_count_lower": 4,
+      "fail_count_upper": 7,
+      "lower": 0.5,
+      "upper": 0.875
+    },
+    "source_linked": {
+      "accepted": 0,
+      "denominator": 9,
+      "PASS": 0,
+      "FAIL": 0,
+      "UNKNOWN": 0,
+      "fail_count_lower": 0,
+      "fail_count_upper": 0,
+      "lower": null,
+      "upper": null
+    }
+  },
+  "Python_P26_comparison_run_id": 44769991402,
+  "Python_P26_result_expected_sha256": "4ce92ed6a4a835504bd250157f03744efca55cb74e449e7de1dfba7f338f6569",
+  "independent_calculation_agreement": true,
+  "claim_boundary": "Posthoc nine-decision finite-case descriptive bounds under three explicit unknown endpoints; original task reports and P9 decisions unmodified. Does not independently execute code patches or original benchmark."
+}
