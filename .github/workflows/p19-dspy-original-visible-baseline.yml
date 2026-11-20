@@ -1,0 +1,85 @@
+name: P19 DSPy original historical adapter baseline — frozen visible AST tests only
+
+on:
+  push:
+    paths: ['.github/workflows/p19-dspy-original-visible-baseline.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    env:
+      BASE_SHA: 16ceaba5f7126ca86e5b50b669975c926b9f8f55
+      SOURCE_BLOB: 5a20dcff321e3aded9c32039d9c060aa79a5e1ea
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout pre-registered P19 tests, original source path, no candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Assert frozen 10-case frame and source-visibility boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p19_base
+          python3 - <<'PY'
+          import json,pathlib,hashlib,os
+          r=json.loads(pathlib.Path('pilot/dspy/P19_PREREGISTRATION_20261120.json').read_text())
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert len(f['selected'])==10 and f['selected'][5]['instance_id']==r['task']['instance_id']
+          assert f['selected'][5]['repo']==r['task']['repo']=='stanfordnlp/dspy'
+          assert r['task']['base_sha']==os.environ['BASE_SHA']
+          assert r['task']['source_blob_sha']==os.environ['SOURCE_BLOB']
+          assert r['source_freeze']['revision']==f['dataset_revision_sha']
+          assert r['visible_suite']['freeze_before_first_patch'] is True
+          assert r['original_P9_policy']['unchanged'] is True
+          print('P19_REGISTERED_ORIGINAL_SOURCE_AND_FROZEN_VISIBLE_TESTS')
+          print('P19_FROZEN_TEST_SHA256='+hashlib.sha256(pathlib.Path('pilot/dspy/p19_visible_original_adapter_ast.py').read_bytes()).hexdigest())
+          PY
+      - name: Python 3.11 and Pydantic 2.9.2 for original AST semantics
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download exact historical DSPy source WITHOUT original benchmark test_patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/dspy_src"
+          git -C "$RUNNER_TEMP/dspy_src" remote add origin https://github.com/stanfordnlp/dspy.git
+          git -C "$RUNNER_TEMP/dspy_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/dspy_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/dspy_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/dspy_src" hash-object dspy/adapters/chat_adapter.py)" = "$SOURCE_BLOB"
+          python3 -m pip install --disable-pip-version-check 'pydantic==2.9.2' \
+            > p19_base/pydantic_install.log 2>&1 || { tail -n 90 p19_base/pydantic_install.log; exit 1; }
+          python3 -m pip freeze > p19_base/environment.txt
+      - name: Execute nine original source AST tests on unmodified DSPy; retain original negative results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p19_run_visible_source.py --repo "$RUNNER_TEMP/dspy_src" \
+            --stage historical_base --out p19_base/P19_ORIGINAL_VISIBLE_RECEIPT.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('p19_base/P19_ORIGINAL_VISIBLE_RECEIPT.json'))
+          assert r['tests_run']==9
+          assert r['target_source_blob_sha']=='5a20dcff321e3aded9c32039d9c060aa79a5e1ea'
+          assert r['source_ast_original_functions'] is True
+          assert r['true_task_oracle'] is False
+          print('P19_ORIGINAL_BASE_TESTS_PASS='+str(r['passed']))
+          print('P19_ORIGINAL_BASE_TESTS_FAIL='+str(r['failed']))
+          print('P19_ORIGINAL_BASE_TESTS_ERROR='+str(r['errors']))
+          print('P19_HIDDEN_TASK_ORACLE=NOT_ACCESSED')
+          PY
+      - name: Preserve source-locked visible receipt and full test-error logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p19-dspy-frozen-original-visible-baseline
+          path: p19_base/
+          retention-days: 60
+          if-no-files-found: warn
