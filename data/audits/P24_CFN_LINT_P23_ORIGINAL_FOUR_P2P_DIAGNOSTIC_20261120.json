@@ -1,0 +1,55 @@
+{
+  "error_family_counts": {
+    "AssertionError": 17,
+    "E3510": 1,
+    "ERROR ": 2,
+    "FAILED ": 7,
+    "ImportError": 0,
+    "ModuleNotFoundError": 0,
+    "RuntimeError": 0,
+    "Traceback (most recent call last)": 0,
+    "TypeError": 0,
+    "ValueError": 4
+  },
+  "exception_type_counts": {
+    "AssertionError": 17,
+    "CalledProcessError": 10,
+    "ValueError": 4
+  },
+  "failing_p2p_test_ids": [
+    "test/integration/test_good_templates.py::TestQuickStartTemplates::test_module_integration",
+    "test/integration/test_good_templates.py::TestQuickStartTemplates::test_templates",
+    "test/unit/module/override/test_exclude.py::TestExclude::test_success_run",
+    "test/unit/module/test_rules_collections.py::TestRulesCollection::test_success_run"
+  ],
+  "failing_test_name_occurrences_in_log": {
+    "test/integration/test_good_templates.py::TestQuickStartTemplates::test_module_integration": 8,
+    "test/integration/test_good_templates.py::TestQuickStartTemplates::test_templates": 19,
+    "test/unit/module/override/test_exclude.py::TestExclude::test_success_run": 14,
+    "test/unit/module/test_rules_collections.py::TestRulesCollection::test_success_run": 14
+  },
+  "hidden_source_code_republished": false,
+  "many_p2p_passed": true,
+  "new_independent_task": false,
+  "original_P23_run_id": 44738711010,
+  "original_f2p_passed": 1,
+  "original_f2p_total": 1,
+  "original_official_resolved": false,
+  "original_output_sha256": "965babfbe839670397012b811098b2a307c5986d4272fcff5e4f29fd7c142650",
+  "original_p2p_failed": 4,
+  "original_p2p_passed": 1227,
+  "original_p9_decisions_unchanged": true,
+  "original_report_sha256": "42cdf00c3aebf47af0f63184e0a200603bf310e158d0d178e4ada178584e71df",
+  "original_task": "aws-cloudformation__cfn-lint-3779",
+  "original_test_output_lines": 3626,
+  "schema": "99llm_X1_P24_original_P23_p2p_postreveal_validation_v1",
+  "source_artifact_id": 14630435763,
+  "source_patch_changed": false,
+  "source_test_file_revealed_to_original_agent": false,
+  "status": "POSTREVEAL_ONLY_NO_CODE_CHANGE",
+  "total_tests_classified": 1232,
+  "source_postreveal_run_id": 44739369006,
+  "original_first_attempt_result_should_not_change": true,
+  "scientific_caution": "Four original P2P failures may arise from source regressions or other test/execution conditions. Exact identities are observed, but attribution to IAM regex change is NOT proven by this summary alone.",
+  "original_frozen_task_unresolved": true
+}
