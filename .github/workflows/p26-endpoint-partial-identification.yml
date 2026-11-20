@@ -1,0 +1,71 @@
+name: P26 source-grounded original-task risk bounds (posthoc, no new oracle)
+
+on:
+  push:
+    paths: ['.github/workflows/p26-endpoint-partial-identification.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-frame-evidence-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - name: Checkout frozen evidence source reports and new P26 protocol
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify source baseline and no data substitution
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p26_result
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          p=json.loads(pathlib.Path('protocol/P26_ENDPOINT_PARTIAL_IDENTIFICATION_PRECOMPUTATION_20261120.json').read_text())
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert p['study_status']=='POSTHOC_DETERMINISTIC_ID_SET_NOT_NEW_BLINDED_POLICY'
+          assert p['original_population_size']==f['n_selected']==len(f['selected'])==10
+          assert f['dataset_revision_sha']=='babb27e45e072219195db7a744bbf0d3c1a36e56'
+          assert p['no_fabricated_threshold_or_weight'] is True
+          assert p['original_decisions_untouched'] is True
+          assert p['original_ten_task_frame_untouched'] is True
+          print('P26_ORIGINAL_FROZEN_SOURCE_FRAME_SHA256='+hashlib.sha256(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_bytes()).hexdigest())
+          print('P26_PRECOMPUTATION_PROTOCOL_SHA256='+hashlib.sha256(pathlib.Path('protocol/P26_ENDPOINT_PARTIAL_IDENTIFICATION_PRECOMPUTATION_20261120.json').read_bytes()).hexdigest())
+          PY
+      - name: Recompute source-grounded conditional identified intervals
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p26_identified_acceptance_bounds.py \
+            --out p26_result/P26_IDENTIFIED_ACCEPTANCE_BOUNDS.json
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          p=pathlib.Path('p26_result/P26_IDENTIFIED_ACCEPTANCE_BOUNDS.json')
+          r=json.loads(p.read_text(encoding='utf8'))
+          assert r['attempted_original_task_candidate_count']==9
+          assert r['endpoint_admitted_issue_specific_F2P_fail_count']==4
+          assert r['endpoint_admitted_original_task_pass_count']==2
+          assert r['endpoint_unknown_with_candidate_count']==3
+          assert r['policies']['local_pass']['false_accept_risk_sharp_exact_bounds']==['1/2','7/8']
+          assert r['policies']['self_report']['false_accept_risk_sharp_exact_bounds']==['2/5','4/5']
+          assert r['policies']['source_linked']['false_accept_risk_sharp_exact_bounds'] is None
+          assert r['source_linked_zero_accept_risk_is_undefined']
+          print('P26_IDENTIFIED_OUTPUT_SHA256='+hashlib.sha256(p.read_bytes()).hexdigest())
+          print('P26_NINE_CANDIDATES_TWO_PASS_FOUR_DIRECT_F2P_FAIL_THREE_ENDPOINT_UNKNOWN')
+          PY
+      - name: Full software validation and new corruption controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -v
+      - name: Preserve source-derived results and exact test logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p26-original-10-task-identification-only
+          path: p26_result/
+          retention-days: 60
+          if-no-files-found: warn
