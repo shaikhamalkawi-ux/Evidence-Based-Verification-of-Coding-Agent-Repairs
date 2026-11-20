@@ -1,0 +1,29 @@
+{
+  "schema": "99llm_X1_P23_second_visible_stage_date_extension_prereg_v1",
+  "status": "SECOND_CANDIDATE_REG_AFTER_FIRST_FROZEN_VISIBLE_FAILURE_BEFORE_SECOND_PATCH_OR_ORIGINAL_ORACLE",
+  "original_task": "aws-cloudformation__cfn-lint-3779",
+  "original_base_sha": "de28d1e43777e3782a06b74d9091c3471636eb70",
+  "original_iam_policy_blob": "99f30247c838aea3910f891a54c9bbad1d67c88a",
+  "exact_first_candidate_sha": "7ce6016f638058b44f471fee575a3b298c84b369",
+  "exact_first_schema_blob": "50b226c27628fdaab4c27226702f9b5674b10a52",
+  "first_visible_run_id": 44736620893,
+  "first_candidate_result": "61/64 correctly classified, 3 valid date operators still rejected, 19/19 invalid operators retained",
+  "frozen_original_case_file": "pilot/cfnlint/P23_FROZEN_VISIBLE_IAM_CASES_20261120.json",
+  "frozen_original_case_sha256": "ea14222bd3ef2fc472192800fde99b478e6598173e918d270204f79a81aa7095",
+  "original_first_candidate_file": "pilot/cfnlint/p23_candidate_initial.py",
+  "pending_bounded_change": "Add exactly 3 Date(Less|Greater)Than(Equals)?(IfExists)? regex keys (unqualified, ForAllValues, ForAnyValue), each reusing original ConditionValue or ConditionSetValue refs, with no other schema modifications.",
+  "observed_visible_failing_cases": [
+    "P15 DateLessThanEquals",
+    "P16 DateGreaterThan",
+    "PX10 DateGreaterThanEqualsIfExists"
+  ],
+  "expected_behavior": "All 45 frozen valid cases accepted; all 19 invalid cases rejected; existing 61 earlier successes preserved.",
+  "is_adaptive_after_visible_test": true,
+  "is_adaptive_after_hidden_test": false,
+  "original_gold_test_patch_not_accessed": true,
+  "original_P9_not_run_yet": true,
+  "original_task_hidden_oracle_unseen": true,
+  "source_credibility": "AWS IAM official Condition operators documentation lists DateLessThan/DateGreaterThan and IfExists, and set modifiers ForAllValues/ForAnyValue.",
+  "preregularized_risk": "This is a local iterative revision based on a frozen visible 64-case set, not a fresh independent holdout trial. The source code is not evaluated by hidden task oracle until original policy decisions are sealed.",
+  "semantic_scope_limit": "IAM operator spelling/grammar in historical cfnlint policy.json only, not AWS authorization semantics or service-specific operator-key applicability."
+}
