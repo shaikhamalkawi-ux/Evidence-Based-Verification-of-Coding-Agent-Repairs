@@ -1,0 +1,110 @@
+{
+  "schema": "99llm_X1_P23_additional_public_cli_e3510_source_verification_v1",
+  "status": "ADDITIONAL_PUBLIC_INTEGRATION_CASES_DEFINED_AFTER_SECOND_SOURCE_PATCH_BEFORE_CLI_EXECUTION_AND_BEFORE_ORIGINAL_HIDDEN_BENCHMARK",
+  "source_task": "aws-cloudformation__cfn-lint-3779",
+  "original_base_sha": "de28d1e43777e3782a06b74d9091c3471636eb70",
+  "second_candidate_sha": "a1bd25e330d96cf450a44809fecd060d795e24ab",
+  "second_candidate_schema_blob": "bbf877cd6815856f8714537465123ed5551b8e79",
+  "original_rule_ID": "E3510",
+  "n_cases": 9,
+  "valid_count": 6,
+  "invalid_count": 3,
+  "cases": [
+    {
+      "case_id": "CLI_P01",
+      "operator": "StringEqualsIfExists",
+      "key": "aws:RequestedRegion",
+      "value": "us-east-1",
+      "expected_e3510": false
+    },
+    {
+      "case_id": "CLI_P02",
+      "operator": "ForAnyValue:StringEquals",
+      "key": "aws:TagKeys",
+      "value": [
+        "Environment"
+      ],
+      "expected_e3510": false
+    },
+    {
+      "case_id": "CLI_P03",
+      "operator": "ForAllValues:StringEquals",
+      "key": "aws:TagKeys",
+      "value": [
+        "Environment",
+        "Project"
+      ],
+      "expected_e3510": false
+    },
+    {
+      "case_id": "CLI_P04",
+      "operator": "NumericLessThanEquals",
+      "key": "aws:MultiFactorAuthAge",
+      "value": "3600",
+      "expected_e3510": false
+    },
+    {
+      "case_id": "CLI_P05",
+      "operator": "DateGreaterThanIfExists",
+      "key": "aws:CurrentTime",
+      "value": "2025-01-01T00:00:00Z",
+      "expected_e3510": false
+    },
+    {
+      "case_id": "CLI_P06",
+      "operator": "StringEquals",
+      "key": "aws:RequestedRegion",
+      "value": "us-east-1",
+      "expected_e3510": false
+    },
+    {
+      "case_id": "CLI_N01",
+      "operator": "ForAnyValues:StringEquals",
+      "key": "aws:TagKeys",
+      "value": [
+        "Environment"
+      ],
+      "expected_e3510": true
+    },
+    {
+      "case_id": "CLI_N02",
+      "operator": "StringEqualsIfExist",
+      "key": "aws:RequestedRegion",
+      "value": "us-east-1",
+      "expected_e3510": true
+    },
+    {
+      "case_id": "CLI_N03",
+      "operator": "ForAnyValue:StringEqualsBogus",
+      "key": "aws:TagKeys",
+      "value": [
+        "Environment"
+      ],
+      "expected_e3510": true
+    }
+  ],
+  "generated_template": {
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+      "Policy": {
+        "Type": "AWS::IAM::ManagedPolicy",
+        "Properties": {
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": {
+              "Effect": "Allow",
+              "Action": "s3:ListBucket",
+              "Resource": "arn:aws:s3:::example-bucket",
+              "Condition": "__REPLACE_WITH_CASE_OPERATOR_MAPPING__"
+            }
+          }
+        }
+      }
+    }
+  },
+  "note": "The complete original large AWS ParallelCluster policy was not downloaded; these are smaller, openly disclosed, purpose-built source-level E3510 scenarios.",
+  "case_boundary": "CLI integration checks E3510 specifically. It does not certify AWS IAM authorization, service-specific key suitability, or complete user-supplied 600-line template.",
+  "source_pinned_before_cli": true,
+  "original_hidden_gold_unseen": true,
+  "results_pending": true
+}
