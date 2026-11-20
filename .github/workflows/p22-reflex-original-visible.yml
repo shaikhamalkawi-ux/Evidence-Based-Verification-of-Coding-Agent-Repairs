@@ -1,0 +1,122 @@
+name: P22 original Reflex Field foreach visible reproduction only (PREPATCH)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p22-reflex-original-visible.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepatch-original-visible:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout P22 original task register and visible reproduction
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify original frozen task and no hidden oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p22_original
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          r=json.loads(pathlib.Path('protocol/P22_REFLEX_ORIGINAL_FIELD_FOREACH_PREPATCH_20261120.json').read_text())
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert r['frozen_original_task_index']==9
+          assert len(f['selected'])==10
+          assert f['selected'][8]['instance_id']==r['selected_task']=='reflex-dev__reflex-4510'
+          assert r['base_sha']=='2520c51aaf4c0a4af965026ae3a3fd5b03930288'
+          assert r['visible_problem_sha256']=='35b0b9b3dfa1a12bb7f400d8250d9e85039f99e12a4d75c70c01ca505d118767'
+          assert r['no_reference_solution_or_test_patch_access']
+          print('P22_FROZEN_NINTH_TASK_PYTHON_313_PREFLIGHT_NOT_ORACLE')
+          print('P22_PREPATCH_REPRODUCER_SHA256='+hashlib.sha256(pathlib.Path('pilot/reflex/p22_original_issue_visible.py').read_bytes()).hexdigest())
+          PY
+      - name: Use Python 3.13 from reporter environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Fetch exact original public Reflex source and verify SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/reflex_src"
+          git -C "$RUNNER_TEMP/reflex_src" remote add origin https://github.com/reflex-dev/reflex.git
+          git -C "$RUNNER_TEMP/reflex_src" fetch --depth 1 origin 2520c51aaf4c0a4af965026ae3a3fd5b03930288
+          git -C "$RUNNER_TEMP/reflex_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/reflex_src" rev-parse HEAD)" = 2520c51aaf4c0a4af965026ae3a3fd5b03930288
+          git -C "$RUNNER_TEMP/reflex_src" hash-object reflex/state.py > p22_original/historical_state_blob.txt
+          git -C "$RUNNER_TEMP/reflex_src" hash-object reflex/base.py > p22_original/historical_base_blob.txt
+      - name: Install historical Reflex directly without source patch or hidden benchmark
+        shell: bash
+        run: |
+          set +e
+          python3 -m pip install -U pip wheel > p22_original/python_bootstrap.log 2>&1
+          python3 -m pip install "$RUNNER_TEMP/reflex_src" \
+            > p22_original/install_original_reflex.log 2>&1
+          rc=$?
+          echo "$rc" > p22_original/install_exit_code.txt
+          tail -n 90 p22_original/install_original_reflex.log
+          if [ "$rc" -ne 0 ]; then
+            echo "P22_SETUP_HOLD_DEPENDENCY_OR_PYTHON_COMPATIBILITY_NOT_CODE_FAILURE"
+          fi
+          python3 -m pip freeze > p22_original/python_environment.txt
+          exit 0
+      - name: Execute original reporter reproduction only when import is available
+        shell: bash
+        run: |
+          set +e
+          if [ "$(cat p22_original/install_exit_code.txt)" = 0 ]; then
+            python3 pilot/reflex/p22_original_issue_visible.py \
+              --out p22_original/P22_BASELINE_VISIBLE.json \
+              > p22_original/P22_baseline_stdout.log 2>&1
+            rc=$?
+            cat p22_original/P22_baseline_stdout.log
+          else
+            rc=99
+          fi
+          echo "$rc" > p22_original/baseline_execution_code.txt
+          if [ "$rc" -ne 0 ]; then
+            echo "P22_BASELINE_SETUP_HOLD_NOT_TASK_CORRECTNESS"
+          fi
+          exit 0
+      - name: Record no-imputation source environment status
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib
+          d=pathlib.Path('p22_original')
+          if (d/'P22_BASELINE_VISIBLE.json').exists():
+              result=json.loads((d/'P22_BASELINE_VISIBLE.json').read_text())
+              status=result['status']
+              if not status.startswith('BASELINE_'):raise ValueError(status)
+          else:
+              status='SETUP_HOLD_OR_EXECUTION_ERROR_NO_BASELINE_ADMITTED'
+          summary={
+              'original_task':'reflex-dev__reflex-4510',
+              'source_base_sha':'2520c51aaf4c0a4af965026ae3a3fd5b03930288',
+              'reported_python':'3.13',
+              'baseline_status':status,
+              'install_exit':int((d/'install_exit_code.txt').read_text()),
+              'baseline_execution_exit':int((d/'baseline_execution_code.txt').read_text()),
+              'no_source_candidate':True,
+              'no_original_hidden_oracle':True,
+              'no_repair_success_failure_label':True,
+              'no_task_substitution':True,
+          }
+          (d/'P22_BASELINE_ADMISSION.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
+          print('P22_BASELINE_ADMISSION '+json.dumps(summary,sort_keys=True))
+          PY
+      - name: Archive limited environment and visible evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p22-reflex-original-python313-visible-prepatch
+          path: p22_original/
+          retention-days: 60
+          if-no-files-found: warn
