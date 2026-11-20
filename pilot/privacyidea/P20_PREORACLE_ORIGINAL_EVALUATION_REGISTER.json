@@ -1,0 +1,58 @@
+{
+  "protocol_id": "99llm-X1-P20-ORIGINAL-ORACLE-PREEXEC-20261120",
+  "scope": "One original frozen task initial candidate; NOT a full Flask app reproducer",
+  "original_task_id": "privacyidea__privacyidea-4251",
+  "original_case_index_one_based": 7,
+  "original_case_source_repo": "privacyidea/privacyidea",
+  "original_case_base_sha": "a44f38b40a61c5b91e6de68d20d27ed01d3ccb56",
+  "original_case_source_blob": "ada40e1d3d5284743ae5b3e84c472f20363f4923",
+  "original_task_source_file": "privacyidea/lib/eventhandler/scripthandler.py",
+  "initial_candidate_sha": "4543bd4e279083311783c13e9d950b4534922d8e",
+  "initial_candidate_blob": "f1e0d1d1847baa5814c04f54807dce9df7524b8c",
+  "initial_candidate_patch_sha256": "c7bc136dc61ebce92cd2a1781df775fbaa86a340ddf610551ec2499884f3382a",
+  "original_visible_tests_sha256": "1994fb6d092cb1988677ebd139435c3aed6ec85fc5f7cc5f97eace56b0fa1f00",
+  "original_visible_test_sources": "original ScriptEventHandler class AST and stdlib temp dirs with import-only application stubs",
+  "original_source_baseline": {
+    "passed": 5,
+    "total": 10,
+    "errors": 5,
+    "run_id": 44668944358
+  },
+  "original_source_first_candidate": {
+    "passed": 10,
+    "total": 10,
+    "errors": 0,
+    "run_id": 44669118206
+  },
+  "original_P9_version": "X1-P9-alpha-1-20261116",
+  "original_P9_preoracle_utc": "2026-11-20T03:40:19Z",
+  "original_P9_seal_commit": "0917af294ee65ace8ef6c7496d259162bab80122",
+  "original_P9_decisions_sha256": "33edbd2833c0730d6fa280a42f2cd05fe6deb754dce8c29764be5d40786f3f3d",
+  "original_P9_input_sha256": "b5c936b957f48cc88705ebd4f1e6d479ae3f72471e28a95b34abc5010c741df6",
+  "original_P9_script_sha256": "baea708bacf643bdf6110d5c0ba3a584d8ad0783f993bfe481f96ce8149ae6fd",
+  "P9_frozen_decisions": {
+    "self_report": "HOLD",
+    "local_pass": "ACCEPT",
+    "source_linked": "HOLD"
+  },
+  "initial_claim_of_full_HTTP_task_resolution": false,
+  "actor_independently_authenticated": false,
+  "original_harness": {
+    "repo": "microsoft/SWE-bench-Live",
+    "commit": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "dataset": "SWE-bench-Live/SWE-bench-Live",
+    "split": "lite",
+    "revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "image_namespace": "starryzhang"
+  },
+  "evaluator_sequence": [
+    "Verify exact P9 input/decision/script SHA and existing public Git seal commit",
+    "Rebuild exact original source and first patch source/commit SHA",
+    "Only then retrieve the original hidden benchmark task row and run pinned original evaluator",
+    "Admit F2P/P2P only for unique, nonempty executed report; otherwise UNKNOWN/INFRA not failed code"
+  ],
+  "no_original_hidden_data_seen_yet": true,
+  "no_new_P9_process_policy_for_this_task": true,
+  "no_fabricated_human_coder_or_agent_attestation": true,
+  "no_retroactive_MR30_or_P9_to_P19_changes": true
+}
