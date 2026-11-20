@@ -42,7 +42,7 @@ jobs:
       - name: Download original P20 evaluator artifact
         uses: actions/download-artifact@v4
         with:
-          name: p20-privacyidea-original-oracle
+          name: p20-privacyidea-original-task-oracle
           run-id: 44669546280
           github-token: ${{ github.token }}
           path: p21_raw_artifact
