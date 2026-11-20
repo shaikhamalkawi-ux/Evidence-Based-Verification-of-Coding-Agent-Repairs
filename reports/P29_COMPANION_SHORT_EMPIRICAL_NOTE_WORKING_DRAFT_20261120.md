@@ -53,7 +53,7 @@ The **P27 posthoc alternative endpoint** asks only whether all original F2P pass
 Both original candidate scores remain UNRESOLVED by the stipulated strict benchmark rule. We make no assertion that the 29 shared failures have independent causes; there are only two paired task comparisons.
 
 ### 3.3 P29 raw full pytest-ID cross-check (read-only retrospective source recovery)
-The original GitHub Actions artifacts from **Kedro #4406** (candidate run 44159300952; original-source neutral run 44162955737) and **cfn-lint #3779** (candidate run 44738711010; neutral run 44761416230) were downloaded and verified by SHA-256. An independent standard-library parser extracted only complete \`FAILED\` and \`PASSED\` pytest result names from the archived original text summaries. It did not infer a test status from Kedro application error-logging messages.
+The original GitHub Actions artifacts from **Kedro #4406** (candidate run 44159300952; original-source neutral run 44162955737) and **cfn-lint #3779** (candidate run 44738711010; neutral run 44761416230) were downloaded and verified by SHA-256. An independent standard-library parser extracted only complete `FAILED` and `PASSED` pytest result names from the archived original text summaries. It did not infer a test status from Kedro application error-logging messages.
 
 | Historical task | Raw FAILED full names, candidate | Raw FAILED full names, neutral | Shared full FAILED names | Candidate-only FAILED full names | Control-only FAILED full names |
 |---|---:|---:|---:|---:|---:|
