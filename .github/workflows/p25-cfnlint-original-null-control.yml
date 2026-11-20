@@ -1,0 +1,218 @@
+name: P25 POSTREVEAL matched original cfn-lint no-code README control (NOT BLIND)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p25-cfnlint-original-null-control.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-null-control:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      INSTANCE_ID: aws-cloudformation__cfn-lint-3779
+      BASE_SHA: de28d1e43777e3782a06b74d9091c3471636eb70
+      DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      ORIGINAL_HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout original sealed P23 outcome and P25 postreveal design
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify prior P23 original outcome and unchanged P9 rules
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p25_null
+          python3 - <<'PY'
+          import json,pathlib,os,hashlib
+          reg=json.loads(pathlib.Path('protocol/P25_CFN_LINT_POSTREVEAL_BASELINE_NULL_CONTROL_20261120.json').read_text())
+          prior=json.loads(pathlib.Path('data/audits/P23_CFN_LINT_ORIGINAL_TASK_ORACLE_20261120.json').read_text())
+          manifest=json.loads(pathlib.Path('pilot/cfnlint/sealed/P9_DECISION_SEAL.json').read_text())
+          assert reg['status']=='POSTREVEAL_MATCHED_NULL_SOURCE_CONTROL_NO_BLIND_AGENT_CLAIM'
+          assert reg['original_frozen_case']==os.environ['INSTANCE_ID']
+          assert reg['original_base_commit']==os.environ['BASE_SHA']
+          assert reg['original_dataset_rev']==os.environ['DATASET_REV']
+          assert reg['original_harness_sha']==os.environ['ORIGINAL_HARNESS_SHA']
+          assert reg['original_P23_ORACLE_run_id']==44738711010
+          assert reg['original_P9_decision_seal_sha256']==manifest['decisions_sha256']
+          assert prior['original_harness_task_observation']['f2p_passed']==1
+          assert prior['original_harness_task_observation']['p2p_failed']==4
+          assert prior['original_harness_task_observation']['official_resolved'] is False
+          assert reg['no_change_to_P23_original_result']
+          print('P25_POSTREVEAL_MATCHED_SOURCE_CONTROL_NO_P9_REDECISION')
+          PY
+          docker version
+      - name: Reconstruct original cfn-lint base, append README-only neutral comment
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/cfn_original"
+          git -C "$RUNNER_TEMP/cfn_original" remote add origin https://github.com/aws-cloudformation/cfn-lint.git
+          git -C "$RUNNER_TEMP/cfn_original" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/cfn_original" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$BASE_SHA"
+          SOURCE_BEFORE=$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)
+          test "$SOURCE_BEFORE" = 99f30247c838aea3910f891a54c9bbad1d67c88a
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          root=Path(os.environ['RUNNER_TEMP'])/'cfn_original'
+          file=root/'README.md'
+          raw=file.read_bytes()
+          # Markdown-only neutral comment, never importable code or IAM schema.
+          file.write_bytes(raw+b'\n<!-- P25 postreveal matched no-source-change diagnostic control -->\n')
+          PY
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$SOURCE_BEFORE"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" diff --name-only)" = "README.md"
+          git -C "$RUNNER_TEMP/cfn_original" diff --check
+          git -C "$RUNNER_TEMP/cfn_original" diff -- README.md > p25_null/neutral_readme_only.diff
+          test -s p25_null/neutral_readme_only.diff
+          git -C "$RUNNER_TEMP/cfn_original" diff -- src/ test/ > p25_null/source_and_tests_diff_expected_empty.txt
+          test ! -s p25_null/source_and_tests_diff_expected_empty.txt
+          sha256sum p25_null/neutral_readme_only.diff > p25_null/neutral_patch_sha256.txt
+          python3 - <<'PY'
+          import json,os,pathlib
+          patch=pathlib.Path('p25_null/neutral_readme_only.diff').read_text()
+          assert patch.startswith('diff --git a/README.md b/README.md')
+          assert 'src/cfnlint/' not in patch
+          prediction={'instance_id':os.environ['INSTANCE_ID'],
+             'model_name_or_path':'P25_POSTREVEAL_README_ONLY_NULL_CONTROL_NOT_AGENT',
+             'model_patch':patch}
+          pathlib.Path('p25_null/predictions.jsonl').write_text(json.dumps(prediction)+'\n')
+          print('P25_ORIGINAL_SOURCE_UNCHANGED_README_ONLY_NONEMPTY_PATCH')
+          PY
+      - name: Setup Python 3.12 to run original pinned harness
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original unmodified SWE-bench-Live harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$ORIGINAL_HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$ORIGINAL_HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$ORIGINAL_HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > p25_null/environment.txt
+      - name: Load exact same original task after explicit postreveal declaration
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/null_task"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          ds=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['DATASET_REV'])
+          rows=[dict(x) for x in ds if x['instance_id']==os.environ['INSTANCE_ID']]
+          assert len(rows)==1
+          (pathlib.Path(os.environ['RUNNER_TEMP'])/'null_task/task.jsonl').write_text(
+             json.dumps(rows[0],ensure_ascii=False,default=str)+'\n')
+          print('P25_ORIGINAL_TASK_ALREADY_REVEALED_THIS_IS_A_NULL_CONTROL')
+          PY
+      - name: Execute unchanged original Docker evaluator on documentation-only control
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p25_null/oracle_started_at_utc.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/null_task/task.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/p25_null/predictions.jsonl" \
+              --max_workers 1 --timeout 900 \
+              --run_id "evcar-p25-null-control-readme-only" \
+            > "$GITHUB_WORKSPACE/p25_null/original_harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p25_null/original_harness_exit_code.txt"
+          tail -n 85 "$GITHUB_WORKSPACE/p25_null/original_harness_stdout.log"
+          echo "P25_ORIGINAL_HARNESS_EXIT=$rc; no-code control does not prove original agent success"
+          exit "$rc"
+      - name: Extract matched task report and exact overlap with P23 four P2P test names
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,shutil
+          iid=os.environ['INSTANCE_ID']
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          out=pathlib.Path('p25_null')
+          reports=[]
+          for f in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(f):continue
+              try:
+                  data=json.loads(f.read_text())
+                  if isinstance(data,dict) and iid in data:reports.append((f,data[iid]))
+              except (ValueError,OSError):continue
+          orig=json.loads(pathlib.Path('data/audits/P24_CFN_LINT_P23_ORIGINAL_FOUR_P2P_DIAGNOSTIC_20261120.json').read_text())
+          expected=set(orig['failing_p2p_test_ids'])
+          observed={
+            'schema':'99llm_X1_P25_postreveal_readme_only_original_task_oracle_v1',
+            'task':iid,
+            'source_base_sha':os.environ['BASE_SHA'],
+            'baseline_control_patch_type':'README_MARKDOWN_COMMENT_ONLY',
+            'original_harness_run':44738711010,
+            'original_harness_original_p2p_failed':4,
+            'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+            'matched_reports':len(reports),
+            'status':'NOT_ADMITTED',
+            'f2p_passed':None,'f2p_total':None,'p2p_failed':None,
+            'p2p_passed':None,'tests_executed':None,'resolved':None,
+            'original_four_failing_test_ids':sorted(expected),
+            'matched_failure_overlap_ids':None,
+            'control_only_failure_ids':None,
+            'original_only_failure_ids':None,
+            'no_source_code_or_schema_change':True,
+            'no_new_agent_or_original_blind_task':True,
+            'original_P9_untouched':True
+          }
+          if len(reports)==1:
+              f,r=reports[0]
+              shutil.copyfile(f,out/'original_report.json')
+              fs=r.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              ps=r.get('tests_status',{}).get('PASS_TO_PASS',{})
+              s=fs.get('success',[]);e=fs.get('failure',[])
+              p=ps.get('success',[]);q=ps.get('failure',[])
+              log=f.parent/'test_output.txt'
+              if log.is_file():shutil.copyfile(log,out/'original_test_output.txt')
+              if log.is_file() and all(isinstance(x,list) for x in (s,e,p,q)) and len(s)+len(e)>0 and len(s)+len(e)+len(p)+len(q)>0:
+                  actual=set(q)
+                  observed.update({
+                    'status':'COMPLETE_POSTREVEAL_CONTROL',
+                    'f2p_passed':len(s),'f2p_total':len(s)+len(e),
+                    'p2p_failed':len(q),'p2p_passed':len(p),
+                    'tests_executed':len(s)+len(e)+len(p)+len(q),
+                    'resolved':r.get('resolved'),
+                    'matched_failure_overlap_ids':sorted(actual&expected),
+                    'control_only_failure_ids':sorted(actual-expected),
+                    'original_only_failure_ids':sorted(expected-actual),
+                    'original_test_output_sha256':hashlib.sha256(log.read_bytes()).hexdigest(),
+                    'original_test_output_line_count':len(log.read_text(errors='replace').splitlines())})
+              job=f.parent/'run_instance.log'
+              if job.is_file():shutil.copyfile(job,out/'run_instance.log')
+          (out/'P25_ORIGINAL_NULL_CONTROL_RESULT.json').write_text(json.dumps(observed,indent=2,sort_keys=True)+'\n')
+          print('P25_ORIGINAL_NULL_CONTROL_EVIDENCE '+json.dumps(observed,sort_keys=True))
+          PY
+          docker image ls --digests > p25_null/docker_images.txt || true
+      - name: Preserve raw original evaluator receipts only in expiring artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p25-cfnlint-original-null-control-postreveal
+          path: p25_null/
+          retention-days: 60
+          if-no-files-found: error

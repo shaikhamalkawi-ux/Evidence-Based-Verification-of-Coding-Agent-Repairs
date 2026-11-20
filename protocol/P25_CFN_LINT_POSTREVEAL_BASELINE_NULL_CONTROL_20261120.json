@@ -1,0 +1,52 @@
+{
+  "schema": "99llm_X1_P25_original_task_postreveal_documentation_only_baseline_control_v1",
+  "status": "POSTREVEAL_MATCHED_NULL_SOURCE_CONTROL_NO_BLIND_AGENT_CLAIM",
+  "original_frozen_case": "aws-cloudformation__cfn-lint-3779",
+  "original_frozen_rank": 10,
+  "original_repo": "aws-cloudformation/cfn-lint",
+  "original_base_commit": "de28d1e43777e3782a06b74d9091c3471636eb70",
+  "original_P23_final_candidate_sha": "a1bd25e330d96cf450a44809fecd060d795e24ab",
+  "original_P23_final_patch_sha256": "f2aa236b6f72a006f920046be80b0a8cce272ef8a3dd9b118d091e2541a9a286",
+  "original_P23_ORACLE_run_id": 44738711010,
+  "original_P23_ORACLE_artifact_id": 14630435763,
+  "original_P23_result": {
+    "f2p_passed": 1,
+    "f2p_total": 1,
+    "p2p_failed": 4,
+    "p2p_passed": 1227,
+    "tests_executed": 1232,
+    "resolved": false
+  },
+  "original_four_failing_P2P_tests": [
+    "test/integration/test_good_templates.py::TestQuickStartTemplates::test_module_integration",
+    "test/integration/test_good_templates.py::TestQuickStartTemplates::test_templates",
+    "test/unit/module/override/test_exclude.py::TestExclude::test_success_run",
+    "test/unit/module/test_rules_collections.py::TestRulesCollection::test_success_run"
+  ],
+  "matched_control_design": "Reproduce the original historical repository base SHA exactly; apply only a nonfunctional Markdown comment appended to README.md, so that the original benchmark harness has a nonempty Git patch while all Python and IAM JSON source code are byte-identical to the original base.",
+  "control_expected": "F2P should not pass because original source bug remains; compare all P2P failure IDs/number from the same pinned evaluator and same Docker namespace with P23 candidate on the same local date. This is a POSTREVEAL diagnostic, not a prospective policy test.",
+  "control_patch_immutability": "Only README.md may change, and all source program/schema paths must equal original base. No source code edit, runtime parameter alteration, synthetic fix or historical time injection.",
+  "original_dataset_rev": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "original_harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "docker_namespace": "starryzhang",
+  "external_prior_relevant_issue": "https://github.com/aws-cloudformation/cfn-lint/issues/4125",
+  "external_prior_issue_created_utc": "2025-04-25T10:39:41Z",
+  "prior_issue_characterization": "The upstream issue explicitly reports the same TestRulesCollection::test_success_run failure after 2025-09-01 from E2533 Lambda runtime lifecycle date behavior. This is prior art, not a new original finding.",
+  "scientific_endpoints": [
+    "Original F2P and P2P counts under the same frozen image with neutral documentation-only patch",
+    "Exact overlap of the four P23 reported failed P2P test IDs with the null control",
+    "Any additional baseline-only failures or task verifier infrastructure errors",
+    "Separate raw original P23 unresolved label from postreveal causal/attribution interpretation"
+  ],
+  "claim_limits": [
+    "P25 is not a new blind agent repair, new benchmark task, or prospective verifier gate validation",
+    "Do not update P23 first-attempt original official resolved=false or P9 sealed decisions",
+    "If neutral control reproduces 4 failures, this supports non-attribution of those specific failures to the IAM patch, but does not retroactively alter the official benchmark PASS/FAIL result",
+    "If neutral control differs, preserve both and investigate; do not assume a failed test is an actual source code regression",
+    "No hidden grader patch, raw source, or full test output published in repository"
+  ],
+  "original_P9_decision_seal_sha256": "01ba163c361473e2354589d038f86c321267035001e69cda92c03026172eac2c",
+  "no_change_to_P23_original_result": true,
+  "no_new_model_authorship_attestation": true,
+  "no_human_coder": true
+}

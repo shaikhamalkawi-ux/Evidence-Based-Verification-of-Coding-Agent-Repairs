@@ -1,0 +1,253 @@
+{
+  "schema": "99llm_X1_P25_ten_frozen_task_report_versus_endpoint_admission_v1",
+  "current_lineage": "P25 matched original-source postreveal null control, without merging prior draft branches",
+  "sample_n_frozen": 10,
+  "source_dataset_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "raw_original_harness_executed_count": 9,
+  "raw_original_harness_resolved_count": 2,
+  "raw_original_harness_unresolved_count": 7,
+  "not_executed_original_harness_count": 1,
+  "endpoint_special_cases": {
+    "privacyidea": "Postreveal missing fixture makes original reported outcome unadmitted for source-code truth",
+    "cfnlint": "Original F2P passed but shared 4/4 P2P failures also happen with no-code baseline; raw original unresolved remains",
+    "reflex": "No original hidden task oracle; original reported bug not reproduced under tested dependency environments"
+  },
+  "seven_task_nonhomogeneous_policy_snapshot": {
+    "self_report": {
+      "qc_subset_count": 7,
+      "accepted": 4,
+      "accepted_raw_unresolved": 3,
+      "accepted_raw_resolved": 1,
+      "held_raw_resolved": 1,
+      "risk_among_accepted": "3/4"
+    },
+    "local_pass": {
+      "qc_subset_count": 7,
+      "accepted": 6,
+      "accepted_raw_unresolved": 5,
+      "accepted_raw_resolved": 1,
+      "held_raw_resolved": 1,
+      "risk_among_accepted": "5/6"
+    },
+    "source_linked": {
+      "qc_subset_count": 7,
+      "accepted": 0,
+      "accepted_raw_unresolved": 0,
+      "accepted_raw_resolved": 0,
+      "held_raw_resolved": 2,
+      "risk_among_accepted": null
+    }
+  },
+  "rows": [
+    {
+      "original_frozen_rank": 1,
+      "task": "kedro-org__kedro-4406",
+      "original_selection_sha256": "001538a6cb086f39e18ad031e95eee676802429d2aff69279f5f531ce07dfd3c",
+      "original_repo": "kedro-org/kedro",
+      "source_of_status": "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+      "raw_original_harness_run_id": 44159300952,
+      "raw_original_harness_status": "COMPLETE",
+      "raw_original_resolved": false,
+      "underlying_code_correctness_admission": "RAW_ORIGINAL_HARNESS_VERDICT_WITHOUT_MATCHED_BASELINE_ATTRIBUTION",
+      "p9_original_preoracle": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "INITIAL",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 2,
+      "task": "pdm-project__pdm-3419",
+      "original_selection_sha256": "00c257949331930b2a1fe1d9380fb0d6842932d5eb845f55f11ce2be19a5ffe5",
+      "original_repo": "pdm-project/pdm",
+      "source_of_status": "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+      "raw_original_harness_run_id": 44237374542,
+      "raw_original_harness_status": "COMPLETE",
+      "raw_original_resolved": false,
+      "underlying_code_correctness_admission": "RAW_ORIGINAL_HARNESS_VERDICT_WITHOUT_MATCHED_BASELINE_ATTRIBUTION",
+      "p9_original_preoracle": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "INITIAL",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 3,
+      "task": "matplotlib__matplotlib-28933",
+      "original_selection_sha256": "01913472a33e14af6f43d8ab53095a58517865b6cf9bb447784787f2fd08cf3e",
+      "original_repo": "matplotlib/matplotlib",
+      "source_of_status": "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+      "raw_original_harness_run_id": 44594455715,
+      "raw_original_harness_status": "COMPLETE",
+      "raw_original_resolved": false,
+      "underlying_code_correctness_admission": "RAW_ORIGINAL_HARNESS_VERDICT_WITHOUT_MATCHED_BASELINE_ATTRIBUTION",
+      "p9_original_preoracle": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "POST_SYNTHETIC_FEEDBACK_FINAL",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 4,
+      "task": "python-babel__babel-1163",
+      "original_selection_sha256": "020831733aec9dbbcc20579900fae38f1ac63fbccfc917293ed6c904e93497f9",
+      "original_repo": "python-babel/babel",
+      "source_of_status": "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+      "raw_original_harness_run_id": 44161755692,
+      "raw_original_harness_status": "COMPLETE",
+      "raw_original_resolved": true,
+      "underlying_code_correctness_admission": "RAW_ORIGINAL_HARNESS_VERDICT_WITHOUT_MATCHED_BASELINE_ATTRIBUTION",
+      "p9_original_preoracle": {
+        "self_report": "HOLD",
+        "local_pass": "HOLD",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "INITIAL",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 5,
+      "task": "pytorch__torchtune-2139",
+      "original_selection_sha256": "028f67a80f5247b09a9e0848b74e394cbb68f51751043bdf17bbb0c6826abc42",
+      "original_repo": "pytorch/torchtune",
+      "source_of_status": "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+      "raw_original_harness_run_id": 44613016409,
+      "raw_original_harness_status": "COMPLETE",
+      "raw_original_resolved": false,
+      "underlying_code_correctness_admission": "RAW_ORIGINAL_HARNESS_VERDICT_WITHOUT_MATCHED_BASELINE_ATTRIBUTION",
+      "p9_original_preoracle": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "INITIAL_CPU_SOURCE_PROXY",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 6,
+      "task": "stanfordnlp__dspy-1609",
+      "original_selection_sha256": "02fa56f6491bdd6ee2fcb4ae1a1eff97d712cfd8fddd1064feccff8775c89729",
+      "original_repo": "stanfordnlp/dspy",
+      "source_of_status": "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+      "raw_original_harness_run_id": 44666993268,
+      "raw_original_harness_status": "COMPLETE",
+      "raw_original_resolved": false,
+      "underlying_code_correctness_admission": "RAW_ORIGINAL_HARNESS_VERDICT_WITHOUT_MATCHED_BASELINE_ATTRIBUTION",
+      "p9_original_preoracle": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "INITIAL_TYPED_DEMONSTRATION",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 7,
+      "task": "privacyidea__privacyidea-4251",
+      "original_selection_sha256": "03c483d5145143bd7e3a85250b76cac8b097afcb5b27d2cf317c32b937d4cba2",
+      "original_repo": "privacyidea/privacyidea",
+      "source_of_status": "data/audits/P21_PRIVACYIDEA_ENDPOINT_ADMISSION_REPRODUCED_20261120.json",
+      "raw_original_harness_run_id": 44669546280,
+      "raw_original_harness_status": "COMPLETE_RAW_VERDICT_WITH_INVALID_ENDPOINT",
+      "raw_original_resolved": false,
+      "underlying_code_correctness_admission": "HOLD_SYSTEMIC_TEST_IMPORT_FAILURE",
+      "p9_original_preoracle": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "INITIAL_AST_SOURCE_PROXY",
+      "rationale": "The original test artifact contains ModuleNotFoundError swe100_fixture_clock; all 2022 raw P2P failures cannot be presumed separate source regressions.",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": false,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 8,
+      "task": "joke2k__faker-2155",
+      "original_selection_sha256": "041334c6fa307607a14a31fdc57288f9deb9dae30c2f7c67925d1b57caea1b29",
+      "original_repo": "joke2k/faker",
+      "source_of_status": "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+      "raw_original_harness_run_id": 44166705455,
+      "raw_original_harness_status": "COMPLETE",
+      "raw_original_resolved": true,
+      "underlying_code_correctness_admission": "RAW_ORIGINAL_HARNESS_VERDICT_WITHOUT_MATCHED_BASELINE_ATTRIBUTION",
+      "p9_original_preoracle": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "INITIAL",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 9,
+      "task": "reflex-dev__reflex-4510",
+      "original_selection_sha256": "042571b27fe4242ff7394645d6325013f54419e14a651ddc19c063a9476a8a7b",
+      "original_repo": "reflex-dev/reflex",
+      "source_of_status": "data/audits/P22C_REFLEX_VINTAGE_DEPENDENCY_COMPARISON_20261120.json",
+      "raw_original_harness_run_id": null,
+      "raw_original_harness_status": "NOT_EXECUTED_VISIBLE_REPRODUCTION_NOT_IDENTIFIED",
+      "raw_original_resolved": null,
+      "underlying_code_correctness_admission": "HOLD_SOURCE_DEPENDENCY_AND_REPRODUCTION",
+      "p9_original_preoracle": {
+        "self_report": null,
+        "local_pass": null,
+        "source_linked": null
+      },
+      "record_stage": "PREPATCH_SOURCE_FEASIBILITY",
+      "rationale": "Reported typing.Any reproduction did not occur; current dependencies mask imports, vintage sqlmodel pins run with no exception.",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": false,
+      "is_a_definitively_source_attributed_false_accept": false
+    },
+    {
+      "original_frozen_rank": 10,
+      "task": "aws-cloudformation__cfn-lint-3779",
+      "original_selection_sha256": "052ef43cda461658ac1bd9255a01ea622484d2b4bad8cd0e55b443a22de23687",
+      "original_repo": "aws-cloudformation/cfn-lint",
+      "source_of_status": "data/audits/P25_CFN_LINT_MATCHED_ORIGINAL_NULL_CONTROL_EXECUTED_20261120.json",
+      "raw_original_harness_run_id": 44738711010,
+      "raw_original_harness_status": "COMPLETE_RAW_UNRESOLVED_MATCHED_P2P_BASELINE_FAILS",
+      "raw_original_resolved": false,
+      "underlying_code_correctness_admission": "HOLD_ORIGINAL_OFFICIAL_UNRESOLVED_BUT_P2P_PATCH_ATTRIBUTION_NOT_SUPPORTED",
+      "p9_original_preoracle": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "record_stage": "SECOND_VISIBLE_SOURCE_CANDIDATE",
+      "issue_f2p": "1/1",
+      "p2p_exact_matched_failure_overlap": "4/4",
+      "reference_null_control_run_id": 44761416230,
+      "rationale": "Original P23 issue F2P passes. The identical 4 failed P2P IDs occur when ONLY README is changed; original official task remains unresolved.",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": false,
+      "is_a_definitively_source_attributed_false_accept": false
+    }
+  ],
+  "methodological_limits": [
+    "Seven-task observed policy subset is heterogeneous, including Matplotlib after synthetic developer-style feedback and other initial attempts; no population effects or confidence intervals.",
+    "Case-level endpoint QC source attribution may be unresolved even when original test reports are parsed; raw original benchmark outcomes remain untouched.",
+    "P25 baseline null control is postreveal and not an eleventh task, not a new agent candidate, and cannot make original P23 labeled resolved.",
+    "P20 privacyIDEA imported fixture failure raw P2P errors must NOT be turned into local false accept counts.",
+    "Source-linked policy has zero accepted tasks; false accept rate among accepted undefined, not zero.",
+    "No independent model actor attestation and no human coder reliability experiment.",
+    "No claim of cross-task causal policy superiority. Original manuscript MR30 and frozen original P9 decision records are not edited.",
+    "Seven historical original-harness verdicts are descriptive task-level labels, not comprehensive confirmation that all failed tests are newly caused by the candidate repair; baseline comparisons remain incomplete for several tasks."
+  ],
+  "seven_task_descriptive_raw_harness_subset_count": 7,
+  "seven_task_descriptive_raw_harness_subset_resolved": 2,
+  "seven_task_descriptive_raw_harness_subset_unresolved": 5,
+  "panel_label": "Seven-task historical original-harness descriptive panel, not confirmed per-task source-causality or population-level policy precision."
+}
