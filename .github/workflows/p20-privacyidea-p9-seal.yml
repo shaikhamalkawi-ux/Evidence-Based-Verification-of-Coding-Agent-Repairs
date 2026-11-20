@@ -1,0 +1,82 @@
+name: P20 preoracle SHA-seal original frozen P9 ScriptEventHandler task decision
+
+on:
+  push:
+    paths: ['.github/workflows/p20-privacyidea-p9-seal.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preoracle-source-decision:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout original P9 policy and P20 visible result
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check original frozen task index, source SHA and full-task claim boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p20_preoracle_seal
+          python3 - <<'PY'
+          import hashlib,json,pathlib,datetime
+          p=pathlib.Path('pilot/privacyidea')
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          reg=json.loads((p/'P20_PREREGISTRATION_20261120.json').read_text())
+          row=json.loads((p/'P20_DECISION_INPUT_WITHOUT_TIME.jsonl').read_text())
+          assert len(frame['selected'])==10
+          assert frame['selected'][6]['instance_id']==reg['task']['instance_id']=='privacyidea__privacyidea-4251'
+          assert frame['selected'][6]['repo']=='privacyidea/privacyidea'
+          assert row['head_sha']==row['receipts'][0]['head_sha']=='4543bd4e279083311783c13e9d950b4534922d8e'
+          assert row['source_verification']['candidate_patch_sha256']=='c7bc136dc61ebce92cd2a1781df775fbaa86a340ddf610551ec2499884f3382a'
+          assert row['source_verification']['candidate_source_blob']=='f1e0d1d1847baa5814c04f54807dce9df7524b8c'
+          assert row['receipts'][0]['test_count']==10 and row['receipts'][0]['status']=='success'
+          assert row['source_verification']['candidate_visible']['passed']==10
+          assert row['source_verification']['Flask_application_HTTP_response_not_executed'] is True
+          assert row['agent_claimed_fixed'] is False and row['target_agent_is_commit_author'] is False
+          assert row['source_verification']['original_independent_task_oracle_not_yet_seen'] is True
+          assert hashlib.sha256((p/'p20_visible_original_script_handler_ast.py').read_bytes()).hexdigest()==row['source_verification']['frozen_visible_tests_sha256']
+          forbidden={'oracle','oracle_status','oracle_result','future_ci','future_test','heldout_result','label','resolved','task_outcome','test_patch','FAIL_TO_PASS','PASS_TO_PASS'}
+          assert not forbidden.intersection(row)
+          now=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
+          assert now>row['receipts'][0]['completed_at']
+          row['t_decision']=now
+          (pathlib.Path('p20_preoracle_seal')/'P20_DECISION_INPUT.jsonl').write_text(json.dumps(row,sort_keys=True)+'\n')
+          print('P20_ORIGINAL_P9_DECISION_TIMESTAMP_UTC='+now)
+          print('P20_ORIGINAL_BENCHMARK_GOLD_NOT_READ')
+          PY
+      - name: Execute unchanged original P9 policy and SHA seal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p9_decide.py \
+            --input p20_preoracle_seal/P20_DECISION_INPUT.jsonl \
+            --out p20_preoracle_seal/locked
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('p20_preoracle_seal')
+          d=json.loads((p/'locked/P9_DECISIONS_SEALED.jsonl').read_text())
+          s=json.loads((p/'locked/P9_DECISION_SEAL.json').read_text())
+          assert d['episode_id']=='privacyidea__privacyidea-4251__INITIAL_SOURCE_ATTEMPT'
+          assert d['head_sha']=='4543bd4e279083311783c13e9d950b4534922d8e'
+          assert d['decisions']=={'self_report':'HOLD','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert hashlib.sha256((p/'P20_DECISION_INPUT.jsonl').read_bytes()).hexdigest()==s['input_sha256']
+          assert hashlib.sha256((p/'locked/P9_DECISIONS_SEALED.jsonl').read_bytes()).hexdigest()==s['decisions_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==s['script_sha256']
+          print('P20_SEALED_INPUT='+json.dumps(json.loads((p/'P20_DECISION_INPUT.jsonl').read_text()),sort_keys=True))
+          print('P20_SEALED_DECISION='+json.dumps(d,sort_keys=True))
+          print('P20_SEALED_MANIFEST='+json.dumps(s,sort_keys=True))
+          print('P20_SHA_LOCK_COMPLETE_BEFORE_ORACLE')
+          PY
+      - name: Preserve original complete preoracle SHA material
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p20-privacyidea-original-p9-seal
+          path: p20_preoracle_seal/
+          retention-days: 60
+          if-no-files-found: error
