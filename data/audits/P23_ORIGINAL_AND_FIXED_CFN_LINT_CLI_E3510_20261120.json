@@ -1,0 +1,253 @@
+{
+  "schema": "99llm_X1_P23_original_source_real_cli_E3510_v1",
+  "source_run_id": 44737604630,
+  "original_task": "aws-cloudformation__cfn-lint-3779",
+  "original_source_commit": "de28d1e43777e3782a06b74d9091c3471636eb70",
+  "final_candidate_git_sha": "a1bd25e330d96cf450a44809fecd060d795e24ab",
+  "original_cli": {
+    "cli_case_sha256": "2baeadafb0e8de15dd53a5395e47af9e2ab470ee467a3386a33a977c67c3a2d7",
+    "code_agent_actor_independently_attested": false,
+    "invalid_expected_e3510_present": 3,
+    "matching_expectation": 4,
+    "mismatching_expectation": 5,
+    "n_cases": 9,
+    "no_reference_patch_access": true,
+    "not_full_iam_authorization_semantics": true,
+    "original_base_sha": "de28d1e43777e3782a06b74d9091c3471636eb70",
+    "original_heldout_task_oracle_executed": false,
+    "stage": "historical_base",
+    "study": "P23_source_public_cli_iam_condition_e3510_pre_hidden_v1",
+    "task": "aws-cloudformation__cfn-lint-3779",
+    "valid_expected_e3510_absent": 1,
+    "cases": [
+      {
+        "case_id": "CLI_P01",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "d5acea2ee41b1543cf2b81b565cc1ef107297522758dce6ea3607f3fb9fdc237",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": false,
+        "expected_e3510": false,
+        "observed_e3510": true,
+        "operator": "StringEqualsIfExists"
+      },
+      {
+        "case_id": "CLI_P02",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "0a183d577a7258a5c0eb0914cf0f1150b375b1b430d9c818ec3a52e3cdf22723",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": false,
+        "expected_e3510": false,
+        "observed_e3510": true,
+        "operator": "ForAnyValue:StringEquals"
+      },
+      {
+        "case_id": "CLI_P03",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "c1426be5a11fc3dc4542d5a614f14a2a4a6f5a9cf63f8e9c261a28ab3aae0b4e",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": false,
+        "expected_e3510": false,
+        "observed_e3510": true,
+        "operator": "ForAllValues:StringEquals"
+      },
+      {
+        "case_id": "CLI_P04",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "9747f315a493045c3d116dcc77330e1f07ba5ecd970a1de1eaf88f6f588b3f3f",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": false,
+        "expected_e3510": false,
+        "observed_e3510": true,
+        "operator": "NumericLessThanEquals"
+      },
+      {
+        "case_id": "CLI_P05",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "98937a10275a5b7940e086370cb11b001ec3a2498a45c84794ecc518eac0eddd",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": false,
+        "expected_e3510": false,
+        "observed_e3510": true,
+        "operator": "DateGreaterThanIfExists"
+      },
+      {
+        "case_id": "CLI_P06",
+        "cli_exit": 0,
+        "cli_raw_log_sha256": "5239a7754876b9a70871c45e41f1bd9abbd91ed2de67af926c1cfcc9c9377d51",
+        "diagnostic_codes": [],
+        "e3510_match": true,
+        "expected_e3510": false,
+        "observed_e3510": false,
+        "operator": "StringEquals"
+      },
+      {
+        "case_id": "CLI_N01",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "3ac3a6c74c9bfe9ff1e2bb04be0a568cab83669451cf265abaaa197c356d3322",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": true,
+        "expected_e3510": true,
+        "observed_e3510": true,
+        "operator": "ForAnyValues:StringEquals"
+      },
+      {
+        "case_id": "CLI_N02",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "295259fe8fd8dc52e228caf02a03805c222743ae11e1ef6f6c4611ff83e3cd78",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": true,
+        "expected_e3510": true,
+        "observed_e3510": true,
+        "operator": "StringEqualsIfExist"
+      },
+      {
+        "case_id": "CLI_N03",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "34c52a718d666278300f053d20c78b5e3436e7a58f39362923694545d0a7e9ef",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": true,
+        "expected_e3510": true,
+        "observed_e3510": true,
+        "operator": "ForAnyValue:StringEqualsBogus"
+      }
+    ]
+  },
+  "final_cli": {
+    "cli_case_sha256": "2baeadafb0e8de15dd53a5395e47af9e2ab470ee467a3386a33a977c67c3a2d7",
+    "code_agent_actor_independently_attested": false,
+    "invalid_expected_e3510_present": 3,
+    "matching_expectation": 9,
+    "mismatching_expectation": 0,
+    "n_cases": 9,
+    "no_reference_patch_access": true,
+    "not_full_iam_authorization_semantics": true,
+    "original_base_sha": "de28d1e43777e3782a06b74d9091c3471636eb70",
+    "original_heldout_task_oracle_executed": false,
+    "stage": "second_candidate",
+    "study": "P23_source_public_cli_iam_condition_e3510_pre_hidden_v1",
+    "task": "aws-cloudformation__cfn-lint-3779",
+    "valid_expected_e3510_absent": 6,
+    "cases": [
+      {
+        "case_id": "CLI_P01",
+        "cli_exit": 0,
+        "cli_raw_log_sha256": "5239a7754876b9a70871c45e41f1bd9abbd91ed2de67af926c1cfcc9c9377d51",
+        "diagnostic_codes": [],
+        "e3510_match": true,
+        "expected_e3510": false,
+        "observed_e3510": false,
+        "operator": "StringEqualsIfExists"
+      },
+      {
+        "case_id": "CLI_P02",
+        "cli_exit": 0,
+        "cli_raw_log_sha256": "5239a7754876b9a70871c45e41f1bd9abbd91ed2de67af926c1cfcc9c9377d51",
+        "diagnostic_codes": [],
+        "e3510_match": true,
+        "expected_e3510": false,
+        "observed_e3510": false,
+        "operator": "ForAnyValue:StringEquals"
+      },
+      {
+        "case_id": "CLI_P03",
+        "cli_exit": 0,
+        "cli_raw_log_sha256": "5239a7754876b9a70871c45e41f1bd9abbd91ed2de67af926c1cfcc9c9377d51",
+        "diagnostic_codes": [],
+        "e3510_match": true,
+        "expected_e3510": false,
+        "observed_e3510": false,
+        "operator": "ForAllValues:StringEquals"
+      },
+      {
+        "case_id": "CLI_P04",
+        "cli_exit": 0,
+        "cli_raw_log_sha256": "5239a7754876b9a70871c45e41f1bd9abbd91ed2de67af926c1cfcc9c9377d51",
+        "diagnostic_codes": [],
+        "e3510_match": true,
+        "expected_e3510": false,
+        "observed_e3510": false,
+        "operator": "NumericLessThanEquals"
+      },
+      {
+        "case_id": "CLI_P05",
+        "cli_exit": 0,
+        "cli_raw_log_sha256": "5239a7754876b9a70871c45e41f1bd9abbd91ed2de67af926c1cfcc9c9377d51",
+        "diagnostic_codes": [],
+        "e3510_match": true,
+        "expected_e3510": false,
+        "observed_e3510": false,
+        "operator": "DateGreaterThanIfExists"
+      },
+      {
+        "case_id": "CLI_P06",
+        "cli_exit": 0,
+        "cli_raw_log_sha256": "5239a7754876b9a70871c45e41f1bd9abbd91ed2de67af926c1cfcc9c9377d51",
+        "diagnostic_codes": [],
+        "e3510_match": true,
+        "expected_e3510": false,
+        "observed_e3510": false,
+        "operator": "StringEquals"
+      },
+      {
+        "case_id": "CLI_N01",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "e7cfbdac31af6d281348366feadd00cab31763735f145dda750ff629847cd1d2",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": true,
+        "expected_e3510": true,
+        "observed_e3510": true,
+        "operator": "ForAnyValues:StringEquals"
+      },
+      {
+        "case_id": "CLI_N02",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "046a317beb57954b4da8d77e3d8c754644f919f7eba56d843601c16841bfc351",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": true,
+        "expected_e3510": true,
+        "observed_e3510": true,
+        "operator": "StringEqualsIfExist"
+      },
+      {
+        "case_id": "CLI_N03",
+        "cli_exit": 2,
+        "cli_raw_log_sha256": "f59b3f4c52b0024f79ba2568a99250534dac5c84a4f19a064811dd0303cbfd30",
+        "diagnostic_codes": [
+          "E3510"
+        ],
+        "e3510_match": true,
+        "expected_e3510": true,
+        "observed_e3510": true,
+        "operator": "ForAnyValue:StringEqualsBogus"
+      }
+    ]
+  },
+  "n_valid_test_templates": 6,
+  "n_invalid_test_templates": 3,
+  "original_false_E3510_valid_templates": 5,
+  "fixed_false_E3510_valid_templates": 0,
+  "negative_E3510_3_cases_preserved": true,
+  "signed_actor_proof_absent": true,
+  "original_hidden_task_oracle_unseen": true,
+  "note": "Additional synthetic source public CLI test cases were authored after second source patch but before their execution and before hidden task oracle; they are not an independent test holdout. Exact real cfn-lint CLI invoked on historical source and candidate."
+}
