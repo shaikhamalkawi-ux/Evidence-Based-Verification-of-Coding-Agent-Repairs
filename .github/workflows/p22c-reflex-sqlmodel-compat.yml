@@ -1,0 +1,113 @@
+name: P22C Reflex original source vintage sqlmodel environment compatibility (NOT CODE REPAIR)
+
+on:
+  push:
+    paths: ['.github/workflows/p22c-reflex-sqlmodel-compat.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-source-dependency-compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    strategy:
+      fail-fast: false
+      matrix:
+        sqlmodel-version: ['0.0.14','0.0.22']
+    steps:
+      - name: Checkout original fixed task, no gold patch or original task oracle
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify source and prior import failure admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p22c_env
+          python3 - <<'PY'
+          import pathlib,json
+          x=json.loads(pathlib.Path('protocol/P22C_REFLEX_VINTAGE_SQLMODEL_ENV_TEST_20261120.json').read_text())
+          e=json.loads(pathlib.Path('data/audits/P22B_REFLEX_ORIGINAL_EXCEPTION_CHAIN_20261120.json').read_text())
+          assert x['status']=='POSTBASELINE_DEPENDENCY_FEASIBILITY_NOT_AN_AGENT_REPAIR'
+          assert e['exception_chain'][1]['type']=='ImportError'
+          assert x['original_base']=='2520c51aaf4c0a4af965026ae3a3fd5b03930288'
+          assert not x['hidden_oracle_not_loaded'] is False
+          print('P22C_ENV_ONLY_REFLEX_SOURCE_UNCHANGED')
+          PY
+      - name: Python 3.13 matching original report
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Get original historical code and install separately pinned dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/reflex_src"
+          git -C "$RUNNER_TEMP/reflex_src" remote add origin https://github.com/reflex-dev/reflex.git
+          git -C "$RUNNER_TEMP/reflex_src" fetch --depth 1 origin 2520c51aaf4c0a4af965026ae3a3fd5b03930288
+          git -C "$RUNNER_TEMP/reflex_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/reflex_src" rev-parse HEAD)" = 2520c51aaf4c0a4af965026ae3a3fd5b03930288
+          python3 -m pip install -U pip wheel > p22c_env/bootstrap.log 2>&1
+          set +e
+          python3 -m pip install "$RUNNER_TEMP/reflex_src" > p22c_env/base_install.log 2>&1
+          base_rc=$?
+          echo "$base_rc" > p22c_env/base_install_exit.txt
+          if [ "$base_rc" -eq 0 ]; then
+            python3 -m pip install 'sqlmodel==${{ matrix.sqlmodel-version }}' > p22c_env/pin_install.log 2>&1
+            pin_rc=$?
+          else
+            pin_rc=99
+          fi
+          echo "$pin_rc" > p22c_env/pin_install_exit.txt
+          if [ "$pin_rc" -ne 0 ]; then
+            tail -n 70 p22c_env/pin_install.log 2>/dev/null || true
+          fi
+          python3 -m pip freeze > p22c_env/env.txt
+          exit 0
+      - name: Original bug report reproduction under single-variable environment change
+        shell: bash
+        run: |
+          set +e
+          if [ "$(cat p22c_env/pin_install_exit.txt)" = 0 ]; then
+            python3 pilot/reflex/p22b_exception_chain.py > p22c_env/trace.log 2>&1
+            rc=$?
+            cat p22c_env/trace.log
+          else
+            rc=99
+          fi
+          echo "$rc" > p22c_env/exec_exit.txt
+          exit 0
+      - name: Record complete missingness and dependency diagnosis without source claim
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib,json,sys
+          p=pathlib.Path('p22c_env')
+          r=json.loads((p/'P22B_CHAIN.json').read_text()) if (p/'P22B_CHAIN.json').exists() else {}
+          doc={
+           'task':'reflex-dev__reflex-4510',
+           'source_sha':'2520c51aaf4c0a4af965026ae3a3fd5b03930288',
+           'python':sys.version.split()[0],
+           'pin':'VERSION_PIN',
+           'base_install_exit':int((p/'base_install_exit.txt').read_text()),
+           'pin_install_exit':int((p/'pin_install_exit.txt').read_text()),
+           'original_visible_exception_chain':r.get('exception_chain'),
+           'status':r.get('status','SETUP_HOLD'),
+           'original_source_changed':False,
+           'original_hidden_oracle_used':False,
+           'new_agent_patch':False,
+           'original_task_truth_verified':False}
+          (p/'P22C_COMPAT_RECEIPT.json').write_text(json.dumps(doc,indent=2,sort_keys=True)+'\n')
+          print('P22C_COMPAT_RESULT '+json.dumps(doc,sort_keys=True))
+          PY
+      - name: Upload only source environment and exception cause records
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p22c-reflex-sqlmodel-${{ matrix.sqlmodel-version }}
+          path: p22c_env/
+          retention-days: 60
+          if-no-files-found: warn
