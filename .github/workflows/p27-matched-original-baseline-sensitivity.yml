@@ -1,0 +1,73 @@
+name: P27 postreveal baseline-relative task endpoint sensitivity and old Kedro null
+
+on:
+  push:
+    paths: ['.github/workflows/p27-matched-original-baseline-sensitivity.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-original-frozen-source-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout original frozen P9 and source evidence, never download hidden grader
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify existing Kedro result and postreveal-only limits
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p27_output
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          p=json.loads(pathlib.Path('protocol/P27_KEDRO_PRIOR_ORIGINAL_NULL_ARTIFACT_RECOVERY_20261120.json').read_text())
+          reg=json.loads(pathlib.Path('protocol/P27_POSTREVEAL_BASELINE_RELATIVE_ENDPOINT_SENSITIVITY_20261120.json').read_text())
+          d=json.loads(pathlib.Path('data/audits/P27_KEDRO_PREEXISTING_MATCHED_NULL_20261120.json').read_text())
+          assert p['original_candidate_oracle_run_id']==44159300952
+          assert p['original_null_oracle_run_id']==44162955737
+          assert p['original_null_registered_before_its_own_execution']
+          assert d['status']=='COMPLETE_SAME_FAILURE_SET'
+          assert len(d['matched_p2p_failed_test_ids'])==25
+          assert len(d['candidate_only_failed_p2p_test_ids'])==0
+          assert len(d['control_only_failed_p2p_test_ids'])==0
+          assert reg['status']=='POSTHOC_ALTERNATIVE_ENDPOINT_NOT_REPLACEMENT_FOR_ORIGINAL_BENCHMARK'
+          assert reg['primary_P26_original_risk_bounds_unmodified']
+          print('P27_PRIOR_MATCHED_CONTROL_RECEIPT_SHA256='+hashlib.sha256(pathlib.Path('data/audits/P27_KEDRO_PREEXISTING_MATCHED_NULL_20261120.json').read_bytes()).hexdigest())
+          print('P27_NO_NEW_TASK_OR_DOCKER_ORACLE_ORIGINAL_P9_UNCHANGED')
+          PY
+      - name: Compute DISTINCT baseline-relative issue/P2P test adequacy sensitivity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p27_relative_endpoint_sensitivity.py \
+            --out p27_output/P27_POSTREVEAL_ALTERNATIVE_ENDPOINT.json
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('p27_output/P27_POSTREVEAL_ALTERNATIVE_ENDPOINT.json')
+          r=json.loads(p.read_text())
+          assert len(r['source_task_rows'])==10
+          assert r['candidates_with_original_p9_decisions']==9
+          assert r['policies']['local_pass']['accepted_relative_failure_fraction_bounds']==['1/2','5/8']
+          assert r['policies']['self_report']['accepted_relative_failure_fraction_bounds']==['2/5','2/5']
+          assert r['policies']['source_linked']['accepted_relative_failure_fraction_bounds'] is None
+          assert r['P26_original_endpoint_policy_bounds']['local_pass']==['1/2','7/8']
+          assert r['original_reported_task_verdicts_unchanged']
+          print('P27_ALT_ENDPOINT_OUTPUT_SHA256='+hashlib.sha256(p.read_bytes()).hexdigest())
+          PY
+      - name: Full software tests and Kedro 25/25 negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -v
+      - name: Preserve non-grader JSON source and exact rational arithmetic
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p27-kedro-existing-null-relative-endpoint-bounds
+          path: p27_output/
+          retention-days: 60
+          if-no-files-found: warn
