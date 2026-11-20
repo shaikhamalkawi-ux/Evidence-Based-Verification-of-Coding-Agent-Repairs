@@ -1,0 +1,82 @@
+name: P20 original privacyIDEA ScriptEventHandler AST baseline, visible only
+
+on:
+  push:
+    paths: ['.github/workflows/p20-privacyidea-original-visible.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      BASE_SHA: a44f38b40a61c5b91e6de68d20d27ed01d3ccb56
+      SCRIPT_BLOB: ada40e1d3d5284743ae5b3e84c472f20363f4923
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout frozen original task, tests, no candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify seventh frozen original task without original oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p20_original
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          p=json.loads(pathlib.Path('pilot/privacyidea/P20_PREREGISTRATION_20261120.json').read_text())
+          assert len(f['selected'])==10
+          assert f['selected'][6]['instance_id']==p['task']['instance_id']=='privacyidea__privacyidea-4251'
+          assert f['selected'][6]['repo']=='privacyidea/privacyidea'
+          assert p['task']['base_sha']==os.environ['BASE_SHA']
+          assert p['task']['source_blob_sha']==os.environ['SCRIPT_BLOB']
+          assert p['tests_before_patch']['number']==10
+          assert p['original_benchmark']['original_test_patch_unseen'] is True
+          print('P20_FROZEN_VISIBLE_TEST_SHA256='+hashlib.sha256(pathlib.Path('pilot/privacyidea/p20_visible_original_script_handler_ast.py').read_bytes()).hexdigest())
+          print('P20_NO_HIDDEN_TASK_DATA_SEEN')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retrieve exact source historical privacyIDEA commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/privacyidea_src"
+          git -C "$RUNNER_TEMP/privacyidea_src" remote add origin https://github.com/privacyidea/privacyidea.git
+          git -C "$RUNNER_TEMP/privacyidea_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/privacyidea_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/privacyidea_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/privacyidea_src" hash-object privacyidea/lib/eventhandler/scripthandler.py)" = "$SCRIPT_BLOB"
+      - name: Execute 10 original source AST visible checks, retain true failure report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p20_run_visible.py \
+            --repo "$RUNNER_TEMP/privacyidea_src" \
+            --stage original_base \
+            --out p20_original/P20_ORIGINAL_VISIBLE_RECEIPT.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('p20_original/P20_ORIGINAL_VISIBLE_RECEIPT.json'))
+          assert r['tests']==10
+          assert r['source_blob_sha']=='ada40e1d3d5284743ae5b3e84c472f20363f4923'
+          assert r['original_benchmark_oracle_accessed'] is False
+          print('P20_BASELINE_PASSED='+str(r['passed']))
+          print('P20_BASELINE_FAILED='+str(r['failed']))
+          print('P20_BASELINE_ERRORS='+str(r['errors']))
+          PY
+      - name: Preserve source and visible original-only receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p20-privacyidea-original-source-only
+          path: p20_original/
+          retention-days: 60
+          if-no-files-found: warn
