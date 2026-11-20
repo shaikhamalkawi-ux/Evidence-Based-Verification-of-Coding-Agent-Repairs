@@ -1,0 +1,222 @@
+{
+  "schema": "99llm_X1_P19_seven_task_original_oracle_mixed_stage_nonvacuity_v1",
+  "panel_status": "POSTHOC_DESCRIPTIVE_MIXED_STAGE_SNAPSHOT_NOT_A_PROSPECTIVE_POLICY_SUPERIORITY_ESTIMAND",
+  "frozen_frame": "pilot/frozen_task_frame_20261117.json",
+  "original_task_count": 10,
+  "now_evaluated_distinct_task_count": 7,
+  "not_yet_evaluated_task_count": 3,
+  "original_oracle_task_pass_count": 2,
+  "original_oracle_task_fail_count": 5,
+  "unique_task_rows": [
+    {
+      "task": "kedro-org__kedro-4406",
+      "stage": "INITIAL",
+      "head": "355ae83abe163ab9bbe2aaf7a59cc055f220d13e",
+      "f2p_passed": 1,
+      "f2p_total": 1,
+      "p2p_failed": 25,
+      "tests": 1592,
+      "truth": false,
+      "policy": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44159300952,
+      "source_ref": "main",
+      "decision_path": "pilot/kedro/locked/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44159300952",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/main/pilot/kedro/locked/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "python-babel__babel-1163",
+      "stage": "INITIAL",
+      "head": "e73fbf2b9f4be33af74a29c84bec6814998abe46",
+      "f2p_passed": 8,
+      "f2p_total": 8,
+      "p2p_failed": 0,
+      "tests": 7272,
+      "truth": true,
+      "policy": {
+        "self_report": "HOLD",
+        "local_pass": "HOLD",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44161755692,
+      "source_ref": "main",
+      "decision_path": "pilot/babel/locked/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44161755692",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/main/pilot/babel/locked/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "joke2k__faker-2155",
+      "stage": "INITIAL",
+      "head": "b9c8202d097f88fd43150681edbe14c085bbe1c3",
+      "f2p_passed": 1,
+      "f2p_total": 1,
+      "p2p_failed": 0,
+      "tests": 2051,
+      "truth": true,
+      "policy": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44166705455,
+      "source_ref": "main",
+      "decision_path": "pilot/faker/locked/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44166705455",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/main/pilot/faker/locked/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "pdm-project__pdm-3419",
+      "stage": "INITIAL",
+      "head": "5c5ea31661c70a7bd7ec7b661f32f380b45c1d40",
+      "f2p_passed": 0,
+      "f2p_total": 3,
+      "p2p_failed": 2,
+      "tests": 939,
+      "truth": false,
+      "policy": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44237374542,
+      "source_ref": "p12-pdm-two-stage-blind-pilot-20261118",
+      "decision_path": "pilot/pdm/locked/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44237374542",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/p12-pdm-two-stage-blind-pilot-20261118/pilot/pdm/locked/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "matplotlib__matplotlib-28933",
+      "stage": "POST_SYNTHETIC_FEEDBACK_FINAL",
+      "head": "1c9cb477367e56439fc71e08a4da0661cd105843",
+      "f2p_passed": 0,
+      "f2p_total": 1,
+      "p2p_failed": 0,
+      "tests": 8228,
+      "truth": false,
+      "policy": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44594455715,
+      "source_ref": "p14-matplotlib-two-stage-visible-20261119",
+      "decision_path": "pilot/matplotlib/sealed/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44594455715",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/p14-matplotlib-two-stage-visible-20261119/pilot/matplotlib/sealed/P9_DECISIONS_SEALED.jsonl"
+    },
+    {
+      "task": "pytorch__torchtune-2139",
+      "stage": "INITIAL_CPU_SOURCE_PROXY",
+      "head": "57f45fdd5552908d4b5d42cccd7359ccb4de2560",
+      "f2p_passed": 0,
+      "f2p_total": 1,
+      "p2p_failed": 0,
+      "tests": 651,
+      "truth": false,
+      "policy": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44613016409,
+      "source_ref": "p17-torchtune-source-candidate-20261120",
+      "decision_path": "pilot/torchtune/sealed/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44613016409",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/p17-torchtune-source-candidate-20261120/pilot/torchtune/sealed/P9_DECISIONS_SEALED.jsonl",
+      "original_visible_cpu_source_passes": "6/6",
+      "original_source_cpu_baseline_passes": "2/6",
+      "original_gpu_training_verified": false,
+      "preoracle_utc": "2026-11-19T20:45:51Z",
+      "source_patch_sha256": "c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801"
+    },
+    {
+      "task": "stanfordnlp__dspy-1609",
+      "stage": "INITIAL_TYPED_DEMONSTRATION",
+      "head": "2a2938cbd2b616c684768902bdcc0bfc09e7b9a4",
+      "f2p_passed": 0,
+      "f2p_total": 4,
+      "p2p_failed": 0,
+      "tests": 261,
+      "truth": false,
+      "policy": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      },
+      "run_id": 44666993268,
+      "source_ref": "p19-dspy-typed-demo-prompt-20261120",
+      "decision_path": "pilot/dspy/sealed/P9_DECISIONS_SEALED.jsonl",
+      "original_harness_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44666993268",
+      "preoracle_decision_source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/blob/p19-dspy-typed-demo-prompt-20261120/pilot/dspy/sealed/P9_DECISIONS_SEALED.jsonl",
+      "source_visible_base_passes": "3/9",
+      "source_visible_patch_passes": "9/9",
+      "Databricks_LM_reproducer_executed": false,
+      "actor_verified": false,
+      "preoracle_decision_UTC": "2026-11-20T03:17:43Z",
+      "original_patch_sha256": "e9771581fa04391b72b86f0da93495c0749e6f10f84452a83c4e8d2968a98a08"
+    }
+  ],
+  "original_P9_descriptive_policies": {
+    "self_report": {
+      "n_tasks": 7,
+      "n_accepted": 4,
+      "n_hold": 3,
+      "n_correct_accepted": 1,
+      "n_false_accepted": 3,
+      "n_unnecessary_hold": 1,
+      "false_accept_fraction_among_accepted": "3/4",
+      "false_accept_rate_defined": true,
+      "coverage_fraction": "4/7"
+    },
+    "local_pass": {
+      "n_tasks": 7,
+      "n_accepted": 6,
+      "n_hold": 1,
+      "n_correct_accepted": 1,
+      "n_false_accepted": 5,
+      "n_unnecessary_hold": 1,
+      "false_accept_fraction_among_accepted": "5/6",
+      "false_accept_rate_defined": true,
+      "coverage_fraction": "6/7"
+    },
+    "source_linked": {
+      "n_tasks": 7,
+      "n_accepted": 0,
+      "n_hold": 7,
+      "n_correct_accepted": 0,
+      "n_false_accepted": 0,
+      "n_unnecessary_hold": 2,
+      "false_accept_fraction_among_accepted": null,
+      "false_accept_rate_defined": false,
+      "coverage_fraction": "0/7"
+    }
+  },
+  "forward_process_v1_P19_ONLY": {
+    "case": "stanfordnlp__dspy-1609",
+    "preoracle_accept": "ACCEPT",
+    "original_independent_oracle_success": false,
+    "original_task_false_accept": true,
+    "not_comparable_to_orig_P9_source_linked_actor_requirement": true,
+    "sample_size": 1,
+    "not_population_approval_or_efficiency_evidence": true
+  },
+  "previous_six_task_snapshot": "data/audits/P17_SIX_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+  "P19_original_oracle": "data/audits/P19_DSPY_INITIAL_ORIGINAL_TASK_ORACLE_20261120.json",
+  "no_P18_postreveal_in_original_sample": true,
+  "no_human_coders": true,
+  "no_external_model_actor_attestation": true,
+  "limitations": [
+    "Six prior original task records plus one source-locked DSPy original benchmark result; seven distinct tasks counted once each.",
+    "Matplotlib contributes final post-synthetic-feedback patch, other cases are initial attempts; this is not a homogeneous stage-controlled cohort.",
+    "No confidence intervals, causal policy comparison or generalization from only seven heterogeneous tasks.",
+    "Source-linked original P9 accepts zero tasks, so risk among accepted is undefined, not 0.",
+    "The new no-actor process gate is tested prospectively on only P19, not retrospectively re-scored for old cases.",
+    "The original held-out task result does not establish any remote Databricks LLM or CoNLL workflow execution.",
+    "Original P18 postrevealed string-literal benchmark PASS is not counted as independent model success.",
+    "P10's naturalistic Copilot PRs are a separate observational frame."
+  ]
+}
