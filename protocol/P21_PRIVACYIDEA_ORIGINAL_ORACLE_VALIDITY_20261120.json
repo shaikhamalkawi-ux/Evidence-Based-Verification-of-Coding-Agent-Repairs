@@ -1,0 +1,31 @@
+{
+  "id": "99llm-X1-P21-PRIVACYIDEA-ORIGINAL-ORACLE-VALIDITY-POSTREVEAL",
+  "status": "POSTREVEAL_DIAGNOSTIC_NO_SOURCE_PATCH",
+  "original_task": "privacyidea__privacyidea-4251",
+  "frozen_rank_seven": true,
+  "original_source_base_sha": "a44f38b40a61c5b91e6de68d20d27ed01d3ccb56",
+  "original_P20_candidate_sha": "4543bd4e279083311783c13e9d950b4534922d8e",
+  "original_P20_patch_sha256": "c7bc136dc61ebce92cd2a1781df775fbaa86a340ddf610551ec2499884f3382a",
+  "original_P20_preoracle_policy_decisions_sha256": "33edbd2833c0730d6fa280a42f2cd05fe6deb754dce8c29764be5d40786f3f3d",
+  "original_harness_run_id": 44669546280,
+  "original_harness_artifact_id": 14598469251,
+  "original_harness_report": {
+    "f2p_total": 1,
+    "f2p_passed": 0,
+    "p2p_failed": 2022,
+    "tests_executed": 2023,
+    "official_resolved": false,
+    "matched_reports": 1
+  },
+  "original_test_output_sha256": "8fe0b9bfaccd2cc607abdc8cfbb7cf81d85d60aabb5664389e86c5c7e686efcb",
+  "concern": "All 2022 original P2P tests failed after a very small source change, suggesting collection/setup/harness confounding. Distinguish test execution status from independent task correctness and avoid attributing 2022 real regressions without evidence.",
+  "diagnostic_scope": "Read exact original raw test artifact and determine dominant error type (no module, test collection/setup error vs asserted behavior). Archive bounded counts and short deidentified error indicators, no hidden source or reruns.",
+  "no_new_hidden_test_optimization": true,
+  "no_new_agent_patch": true,
+  "no_original_P9_decision_recompute": true,
+  "no_human_coders": true,
+  "no_task_replacement": true,
+  "claim_limit": "The original harness marked unresolved, but the episode cannot be confidently classified as a source-repair failure/success under systemic infrastructure failures until log audit; keep result on original task frame with QC HOLD.",
+  "raw_hidden_artifact_license": "Do not commit original raw hidden test outputs, exception stack frame source snippets, or third-party binaries to GitHub branch. Only counts and bounded traceback categories.",
+  "original_MR30_P9_to_P20_results_unchanged": true
+}
