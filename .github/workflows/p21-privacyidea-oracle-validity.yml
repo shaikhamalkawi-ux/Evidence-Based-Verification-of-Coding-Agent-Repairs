@@ -1,0 +1,116 @@
+name: P21 postreveal privacyIDEA original oracle QC (no repair)
+
+on:
+  push:
+    paths: ['.github/workflows/p21-privacyidea-oracle-validity.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  postreveal-endpoint-qc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout P20 receipt and P21 postreveal scope
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Enforce same original task, source and policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p21_validity
+          python3 - <<'PY'
+          import json,pathlib
+          p=json.loads(pathlib.Path('protocol/P21_PRIVACYIDEA_ORIGINAL_ORACLE_VALIDITY_20261120.json').read_text())
+          s=json.loads(pathlib.Path('data/audits/P20_PRIVACYIDEA_ORIGINAL_HARNESS_RAW_WITH_QC_HOLD_20261120.json').read_text())
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert frame['selected'][6]['instance_id']==p['original_task']=='privacyidea__privacyidea-4251'
+          assert p['status']=='POSTREVEAL_DIAGNOSTIC_NO_SOURCE_PATCH'
+          assert p['original_P20_candidate_sha']==s['exact_original_candidate_sha']
+          assert p['original_harness_run_id']==s['original_harness_run_id']==44669546280
+          assert p['original_harness_artifact_id']==s['original_harness_artifact_id']==14598469251
+          assert p['original_test_output_sha256']==s['received_original_report']['original_test_output_sha256']
+          assert p['original_P20_preoracle_policy_decisions_sha256']==s['original_P9_decision_sha256']
+          assert s['task_label_sufficiency']=='HOLD_DIAGNOSE_ALL_2022_P2P_FAILURES'
+          assert p['no_new_agent_patch'] and p['no_original_P9_decision_recompute']
+          print('P21_POSTREVEAL_ONLY_ORIGINAL_P20_DECISIONS_PRESERVED')
+          PY
+      - name: Download original P20 evaluator artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: p20-privacyidea-original-task-oracle
+          run-id: 44669546280
+          github-token: ${{ github.token }}
+          path: p21_raw_artifact
+      - name: Verify raw output SHA and classify common error types
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections,hashlib,json,pathlib,re
+          root=pathlib.Path('p21_raw_artifact')
+          files=[str(f.relative_to(root)) for f in root.rglob('*') if f.is_file()]
+          outs=list(root.rglob('original_test_output.txt'))
+          reports=list(root.rglob('original_report.json'))
+          if len(outs)!=1 or len(reports)!=1:
+              raise RuntimeError('Original output/report unavailable: '+json.dumps(files[:25]))
+          raw=outs[0].read_bytes()
+          sha=hashlib.sha256(raw).hexdigest()
+          if sha!='8fe0b9bfaccd2cc607abdc8cfbb7cf81d85d60aabb5664389e86c5c7e686efcb':
+              raise RuntimeError('Wrong original task output checksum')
+          d=json.loads(reports[0].read_text())
+          iid='privacyidea__privacyidea-4251'
+          if iid not in d:raise RuntimeError('Original task report absent')
+          original=d[iid]
+          f=original.get('tests_status',{}).get('FAIL_TO_PASS',{})
+          p=original.get('tests_status',{}).get('PASS_TO_PASS',{})
+          sf,ff=f.get('success',[]),f.get('failure',[])
+          sp,fp=p.get('success',[]),p.get('failure',[])
+          assert len(sf)==0 and len(ff)==1
+          assert len(sp)==0 and len(fp)==2022
+          lines=raw.decode('utf8',errors='replace').splitlines()
+          kinds=['ModuleNotFoundError','ImportError','ConnectionError','OperationalError',
+                 'AssertionError','AttributeError','RuntimeError','TypeError','ValueError',
+                 'FileNotFoundError','SyntaxError','ERROR collecting','fixture',
+                 'E   ','FAILED ','ERROR ','Traceback (most recent call last)']
+          count={k:sum(k in line for line in lines) for k in kinds}
+          errs=collections.Counter()
+          for line in lines:
+              errs.update(re.findall(r'\b([A-Za-z_][A-Za-z_0-9]*(?:Error|Exception))\b',line))
+          module_tokens=sorted(set(re.findall(r"No module named ['\\\"]([^'\\\"]+)['\\\"]",raw.decode('utf8',errors='replace'))))
+          result={
+            'missing_import_module_names':module_tokens,
+            'original_collected_test_cases_observed':None,
+            'schema':'99llm_X1_P21_privacyidea_original_endpoint_qc_v1',
+            'study':'POSTREVEAL_ENDPOINT_VALIDITY_NO_NEW_AGENT_TRIAL',
+            'task':iid,
+            'source_original_run_id':44669546280,
+            'source_original_artifact_id':14598469251,
+            'original_test_output_sha256':sha,
+            'original_report_sha256':hashlib.sha256(reports[0].read_bytes()).hexdigest(),
+            'original_resolved':original.get('resolved'),
+            'f2p_passed':len(sf),'f2p_total':len(sf)+len(ff),
+            'p2p_passed':len(sp),'p2p_failed':len(fp),
+            'tests_classified':len(sf)+len(ff)+len(sp)+len(fp),
+            'raw_test_log_lines':len(lines),
+            'error_family_occurrences':count,
+            'top_exception_types':dict(errs.most_common(15)),
+            'status':'QC_HOLD_SYSTEMIC_ORACLE_FAILURE_PATTERN',
+            'no_new_patch':True,'no_new_P9_decisions':True,
+            'not_a_new_distinct_task':True,'raw_hidden_test_code_published':False,
+          }
+          pathlib.Path('p21_validity/P21_ENDPOINT_FAILURE_DIAGNOSTIC.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print('P21_POSTREVEAL_ORIGINAL_QC '+json.dumps(result,sort_keys=True))
+          PY
+      - name: Preserve bounded error taxonomy only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p21-privacyidea-postreveal-oracle-qc
+          path: p21_validity/
+          retention-days: 60
+          if-no-files-found: warn
