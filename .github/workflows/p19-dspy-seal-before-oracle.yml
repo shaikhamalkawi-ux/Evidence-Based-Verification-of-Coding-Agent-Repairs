@@ -1,0 +1,123 @@
+name: P19 seal DSPy ORIGINAL P9 and NEW actor-free process rule before hidden task oracle
+
+on:
+  push:
+    paths: ['.github/workflows/p19-dspy-seal-before-oracle.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  paired-decision-seal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact candidate receipts and both frozen policies
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Assert original frame, local receipt, candidate/test hashes and no future oracle fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p19_seal
+          python3 - <<'PY'
+          import hashlib,json,pathlib,datetime
+          base=pathlib.Path('pilot/dspy')
+          r=json.loads((base/'P19_PREREGISTRATION_20261120.json').read_text())
+          row=json.loads((base/'P19_DECISION_INPUT_WITHOUT_TIME.jsonl').read_text())
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert f['selected'][5]['instance_id']==r['task']['instance_id']=='stanfordnlp__dspy-1609'
+          assert len(f['selected'])==10 and f['dataset_revision_sha']==r['source_freeze']['revision']
+          assert r['original_P9_policy']['unchanged'] is True
+          assert r['prospective_process_only_v1']['name']=='artifact_linked_no_actor_v1_P19_PROSPECTIVE'
+          assert row['head_sha']==row['receipts'][0]['head_sha']=='2a2938cbd2b616c684768902bdcc0bfc09e7b9a4'
+          assert row['agent_claimed_fixed'] is False and row['target_agent_is_commit_author'] is False
+          assert row['receipts'][0]['status']=='success' and row['receipts'][0]['test_count']==9
+          assert row['source_verification']['visible_passed']==9
+          assert row['source_verification']['original_base_visible_passed']==3
+          assert row['source_verification']['candidate_source_blob']=='5aece153412ca5a1e6f4c7e95815b17ec561ec32'
+          assert row['source_verification']['patch_sha256']=='e9771581fa04391b72b86f0da93495c0749e6f10f84452a83c4e8d2968a98a08'
+          sha=hashlib.sha256((base/'p19_visible_original_adapter_ast.py').read_bytes()).hexdigest()
+          assert sha==row['source_verification']['frozen_visible_tests_sha256']
+          assert sha=='c8c47bf6ae3c641c47683d2becb181ee208f397309e81055bc09a3cc43f51104'
+          assert row['source_verification']['original_independent_task_oracle_not_yet_seen'] is True
+          forbidden={'oracle','oracle_status','oracle_result','future_ci','future_test','heldout_result',
+                     'label','resolved','task_outcome','test_patch','FAIL_TO_PASS','PASS_TO_PASS'}
+          assert not forbidden.intersection(row)
+          stamp=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
+          row['t_decision']=stamp
+          path=pathlib.Path('p19_seal/decision_input.jsonl')
+          path.write_text(json.dumps(row,sort_keys=True)+'\n',encoding='utf-8')
+          print('P19_ORIGINAL_P9_AND_PROCESS_SEAL_TIMESTAMP_UTC='+stamp)
+          print('P19_NO_ORIGINAL_HIDDEN_GOLD_ACCESSED')
+          PY
+      - name: Apply ORIGINAL frozen P9 policy to source-only task record
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p9_decide.py \
+            --input p19_seal/decision_input.jsonl \
+            --out p19_seal/locked
+      - name: Apply separately registered no-actor artifact-linked prospective policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p19_process_gate.py \
+            --input p19_seal/decision_input.jsonl \
+            --out p19_seal/P19_PROCESS_LINKED_V1_SEALED.jsonl
+      - name: Seal and verify immutable original and alternative decisions, no oracle fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          root=pathlib.Path('p19_seal')
+          d=json.loads((root/'locked/P9_DECISIONS_SEALED.jsonl').read_text())
+          p=json.loads((root/'P19_PROCESS_LINKED_V1_SEALED.jsonl').read_text())
+          s=json.loads((root/'locked/P9_DECISION_SEAL.json').read_text())
+          raw_input=(root/'decision_input.jsonl').read_bytes()
+          assert d['episode_id']==p['episode_id']=='stanfordnlp__dspy-1609__INITIAL_ATTEMPT_SOURCE_ONLY'
+          assert d['decisions']=={'self_report':'HOLD','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert p['decision']=='ACCEPT'
+          assert all(p['features'].values())
+          assert p['actor_model_identity_independently_attested'] is False
+          assert p['this_is_original_P9_source_linked_policy'] is False
+          assert p['reference_oracle_used'] is False
+          assert p['head_sha']==d['head_sha']
+          assert p['t_decision']==d['t_decision']
+          assert hashlib.sha256(raw_input).hexdigest()==s['input_sha256']
+          assert hashlib.sha256((root/'locked/P9_DECISIONS_SEALED.jsonl').read_bytes()).hexdigest()==s['decisions_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==s['script_sha256']
+          manifest={
+             'task_id':d['episode_id'],
+             't_decision':d['t_decision'],
+             'candidate_sha':d['head_sha'],
+             'P9_original_decisions_sha256':s['decisions_sha256'],
+             'P9_original_script_sha256':s['script_sha256'],
+             'raw_decision_input_sha256':s['input_sha256'],
+             'new_process_decision_sha256':hashlib.sha256((root/'P19_PROCESS_LINKED_V1_SEALED.jsonl').read_bytes()).hexdigest(),
+             'new_process_script_sha256':hashlib.sha256(pathlib.Path('scripts/p19_process_gate.py').read_bytes()).hexdigest(),
+             'frozen_visible_test_sha256':'c8c47bf6ae3c641c47683d2becb181ee208f397309e81055bc09a3cc43f51104',
+             'candidate_patch_sha256':'e9771581fa04391b72b86f0da93495c0749e6f10f84452a83c4e8d2968a98a08',
+             'independent_agent_actor_attested':False,
+             'hidden_oracle_seen':False,
+             'github_actions_seal_run_id':os.environ['GITHUB_RUN_ID']
+          }
+          (root/'P19_TWO_POLICY_SEAL_MANIFEST.json').write_text(json.dumps(manifest,sort_keys=True,separators=(',',':'))+'\n')
+          print('P19_SEALED_INPUT_RAW='+(root/'decision_input.jsonl').read_text().strip())
+          print('P19_SEALED_ORIGINAL_P9_RAW='+(root/'locked/P9_DECISIONS_SEALED.jsonl').read_text().strip())
+          print('P19_SEALED_ORIGINAL_P9_MANIFEST='+(root/'locked/P9_DECISION_SEAL.json').read_text().strip())
+          print('P19_SEALED_PROCESS_RAW='+(root/'P19_PROCESS_LINKED_V1_SEALED.jsonl').read_text().strip())
+          print('P19_SEALED_TWO_POLICY_MANIFEST='+(root/'P19_TWO_POLICY_SEAL_MANIFEST.json').read_text().strip())
+          print('P19_SEAL_ISSUED_BEFORE_ANY_ORIGINAL_TASK_ORACLE')
+          PY
+      - name: Preserve exact byte streams for public Git commit before hidden test reveal
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p19-dspy-two-policy-preoracle-seal
+          path: p19_seal/
+          retention-days: 60
+          if-no-files-found: error
