@@ -1,0 +1,96 @@
+name: P24B POSTREVEAL bounded cfn-lint P2P failure message taxonomy (NO PATCH)
+
+on:
+  push:
+    paths: ['.github/workflows/p24b-cfnlint-bounded-errors.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  bounded-postreveal-diagnostics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout P24 original task failure source integrity registration
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify P24 parent is already failed and no new code submitted
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p24b
+          python3 - <<'PY'
+          import json,pathlib
+          p=json.loads(pathlib.Path('protocol/P24B_CFN_LINT_ORIGINAL_P2P_BOUNDED_CAUSE_20261120.json').read_text())
+          prior=json.loads(pathlib.Path('data/audits/P24_CFN_LINT_P23_ORIGINAL_FOUR_P2P_DIAGNOSTIC_20261120.json').read_text())
+          assert p['status']=='POSTREVEAL_ANALYSIS_ONLY_NO_NEW_AGENT_ORIGINAL_TASK'
+          assert p['original_report_run']==prior['original_P23_run_id']==44738711010
+          assert prior['original_p2p_failed']==4 and prior['original_p2p_passed']==1227
+          assert p['original_test_output_sha256']==prior['original_output_sha256']
+          assert p['no_new_source_patch'] and p['no_P23_policy_redecision']
+          print('P24B_POSTREVEAL_ONLY_P23_UNCHANGED')
+          PY
+      - name: Download original failed P23 evaluator artifact from prior GitHub run
+        uses: actions/download-artifact@v4
+        with:
+          name: p23-cfn-lint-original-independent-task-oracle
+          run-id: 44738711010
+          github-token: ${{ github.token }}
+          path: p24b_exact_original
+      - name: Extract bounded exception and rule-code summaries only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections,hashlib,json,pathlib,re
+          base=pathlib.Path('p24b_exact_original')
+          files=list(base.rglob('original_test_output.txt'))
+          if len(files)!=1:raise RuntimeError('Original task test output ambiguous')
+          raw=files[0].read_bytes()
+          assert hashlib.sha256(raw).hexdigest()=='965babfbe839670397012b811098b2a307c5986d4272fcff5e4f29fd7c142650'
+          lines=raw.decode('utf8',errors='replace').splitlines()
+          picks=[]
+          for line in lines:
+              s=line.strip()
+              if len(picks)>=40:break
+              if s.startswith('FAILED ') or (
+                 re.match(r'^E\s+',s) and re.search(r'AssertionError|ValueError|CalledProcessError|E\d{4}|TypeError|expected|unexpected|does not match',s,re.I)):
+                  # Output a bounded error summary, never full hidden-test source code.
+                  picks.append(s[:250])
+          rules=collections.Counter()
+          for s in lines:
+              rules.update(re.findall(r'\bE\d{4}\b',s))
+          observed={
+            'schema':'99llm_X1_P24B_original_p2p_capped_failure_lines_v1',
+            'study':'POSTREVEAL_NO_MODEL_PATCH',
+            'original_task':'aws-cloudformation__cfn-lint-3779',
+            'original_P23_run_id':44738711010,
+            'original_raw_test_sha256':hashlib.sha256(raw).hexdigest(),
+            'original_four_p2p_test_ids':[
+               'test/integration/test_good_templates.py::TestQuickStartTemplates::test_module_integration',
+               'test/integration/test_good_templates.py::TestQuickStartTemplates::test_templates',
+               'test/unit/module/override/test_exclude.py::TestExclude::test_success_run',
+               'test/unit/module/test_rules_collections.py::TestRulesCollection::test_success_run'
+            ],
+            'bounded_error_message_lines':picks,
+            'error_code_counts':dict(rules.most_common(15)),
+            'original_test_output_lines':len(lines),
+            'original_code_patch_changed':False,
+            'original_P9_decisions_recomputed':False,
+            'hidden_original_test_source_published':False
+          }
+          pathlib.Path('p24b/P24B_BOUNDED_P2P_EXCEPTION_DETAILS.json').write_text(json.dumps(observed,indent=2,sort_keys=True)+'\n')
+          print('P24B_BOUNDED_P2P_ERRORS '+json.dumps(observed,sort_keys=True))
+          PY
+      - name: Archive only bounded source error classes without hidden grader files
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p24b-cfnlint-p2p-original-error-taxonomy
+          path: p24b/
+          retention-days: 60
+          if-no-files-found: warn
