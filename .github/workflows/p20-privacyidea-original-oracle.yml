@@ -1,0 +1,226 @@
+name: P20 privacyIDEA ORIGINAL pinned task oracle AFTER original P9 SHA seal
+
+on:
+  push:
+    paths: ['.github/workflows/p20-privacyidea-original-oracle.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-patch-original-task:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      IID: privacyidea__privacyidea-4251
+      BASE_SHA: a44f38b40a61c5b91e6de68d20d27ed01d3ccb56
+      SOURCE_BLOB: ada40e1d3d5284743ae5b3e84c472f20363f4923
+      CANDIDATE_SHA: 4543bd4e279083311783c13e9d950b4534922d8e
+      PATCH_SHA: c7bc136dc61ebce92cd2a1781df775fbaa86a340ddf610551ec2499884f3382a
+      DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout preoracle exact decision+candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Before original gold verify frozen source, preoracle P9 three SHA hashes and decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p20_oracle
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          p=pathlib.Path('pilot/privacyidea')
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          r=json.loads((p/'P20_PREORACLE_ORIGINAL_EVALUATION_REGISTER.json').read_text())
+          s=json.loads((p/'sealed/P9_DECISION_SEAL.json').read_text())
+          d=json.loads((p/'sealed/P9_DECISIONS_SEALED.jsonl').read_text())
+          inp=(p/'sealed/P20_DECISION_INPUT.jsonl').read_bytes()
+          decisions=(p/'sealed/P9_DECISIONS_SEALED.jsonl').read_bytes()
+          assert len(f['selected'])==10
+          assert f['selected'][6]['instance_id']==r['original_task_id']==os.environ['IID']
+          assert f['selected'][6]['repo']=='privacyidea/privacyidea'
+          assert f['dataset_revision_sha']==os.environ['DATASET_REV']
+          assert r['original_case_base_sha']==os.environ['BASE_SHA']
+          assert r['initial_candidate_sha']==os.environ['CANDIDATE_SHA']
+          assert r['initial_candidate_patch_sha256']==os.environ['PATCH_SHA']
+          assert r['original_harness']['commit']==os.environ['HARNESS_SHA']
+          assert r['original_P9_seal_commit']=='0917af294ee65ace8ef6c7496d259162bab80122'
+          assert r['original_P9_preoracle_utc']=='2026-11-20T03:40:19Z'
+          assert hashlib.sha256(inp).hexdigest()==s['input_sha256']==r['original_P9_input_sha256']
+          assert hashlib.sha256(decisions).hexdigest()==s['decisions_sha256']==r['original_P9_decisions_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==s['script_sha256']==r['original_P9_script_sha256']
+          assert d['episode_id']=='privacyidea__privacyidea-4251__INITIAL_SOURCE_ATTEMPT'
+          assert d['head_sha']==os.environ['CANDIDATE_SHA']
+          assert d['t_decision']==r['original_P9_preoracle_utc']
+          assert d['decisions']=={'self_report':'HOLD','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert r['initial_claim_of_full_HTTP_task_resolution'] is False
+          assert r['actor_independently_authenticated'] is False
+          assert r['no_original_hidden_data_seen_yet'] is True
+          assert r['no_new_P9_process_policy_for_this_task'] is True
+          print('P20_ORIGINAL_P9_PREORACLE_BYTE_HASHES_ALL_PASS')
+          print('P20_ORIGINAL_P9_FROZEN_SHA='+s['decisions_sha256'])
+          print('P20_ORIGINAL_HIDDEN_TASK_UNOPENED_AT_THIS_STAGE')
+          PY
+          docker version
+      - name: Reproduce original historical source and exact first patch SHA before benchmark gold
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/privacyidea_src"
+          git -C "$RUNNER_TEMP/privacyidea_src" remote add origin https://github.com/privacyidea/privacyidea.git
+          git -C "$RUNNER_TEMP/privacyidea_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/privacyidea_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/privacyidea_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/privacyidea_src" hash-object privacyidea/lib/eventhandler/scripthandler.py)" = "$SOURCE_BLOB"
+          python3 pilot/privacyidea/p20_candidate_initial.py --repo "$RUNNER_TEMP/privacyidea_src"
+          git -C "$RUNNER_TEMP/privacyidea_src" diff --check
+          git -C "$RUNNER_TEMP/privacyidea_src" diff -- privacyidea/lib/eventhandler/scripthandler.py > p20_oracle/agent_patch.diff
+          test "$(sha256sum p20_oracle/agent_patch.diff | awk '{print $1}')" = "$PATCH_SHA"
+          export GIT_AUTHOR_DATE="2026-11-20T03:38:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:38:00Z"
+          git -C "$RUNNER_TEMP/privacyidea_src" add privacyidea/lib/eventhandler/scripthandler.py
+          git -C "$RUNNER_TEMP/privacyidea_src" \
+            -c user.name="GPT-6 P20 research candidate (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P20 initial: avoid Script actions crashing when directory cannot be listed"
+          test "$(git -C "$RUNNER_TEMP/privacyidea_src" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git -C "$RUNNER_TEMP/privacyidea_src" hash-object privacyidea/lib/eventhandler/scripthandler.py \
+            | grep -Fx f1e0d1d1847baa5814c04f54807dce9df7524b8c
+          python3 - <<'PY'
+          import json,os,pathlib
+          out=pathlib.Path('p20_oracle')
+          pred={'instance_id':os.environ['IID'],
+                'model_name_or_path':'GPT6_P20_source_generated_not_agent_attested',
+                'model_patch':(out/'agent_patch.diff').read_text()}
+          (out/'predictions.jsonl').write_text(json.dumps(pred)+'\n')
+          print('P20_ORIGINAL_SOURCE_PATCH_AND_GIT_SHA_EXACT_PREORACLE')
+          PY
+          sha256sum p20_oracle/agent_patch.diff > p20_oracle/agent_patch.sha256
+      - name: Python 3.12 for original pinned task evaluator
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install exact original unchanged official SWE-bench-Live evaluator
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > p20_oracle/environment.txt
+      - name: Retrieve original frozen task row ONLY AFTER successful source and P9 SHA checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/oracle_dataset"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          ds=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['DATASET_REV'])
+          rows=[dict(item) for item in ds if item['instance_id']==os.environ['IID']]
+          assert len(rows)==1
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'oracle_dataset/one_task.jsonl'
+          p.write_text(json.dumps(rows[0],default=str,ensure_ascii=False)+'\n')
+          print('P20_ORIGINAL_TEST_TASK_RETRIEVED_AFTER_PUBLIC_DECISION_SEAL')
+          PY
+      - name: Execute official original task oracle against exact submitted source patch
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p20_oracle/oracle_started_utc.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/oracle_dataset/one_task.jsonl" \
+              --split lite \
+              --instance_ids "$IID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/p20_oracle/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "evcar-p20-privacyidea-first-20261120" \
+            > "$GITHUB_WORKSPACE/p20_oracle/harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p20_oracle/harness_exit.txt"
+          tail -n 100 "$GITHUB_WORKSPACE/p20_oracle/harness_stdout.log"
+          echo "P20_ORIGINAL_HARNESS_EXIT=$rc; this is NOT task correctness"
+          exit "$rc"
+      - name: Parse unique nonempty original F2P/P2P report; missing remains unknown
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,shutil
+          task=os.environ['IID']
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          out=pathlib.Path('p20_oracle')
+          matches=[]
+          for fp in root.rglob('report.json') if root.exists() else []:
+              if task not in str(fp):continue
+              try:
+                  d=json.loads(fp.read_text())
+                  if isinstance(d,dict) and task in d:matches.append((fp,d[task]))
+              except (ValueError,OSError):continue
+          code=root/'swebench/harness/run_evaluation.py'
+          timer=out/'oracle_started_utc.txt'
+          rec={'episode_id':'privacyidea__privacyidea-4251__INITIAL_SOURCE_ATTEMPT',
+               'head_sha':os.environ['CANDIDATE_SHA'],
+               'oracle_type':'heldout_harness',
+               'oracle_code_sha256':hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else '',
+               'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+               'started_at':timer.read_text().strip() if timer.exists() else '',
+               'oracle_test_manifest_frozen_before_decision':True,
+               'oracle_independent_of_visible_receipts':True,
+               'oracle_unmodified_by_agent':True,
+               'status':'error','f2p_total':0,'f2p_passed':0,'p2p_failed':0,'tests_executed':0,
+               'matched_reports':len(matches),
+               'dataset_revision':os.environ['DATASET_REV'],
+               'original_harness_sha':os.environ['HARNESS_SHA'],
+               'full_Flask_HTTP_issue_reproducer_executed_outside_oracle':False,
+               'actor_independently_attested':False}
+          if len(matches)==1:
+              fp,d=matches[0]
+              shutil.copyfile(fp,out/'original_report.json')
+              f=d.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              p=d.get('tests_status',{}).get('PASS_TO_PASS',{})
+              groups=[f.get('success',[]),f.get('failure',[]),p.get('success',[]),p.get('failure',[])]
+              txt=fp.parent/'test_output.txt'
+              if txt.exists():shutil.copyfile(txt,out/'original_test_output.txt')
+              if txt.is_file() and all(isinstance(x,list) for x in groups) and sum(map(len,groups))>0 and len(groups[0])+len(groups[1])>0:
+                  rec.update({'status':'complete',
+                              'f2p_total':len(groups[0])+len(groups[1]),'f2p_passed':len(groups[0]),
+                              'p2p_failed':len(groups[3]),'tests_executed':sum(map(len,groups)),
+                              'official_resolved':d.get('resolved'),
+                              'original_test_output_sha256':hashlib.sha256(txt.read_bytes()).hexdigest()})
+              else:rec['nonadmission_reason']='no_original_nonzero_executed_task_tests'
+              runlog=fp.parent/'run_instance.log'
+              if runlog.is_file():shutil.copyfile(runlog,out/'run_instance.log')
+          else:rec['nonadmission_reason']='missing_or_ambiguous_original_report'
+          (out/'P20_POSTSEAL_ORIGINAL_ORACLE.jsonl').write_text(json.dumps(rec,sort_keys=True)+'\n')
+          print('P20_POSTSEAL_ORIGINAL_ORACLE_EVIDENCE '+json.dumps(rec,sort_keys=True))
+          PY
+          python3 scripts/p9_reveal.py \
+            --sealed-dir pilot/privacyidea/sealed \
+            --oracle p20_oracle/P20_POSTSEAL_ORIGINAL_ORACLE.jsonl \
+            --out p20_oracle/P20_P9_POSTSEAL_SCORE.json
+          df -h / > p20_oracle/disk_after.txt || true
+          docker image ls --digests > p20_oracle/docker_images.txt || true
+      - name: Save raw official original oracle and source receipts; do not publish hidden tests
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p20-privacyidea-original-task-oracle
+          path: p20_oracle/
+          retention-days: 60
+          if-no-files-found: warn
