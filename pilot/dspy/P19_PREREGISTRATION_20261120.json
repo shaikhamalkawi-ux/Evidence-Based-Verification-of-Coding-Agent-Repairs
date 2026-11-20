@@ -1,0 +1,92 @@
+{
+  "protocol_id": "99llm-X1-P19-DSPY-TYPED-DEMONSTRATION-20261120",
+  "status": "REGISTERED_BEFORE_ANY_P19_CANDIDATE_AND_ORIGINAL_HIDDEN_ORACLE",
+  "task": {
+    "original_frozen_index_one_based": 6,
+    "instance_id": "stanfordnlp__dspy-1609",
+    "repo": "stanfordnlp/dspy",
+    "base_sha": "16ceaba5f7126ca86e5b50b669975c926b9f8f55",
+    "visible_problem_sha256": "5915cc3207d8269cdc125cb1d6dcf6e74fbf90464dd216f95d0878b4d4e2f210",
+    "source_file": "dspy/adapters/chat_adapter.py",
+    "source_blob_sha": "5a20dcff321e3aded9c32039d9c060aa79a5e1ea",
+    "source_func_file": "dspy/functional/functional.py",
+    "source_func_blob_sha": "a45e302c082fa8cffd4410b567cf9f98e9ea65b3",
+    "original_func_test_file": "tests/functional/test_functional.py",
+    "original_func_test_blob_sha": "61ac8c15a18e6122989ac0693e7eec03440bc115",
+    "problem_summary": "DSPy 2.5 TypedPredictor List[str] output works directly but BootstrapFewShot optimization reports JSONDecodeError trailing data and retries",
+    "original_production_example": "CoNLL 2003 tokenization on hosted Databricks LM; no API credentials used in this study."
+  },
+  "hypothesis": "The original ChatAdapter formats List[str] output demonstration values as a multiline human-readable list even when TypedPredictor prepares a JSON parser for that output; when few-shot demos are introduced, formatting may bias model output away from valid JSON. This is a plausible mechanism, not a proven root cause of remote LM behavior.",
+  "source_freeze": {
+    "dataset": "SWE-bench-Live/SWE-bench-Live",
+    "split": "lite",
+    "revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "harness_repo": "microsoft/SWE-bench-Live",
+    "harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "no_gold_test_patch_or_reference_patch_access": true
+  },
+  "visible_suite": {
+    "path": "pilot/dspy/p19_visible_original_adapter_ast.py",
+    "freeze_before_first_patch": true,
+    "source_import_mode": "compile the complete original ChatAdapter and helper functions from exact original source AST, using import-only Adapter stub; Pydantic v2 TypeAdapter is real; no network LM inference.",
+    "preregistered_conditions": [
+      "A typed List[str] output demo must be serialized as valid JSON array, not the plain generic list display format",
+      "A typed list[str] output demo must serialize consistently with typing.List[str]",
+      "A typed list of Pydantic BaseModel must remain roundtrip-valid JSON",
+      "Quoted strings, unicode, punctuation and empty typed lists must roundtrip",
+      "A non-TypedPredictor unparsed list output demo retains existing human-readable formatting",
+      "A list INPUT remains in existing input formatting (no collateral change)",
+      "A simple string output remains unchanged",
+      "Full original ChatAdapter format/parse with an input+typed list output demo must roundtrip via TypeAdapter"
+    ],
+    "original_base_expected": "Some originally unsupported typed JSON demo roundtrips fail; do not count infrastructure errors or changed tests as baseline defects"
+  },
+  "candidate_scope": {
+    "file": "dspy/adapters/chat_adapter.py",
+    "proposed": "Within assistant demonstration formatting only, when output field has a TypedPredictor parser and a list or tuple value, use pydantic.TypeAdapter(annotation).dump_json(value).decode() to ensure JSON representation. Keep untyped/inference and input demonstration formats unchanged.",
+    "no_changes": "No source other than that file, no benchmark test patch, no LM credentials, no changes to original task code base."
+  },
+  "original_P9_policy": {
+    "unchanged": true,
+    "policy_version": "X1-P9-alpha-1-20261116",
+    "actor_attestation": "NOT independent; synthetic research Git author cannot satisfy original actor-matched source-linked acceptance",
+    "user_problem_not_claimed_fully_solved_without_remote_LM": true
+  },
+  "prospective_process_only_v1": {
+    "name": "artifact_linked_no_actor_v1_P19_PROSPECTIVE",
+    "rationale": "Separate artifact/process evidence from independent agent author proof; not a rewrite of source_linked P9.",
+    "decision_input_features": [
+      "fixed_task_index",
+      "exact_historical_base",
+      "exact_resulting_head_sha",
+      "source_only_patch",
+      "local_receipt_with_exact_head_sha",
+      "local_test_count_positive",
+      "local_source_suite_frozen_before_patch",
+      "all_declared_visible_tests_pass",
+      "no_test_errors_or_skips",
+      "original_source_legacy_behavior_preserved_in_controls"
+    ],
+    "accept_when": "All features TRUE as determined before original oracle; otherwise HOLD. Can still accept incorrect original task repairs; score honestly.",
+    "no_future_oracle_features": true,
+    "source_authentication_claim": false,
+    "population_claim": "One prospective task; no statistical superiority from n=1"
+  },
+  "executor": {
+    "python": "3.11",
+    "pydantic": "2.x",
+    "runner": "ubuntu-24.04",
+    "source_only_visibility": "Historical source and user-visible problem statement",
+    "original_harness_after_seal_only": true,
+    "full_remote_LM_dataset_reproduction": "NOT DONE: external Databricks account/data are not connected"
+  },
+  "feedback_rule": "If first candidate fails frozen visible suite due to a source defect, one documented AI-generated synthetic correction is allowed; do not invent failure. Any second stage is same task, not independent.",
+  "boundary": [
+    "MR30 and P9–P18 remain unchanged",
+    "P18 postreveal result is NEVER pooled as new trial",
+    "No human coder, no human second screener or inter-coder reliability",
+    "No fabricated model author attestation",
+    "Original 10-case frame remains fixed; this is originally selected index six",
+    "Actual held-out original benchmark truth will be used only after public seal"
+  ]
+}

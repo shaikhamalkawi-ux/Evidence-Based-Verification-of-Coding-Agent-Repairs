@@ -1,0 +1,63 @@
+{
+  "original_task_id": "stanfordnlp__dspy-1609",
+  "original_frozen_index_one_based": 6,
+  "study_type": "ORIGINAL_FROZEN_TASK_INITIAL_ATTEMPT_EVALUATION_WITH_TWO_INDEPENDENT_PREORACLE_POLICY_RULES",
+  "original_benchmark_result": {
+    "actor_independently_attested": false,
+    "both_original_P9_and_process_V1_decisions_frozen_before_oracle": true,
+    "dataset_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "episode_id": "stanfordnlp__dspy-1609__INITIAL_ATTEMPT_SOURCE_ONLY",
+    "external_Databricks_LM_reproducer_executed": false,
+    "f2p_passed": 0,
+    "f2p_total": 4,
+    "head_sha": "2a2938cbd2b616c684768902bdcc0bfc09e7b9a4",
+    "matched_reports": 1,
+    "official_resolved": false,
+    "oracle_code_sha256": "9a9361d7c53f64d573ef546325b6f13d5b593fa78b4ddcbaa380efa0cd0aac04",
+    "oracle_independent_of_visible_receipts": true,
+    "oracle_test_manifest_frozen_before_decision": true,
+    "oracle_type": "heldout_harness",
+    "oracle_unmodified_by_agent": true,
+    "original_harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "original_test_output_sha256": "f80810c03c46a09b5b79499a4aa0f7ca8c8d97d8a56cad675eb3d32c5cc26a48",
+    "p2p_failed": 0,
+    "source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44666993268",
+    "started_at": "2026-11-20T03:20:42Z",
+    "status": "complete",
+    "tests_executed": 261
+  },
+  "original_harness_run_id": 44666993268,
+  "original_harness_artifact_id": 14598665908,
+  "original_source_base_sha": "16ceaba5f7126ca86e5b50b669975c926b9f8f55",
+  "candidate_patch_sha256": "e9771581fa04391b72b86f0da93495c0749e6f10f84452a83c4e8d2968a98a08",
+  "original_visible": {
+    "base_passed": 3,
+    "total": 9,
+    "candidate_passed": 9,
+    "candidate_total": 9,
+    "initial_run_id": 44666349696
+  },
+  "original_P9_decisions": {
+    "self_report": "HOLD",
+    "local_pass": "ACCEPT",
+    "source_linked": "HOLD"
+  },
+  "original_P9_seal_sha256": "caaf84674bbe01354a6710803c383554ee48d44ac9b60c2a30a576437d0d6d6b",
+  "separately_registered_process_gate": {
+    "name": "X1-P19-artifact-linked-no-actor-v1",
+    "preoracle_decision": "ACCEPT",
+    "preoracle_sha256": "c0dab6c34c148c878d2b2befe33e8fe67100849f8f80deb7938f3acec61d0515",
+    "independent_model_actor_claim": false
+  },
+  "original_decisions_frozen_at": "2026-11-20T03:17:43Z",
+  "source_repo_sha_and_P9_no_change": true,
+  "model_based_Databricks_optimization_reproducer_executed": false,
+  "reproducibility_notes": [
+    "Both policies were locked before hidden task row retrieval",
+    "One original benchmark task, not 261 independent outcomes",
+    "Local and process-linked preseal ACCEPT decisions are false accepts on the original task",
+    "Strict P9 source-linked has no verified agent author and remains HOLD",
+    "No claim of full end-to-end remote optimization reproduction",
+    "No synthetic second stage because initial visible suite passed all 9 checks"
+  ]
+}

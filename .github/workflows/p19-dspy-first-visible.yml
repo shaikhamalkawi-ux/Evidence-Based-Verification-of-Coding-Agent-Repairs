@@ -1,0 +1,108 @@
+name: P19 DSPy first source candidate on nine PRE-FROZEN adapter AST tests
+
+on:
+  push:
+    paths: ['.github/workflows/p19-dspy-first-visible.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visible-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BASE_SHA: 16ceaba5f7126ca86e5b50b669975c926b9f8f55
+      BLOB: 5a20dcff321e3aded9c32039d9c060aa79a5e1ea
+      FROZEN_TEST_SHA256: c8c47bf6ae3c641c47683d2becb181ee208f397309e81055bc09a3cc43f51104
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout frozen P19 test, source recipe and task
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Original task and frozen visible-suite SHA gate before candidate replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p19_first
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          r=json.loads(pathlib.Path('pilot/dspy/P19_PREREGISTRATION_20261120.json').read_text())
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert f['selected'][5]['instance_id']==r['task']['instance_id']=='stanfordnlp__dspy-1609'
+          assert r['task']['base_sha']==os.environ['BASE_SHA']
+          assert r['task']['source_blob_sha']==os.environ['BLOB']
+          assert f['dataset_revision_sha']==r['source_freeze']['revision']
+          sha=hashlib.sha256(pathlib.Path('pilot/dspy/p19_visible_original_adapter_ast.py').read_bytes()).hexdigest()
+          assert sha==os.environ['FROZEN_TEST_SHA256']
+          assert r['source_freeze']['no_gold_test_patch_or_reference_patch_access'] is True
+          print('P19_EXISTING_FROZEN_VISIBLE_TEST_SHA='+sha)
+          print('P19_GOLD_HAS_NOT_BEEN_READ')
+          PY
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Reconstruct original DSPy Git source and install only Pydantic
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/dspy_src"
+          git -C "$RUNNER_TEMP/dspy_src" remote add origin https://github.com/stanfordnlp/dspy.git
+          git -C "$RUNNER_TEMP/dspy_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/dspy_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/dspy_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/dspy_src" hash-object dspy/adapters/chat_adapter.py)" = "$BLOB"
+          python3 -m pip install --disable-pip-version-check 'pydantic==2.9.2' > p19_first/install.log 2>&1 || {
+            tail -n 80 p19_first/install.log
+            exit 1
+          }
+          python3 -m pip freeze > p19_first/environment.txt
+      - name: Apply exactly the first scoped candidate; record patch/commit SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/dspy/p19_candidate_initial.py --repo "$RUNNER_TEMP/dspy_src"
+          git -C "$RUNNER_TEMP/dspy_src" diff -- dspy/adapters/chat_adapter.py > p19_first/initial.patch
+          test -s p19_first/initial.patch
+          sha256sum p19_first/initial.patch pilot/dspy/p19_visible_original_adapter_ast.py \
+            > p19_first/source_hashes.txt
+          export GIT_AUTHOR_DATE="2026-11-20T03:22:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:22:00Z"
+          git -C "$RUNNER_TEMP/dspy_src" add dspy/adapters/chat_adapter.py
+          git -C "$RUNNER_TEMP/dspy_src" -c user.name="GPT-6 P19 research patch (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P19 first: encode typed list demonstrations as JSON for existing parser"
+          git -C "$RUNNER_TEMP/dspy_src" rev-parse HEAD > p19_first/initial_sha.txt
+          echo "P19_FIRST_CANDIDATE_SHA=$(cat p19_first/initial_sha.txt)"
+          echo "P19_SYNTHETIC_GIT_AUTHOR_NOT_AGENT_ATTESTATION"
+      - name: Test same frozen nine original AST checks on first patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p19_run_visible_source.py --repo "$RUNNER_TEMP/dspy_src" \
+            --stage candidate --out p19_first/P19_INITIAL_VISIBLE_RECEIPT.json
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          root=pathlib.Path('p19_first')
+          x=json.loads((root/'P19_INITIAL_VISIBLE_RECEIPT.json').read_text())
+          assert x['tests_run']==9
+          assert x['visible_tests_sha256']=='c8c47bf6ae3c641c47683d2becb181ee208f397309e81055bc09a3cc43f51104'
+          assert x['head_sha']==(root/'initial_sha.txt').read_text().strip()
+          assert x['true_task_oracle'] is False
+          assert x['live_external_llm_called'] is False
+          print('P19_FIRST_VISIBLE_PASS_COUNT='+str(x['passed']))
+          print('P19_FIRST_VISIBLE_FAIL_COUNT='+str(x['failed']))
+          print('P19_FIRST_VISIBLE_ERROR_COUNT='+str(x['errors']))
+          print('P19_FIRST_PATCH_SHA256='+hashlib.sha256((root/'initial.patch').read_bytes()).hexdigest())
+          PY
+      - name: Preserve original-source candidate test and immutable exact patch
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p19-dspy-first-source-visible
+          path: p19_first/
+          retention-days: 60
+          if-no-files-found: warn

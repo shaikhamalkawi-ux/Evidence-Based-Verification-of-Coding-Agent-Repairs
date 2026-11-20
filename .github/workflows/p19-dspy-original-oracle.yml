@@ -1,0 +1,232 @@
+name: P19 DSPy ORIGINAL pinned task oracle AFTER TWO policy seals (NOT live Databricks)
+
+on:
+  push:
+    paths: ['.github/workflows/p19-dspy-original-oracle.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-task-source-sha:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      INSTANCE_ID: stanfordnlp__dspy-1609
+      BASE_SHA: 16ceaba5f7126ca86e5b50b669975c926b9f8f55
+      SOURCE_BLOB: 5a20dcff321e3aded9c32039d9c060aa79a5e1ea
+      PATCH_SHA256: e9771581fa04391b72b86f0da93495c0749e6f10f84452a83c4e8d2968a98a08
+      CANDIDATE_SHA: 2a2938cbd2b616c684768902bdcc0bfc09e7b9a4
+      DATASET_REV: babb27e45e072219195db7a744bbf0d3c1a36e56
+      OFFICIAL_HARNESS_SHA: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout exact original P9 and separately preregistered process seal
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify preoracle GitHub seal source SHA, immutable policy and fixed case index
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p19_original_oracle
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          root=pathlib.Path('pilot/dspy/sealed')
+          reg=json.loads(pathlib.Path('pilot/dspy/P19_PREORACLE_ORIGINAL_EVALUATION_REGISTER.json').read_text())
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert len(f['selected'])==10
+          assert f['selected'][5]['instance_id']==reg['original_frozen_task']==os.environ['INSTANCE_ID']
+          assert f['selected'][5]['repo']=='stanfordnlp/dspy'
+          assert f['dataset_revision_sha']==reg['original_dataset_revision_sha']==os.environ['DATASET_REV']
+          assert reg['original_source_base_sha']==os.environ['BASE_SHA']
+          assert reg['original_source_blob_sha']==os.environ['SOURCE_BLOB']
+          assert reg['initial_candidate_sha']==os.environ['CANDIDATE_SHA']
+          assert reg['initial_candidate_patch_sha256']==os.environ['PATCH_SHA256']
+          assert reg['original_harness_sha']==os.environ['OFFICIAL_HARNESS_SHA']
+          assert reg['preoracle_GitHub_immutable_P9_and_process_seal_commit']=='241dbe9f626b6ea880926e25d40888d5159884a9'
+          assert reg['decision_sealed_timestamp_utc']=='2026-11-20T03:17:43Z'
+          assert reg['original_oracle_test_patch_not_seen_before_register'] is True
+          manifest=json.loads((root/'P19_TWO_POLICY_SEAL_MANIFEST.json').read_text())
+          p9manifest=json.loads((root/'P9_DECISION_SEAL.json').read_text())
+          b0=(root/'P19_DECISION_INPUT.jsonl').read_bytes()
+          b1=(root/'P9_DECISIONS_SEALED.jsonl').read_bytes()
+          b2=(root/'P19_PROCESS_LINKED_V1_SEALED.jsonl').read_bytes()
+          assert hashlib.sha256(b0).hexdigest()==manifest['raw_decision_input_sha256']==p9manifest['input_sha256']==reg['original_P9_input_sha256']
+          assert hashlib.sha256(b1).hexdigest()==manifest['P9_original_decisions_sha256']==p9manifest['decisions_sha256']==reg['original_P9_decisions_sha256']
+          assert hashlib.sha256(b2).hexdigest()==manifest['new_process_decision_sha256']==reg['process_policy_decisions_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==manifest['P9_original_script_sha256']==reg['original_P9_script_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p19_process_gate.py').read_bytes()).hexdigest()==manifest['new_process_script_sha256']==reg['process_policy_script_sha256']
+          d=json.loads(b1)
+          p=json.loads(b2)
+          assert d['t_decision']==p['t_decision']==reg['decision_sealed_timestamp_utc']
+          assert d['head_sha']==p['head_sha']==os.environ['CANDIDATE_SHA']
+          assert d['decisions']=={'self_report':'HOLD','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert p['decision']=='ACCEPT' and all(p['features'].values())
+          assert p['actor_model_identity_independently_attested'] is False
+          print('P19_TWO_PREORACLE_DECISION_HASHES_VALIDATED')
+          print('P19_P9_ORIGINAL_SHA256='+manifest['P9_original_decisions_sha256'])
+          print('P19_PROCESS_ONLY_SHA256='+manifest['new_process_decision_sha256'])
+          print('P19_NO_HIDDEN_TASK_DATA_HAS_YET_BEEN_READ')
+          PY
+          docker version
+      - name: Reconstruct exact historical DSPy source and candidate patch SHA BEFORE oracle data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/dspy_src"
+          git -C "$RUNNER_TEMP/dspy_src" remote add origin https://github.com/stanfordnlp/dspy.git
+          git -C "$RUNNER_TEMP/dspy_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/dspy_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/dspy_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/dspy_src" hash-object dspy/adapters/chat_adapter.py)" = "$SOURCE_BLOB"
+          python3 pilot/dspy/p19_candidate_initial.py --repo "$RUNNER_TEMP/dspy_src"
+          git -C "$RUNNER_TEMP/dspy_src" diff --check
+          git -C "$RUNNER_TEMP/dspy_src" diff -- dspy/adapters/chat_adapter.py \
+            > p19_original_oracle/agent_patch.diff
+          test "$(sha256sum p19_original_oracle/agent_patch.diff | awk '{print $1}')" = "$PATCH_SHA256"
+          export GIT_AUTHOR_DATE="2026-11-20T03:22:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:22:00Z"
+          git -C "$RUNNER_TEMP/dspy_src" add dspy/adapters/chat_adapter.py
+          git -C "$RUNNER_TEMP/dspy_src" -c user.name="GPT-6 P19 research patch (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P19 first: encode typed list demonstrations as JSON for existing parser"
+          test "$(git -C "$RUNNER_TEMP/dspy_src" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git -C "$RUNNER_TEMP/dspy_src" hash-object dspy/adapters/chat_adapter.py \
+            | grep -Fx 5aece153412ca5a1e6f4c7e95815b17ec561ec32
+          python3 - <<'PY'
+          import json,os,pathlib
+          item={'instance_id':os.environ['INSTANCE_ID'],
+            'model_name_or_path':'GPT6_P19_research_generated_not_independently_attested',
+            'model_patch':pathlib.Path('p19_original_oracle/agent_patch.diff').read_text()}
+          pathlib.Path('p19_original_oracle/predictions.jsonl').write_text(json.dumps(item)+'\n')
+          print('P19_EXACT_PATCH_AND_GIT_SHA_VERIFIED_BEFORE_HELDOUT_SOURCE')
+          PY
+          sha256sum p19_original_oracle/agent_patch.diff > p19_original_oracle/agent_patch.sha256
+      - name: Python 3.12 for original pinned benchmark evaluator
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retrieve and install exact original official evaluator code
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --single-branch --branch python-only --depth 1 \
+            https://github.com/microsoft/SWE-bench-Live.git "$RUNNER_TEMP/official-harness"
+          git -C "$RUNNER_TEMP/official-harness" fetch --depth 1 origin "$OFFICIAL_HARNESS_SHA"
+          git -C "$RUNNER_TEMP/official-harness" checkout --detach "$OFFICIAL_HARNESS_SHA"
+          test "$(git -C "$RUNNER_TEMP/official-harness" rev-parse HEAD)" = "$OFFICIAL_HARNESS_SHA"
+          python3 -m pip install -e "$RUNNER_TEMP/official-harness"
+          python3 -m pip freeze > p19_original_oracle/environment.txt
+      - name: Retrieve pinned hidden task row ONLY AFTER public seals and exact patch checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/heldout"
+          python3 - <<'PY'
+          import json,os,pathlib
+          from datasets import load_dataset
+          d=load_dataset('SWE-bench-Live/SWE-bench-Live',split='lite',revision=os.environ['DATASET_REV'])
+          rows=[dict(x) for x in d if x['instance_id']==os.environ['INSTANCE_ID']]
+          assert len(rows)==1
+          (pathlib.Path(os.environ['RUNNER_TEMP'])/'heldout/task.jsonl').write_text(json.dumps(rows[0],default=str,ensure_ascii=False)+'\n')
+          print('P19_PINNED_HELDOUT_DSPY_TASK_RETRIEVED_AFTER_BOTH_SEALS')
+          PY
+      - name: Execute original Docker task verifier for exact first candidate
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > p19_original_oracle/oracle_started_at_utc.txt
+          cd "$RUNNER_TEMP/official-harness"
+          timeout --signal=TERM --kill-after=10s 1200s \
+            python3 -m swebench.harness.run_evaluation \
+              --dataset_name "$RUNNER_TEMP/heldout/task.jsonl" \
+              --split lite \
+              --instance_ids "$INSTANCE_ID" \
+              --namespace starryzhang \
+              --predictions_path "$GITHUB_WORKSPACE/p19_original_oracle/predictions.jsonl" \
+              --max_workers 1 \
+              --timeout 900 \
+              --run_id "evcar-p19-dspy-first-20261120" \
+            > "$GITHUB_WORKSPACE/p19_original_oracle/harness_stdout.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$GITHUB_WORKSPACE/p19_original_oracle/harness_exit_code.txt"
+          tail -n 110 "$GITHUB_WORKSPACE/p19_original_oracle/harness_stdout.log"
+          echo "P19_ORIGINAL_HARNESS_EXIT=$rc ; not proof of task resolution"
+          exit "$rc"
+      - name: Admit original F2P/P2P only when unique execution report is genuine and nonempty
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,shutil
+          iid=os.environ['INSTANCE_ID']
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'official-harness'
+          out=pathlib.Path('p19_original_oracle')
+          matches=[]
+          for fp in root.rglob('report.json') if root.exists() else []:
+              if iid not in str(fp):continue
+              try:
+                  d=json.loads(fp.read_text())
+                  if isinstance(d,dict) and iid in d:matches.append((fp,d[iid]))
+              except (ValueError,OSError):continue
+          code=root/'swebench/harness/run_evaluation.py'
+          started=out/'oracle_started_at_utc.txt'
+          result={
+            'episode_id':'stanfordnlp__dspy-1609__INITIAL_ATTEMPT_SOURCE_ONLY',
+            'head_sha':os.environ['CANDIDATE_SHA'],
+            'oracle_type':'heldout_harness',
+            'oracle_code_sha256':hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else '',
+            'source_url':'https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
+            'started_at':started.read_text().strip() if started.exists() else '',
+            'oracle_test_manifest_frozen_before_decision':True,
+            'oracle_independent_of_visible_receipts':True,
+            'oracle_unmodified_by_agent':True,
+            'status':'error','f2p_total':0,'f2p_passed':0,'p2p_failed':0,'tests_executed':0,
+            'matched_reports':len(matches),'original_harness_sha':os.environ['OFFICIAL_HARNESS_SHA'],
+            'dataset_revision':os.environ['DATASET_REV'],
+            'external_Databricks_LM_reproducer_executed':False,
+            'actor_independently_attested':False,
+            'both_original_P9_and_process_V1_decisions_frozen_before_oracle':True
+          }
+          if len(matches)==1:
+              fp,d=matches[0]
+              shutil.copyfile(fp,out/'original_report.json')
+              f=d.get('tests_status',{}).get('FAIL_TO_PASS',{})
+              p=d.get('tests_status',{}).get('PASS_TO_PASS',{})
+              groups=[f.get('success',[]),f.get('failure',[]),p.get('success',[]),p.get('failure',[])]
+              raw=fp.parent/'test_output.txt'
+              if raw.is_file():shutil.copyfile(raw,out/'original_test_output.txt')
+              if raw.is_file() and all(isinstance(x,list) for x in groups) and sum(map(len,groups))>0 and len(groups[0])+len(groups[1])>0:
+                  result.update({
+                     'status':'complete','f2p_total':len(groups[0])+len(groups[1]),
+                     'f2p_passed':len(groups[0]),'p2p_failed':len(groups[3]),
+                     'tests_executed':sum(map(len,groups)),
+                     'official_resolved':d.get('resolved'),
+                     'original_test_output_sha256':hashlib.sha256(raw.read_bytes()).hexdigest()})
+              else:result['nonadmission_reason']='missing_or_zero_original_executed_test_output'
+              tmp=fp.parent/'run_instance.log'
+              if tmp.is_file():shutil.copyfile(tmp,out/'run_instance.log')
+          else:result['nonadmission_reason']='missing_or_ambiguous_original_task_report'
+          (out/'P19_POSTSEAL_ORIGINAL_ORACLE.jsonl').write_text(json.dumps(result,sort_keys=True)+'\n')
+          print('P19_POSTSEAL_ORIGINAL_ORACLE_EVIDENCE '+json.dumps(result,sort_keys=True))
+          PY
+          python3 scripts/p9_reveal.py \
+            --sealed-dir pilot/dspy/sealed \
+            --oracle p19_original_oracle/P19_POSTSEAL_ORIGINAL_ORACLE.jsonl \
+            --out p19_original_oracle/P19_ORIGINAL_P9_POSTSEAL_SCORE.json
+          df -h / > p19_original_oracle/disk_after.txt || true
+          docker image ls --digests > p19_original_oracle/images.txt || true
+      - name: Preserve exact source patch, raw executable task oracle and postseal score
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p19-dspy-original-independent-task-oracle
+          path: p19_original_oracle/
+          retention-days: 60
+          if-no-files-found: error
