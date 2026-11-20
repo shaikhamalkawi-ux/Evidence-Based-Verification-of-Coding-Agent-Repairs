@@ -1,0 +1,62 @@
+{
+  "schema": "99llm_X1_P26_prespecified_endpoint_partial_identification_v1",
+  "authored_after_original_outcomes": "2026-11-20",
+  "study_status": "POSTHOC_DETERMINISTIC_ID_SET_NOT_NEW_BLINDED_POLICY",
+  "parent": "P25 original ten-task evidence and endpoint reconciliation",
+  "original_frame": "pilot/frozen_task_frame_20261117.json",
+  "original_population_size": 10,
+  "attempted_source_candidate_policy_decision_count": 9,
+  "no_candidate_no_policy_decision_task": "reflex-dev__reflex-4510",
+  "source_files": [
+    "data/audits/P19_SEVEN_TASK_MIXED_STAGE_NONVACUITY_20261120.json",
+    "data/audits/P25_TEN_FROZEN_TASKS_ENDPOINT_ADMISSION_RECONCILIATION_20261120.json",
+    "data/audits/P21_PRIVACYIDEA_ENDPOINT_ADMISSION_REPRODUCED_20261120.json",
+    "data/audits/P25_CFN_LINT_MATCHED_ORIGINAL_NULL_CONTROL_EXECUTED_20261120.json",
+    "data/audits/P23_CFN_LINT_ORIGINAL_TASK_ORACLE_20261120.json",
+    "data/audits/P20_PRIVACYIDEA_ORIGINAL_HARNESS_RAW_WITH_QC_HOLD_20261120.json"
+  ],
+  "endpoint_label_rule": {
+    "PASS": "Only a unique original complete benchmark oracle with positive F2P test count, ALL F2P passed, zero P2P failures, and no documented systemic endpoint QC failure. This is a task-oracle pass, not universal source correctness.",
+    "FAIL_F2P": "Only a unique original complete oracle with positive F2P test count and at least one F2P failure, EXCEPT when a documented systemic setup/import failure invalidates the test endpoint.",
+    "UNKNOWN_BASELINE": "F2P all passed but P2P failed; no eligible matching original-source negative control to establish that candidate caused the P2P failure. In the Kedro case do not silently impute candidate causality.",
+    "UNKNOWN_ENDPOINT_IMPORT": "Original raw oracle reported unresolved but exact source log reveals missing test fixture import swe100_fixture_clock, so raw result is not an admitted code-repair verdict.",
+    "UNKNOWN_BASELINE_REPRODUCED": "Original source candidate passes F2P but fails P2P; exactly the same failed P2P tests also occur on original historical source with only a README comment. Raw original verdict stays unresolved and baseline-relative source correctness is not universally certified.",
+    "NO_CANDIDATE": "The ninth original frozen Reflex task has no source candidate or original task oracle; exclude from policy coverage denominator while retaining in original ten-task selection.",
+    "note": "The split is an evidence-admission convention for the specific original issue tests; failed F2P is direct evidence that the original issue criterion is not met, not a theorem of absence of any useful source change."
+  },
+  "sharp_bounds_rule": {
+    "notation": "For a fixed policy, A is the set of decisions ACCEPT among the nine cases with recorded original P9 decisions. Among A, F are directly failed F2P with valid test execution; S are task-oracle passes; U are unresolved/invalid endpoint-or-baseline attribution. The true binary full-task failure rate among A lies in [|F|/|A|, (|F|+|U|)/|A|] if unknown task statuses may be either pass or fail, and no additional cross-task assumptions are imposed.",
+    "undefined_if_no_accepts": true,
+    "sharpness": "Both endpoint extremes are attained under completing every unknown accepted task as pass or every unknown accepted task as fail; this is a standard partial-identification argument, not a new theorem or safety certification.",
+    "source_coverage_rule": "Acceptance coverage is |A|/9, counting all source-candidate tasks whether or not the outcome is known. This is an observed process fraction, not a generalizable rate.",
+    "homogeneity": "Mixed-stage historical case set; comparisons may be sensitive to candidate stage. No population confidence interval, p-value, causal effect, calibration or claimed policy superiority."
+  },
+  "expected_verified_cross_check": {
+    "direct_F2P_failed_task_ids": [
+      "pdm-project__pdm-3419",
+      "matplotlib__matplotlib-28933",
+      "pytorch__torchtune-2139",
+      "stanfordnlp__dspy-1609"
+    ],
+    "direct_original_task_pass_ids": [
+      "python-babel__babel-1163",
+      "joke2k__faker-2155"
+    ],
+    "endpoint_or_attribution_underdetermined_task_ids": [
+      "kedro-org__kedro-4406",
+      "privacyidea__privacyidea-4251",
+      "aws-cloudformation__cfn-lint-3779"
+    ],
+    "no_coded_attempt": [
+      "reflex-dev__reflex-4510"
+    ]
+  },
+  "original_P9_rule_version": "X1-P9-alpha-1-20261116",
+  "original_decisions_untouched": true,
+  "original_ten_task_frame_untouched": true,
+  "new_software_verifier_may_not_query_oracle_or_sources_from_network": true,
+  "no_second_human_coder": true,
+  "no_autonomous_agent_attestation_claim": true,
+  "no_fabricated_threshold_or_weight": true,
+  "manuscripts": "MR30 review paper remains LOCKED; P26 result only a standalone research extension for future author-approved companion paper."
+}
