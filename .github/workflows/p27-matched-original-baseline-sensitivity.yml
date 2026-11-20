@@ -1,3 +1,4 @@
+# P27 restart after readback-key normalization (original-only vs candidate-only field alias); no source claim or grader change.
 name: P27 postreveal baseline-relative task endpoint sensitivity and old Kedro null
 
 on:
