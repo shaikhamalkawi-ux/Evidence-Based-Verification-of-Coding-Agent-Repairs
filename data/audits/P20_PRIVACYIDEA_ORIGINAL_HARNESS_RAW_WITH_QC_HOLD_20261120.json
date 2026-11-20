@@ -1,0 +1,49 @@
+{
+  "schema": "99llm_X1_P20_original_harness_raw_task_report_with_adequacy_gate_v1",
+  "task": "privacyidea__privacyidea-4251",
+  "exact_original_candidate_sha": "4543bd4e279083311783c13e9d950b4534922d8e",
+  "original_harness_run_id": 44669546280,
+  "original_harness_artifact_id": 14598469251,
+  "received_original_report": {
+    "actor_independently_attested": false,
+    "dataset_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "episode_id": "privacyidea__privacyidea-4251__INITIAL_SOURCE_ATTEMPT",
+    "f2p_passed": 0,
+    "f2p_total": 1,
+    "full_Flask_HTTP_issue_reproducer_executed_outside_oracle": false,
+    "head_sha": "4543bd4e279083311783c13e9d950b4534922d8e",
+    "matched_reports": 1,
+    "official_resolved": false,
+    "oracle_code_sha256": "9a9361d7c53f64d573ef546325b6f13d5b593fa78b4ddcbaa380efa0cd0aac04",
+    "oracle_independent_of_visible_receipts": true,
+    "oracle_test_manifest_frozen_before_decision": true,
+    "oracle_type": "heldout_harness",
+    "oracle_unmodified_by_agent": true,
+    "original_harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "original_test_output_sha256": "8fe0b9bfaccd2cc607abdc8cfbb7cf81d85d60aabb5664389e86c5c7e686efcb",
+    "p2p_failed": 2022,
+    "source_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44669546280",
+    "started_at": "2026-11-20T03:43:28Z",
+    "status": "complete",
+    "tests_executed": 2023
+  },
+  "original_preoracle_P9_decisions": {
+    "self_report": "HOLD",
+    "local_pass": "ACCEPT",
+    "source_linked": "HOLD"
+  },
+  "original_P9_decision_sha256": "33edbd2833c0730d6fa280a42f2cd05fe6deb754dce8c29764be5d40786f3f3d",
+  "original_visible_local": {
+    "base_passed": 5,
+    "base_total": 10,
+    "candidate_passed": 10,
+    "candidate_total": 10
+  },
+  "benchmark_status": "OFFICIAL_UNRESOLVED_RAW_REPORT",
+  "task_label_sufficiency": "HOLD_DIAGNOSE_ALL_2022_P2P_FAILURES",
+  "full_original_HTTP_flask_reproduction": "NOT_INDEPENDENTLY_EXECUTED_OUTSIDE_ORACLE",
+  "admission_note": "Original harness produced a nonempty report with F2P0/1 and all P2P 2022 failed. This is suspicious for shared setup/collection failure rather than 2022 code regressions, which cannot be attributed to a single os.listdir guard without inspecting raw test log. Report original harness result faithfully, but hold reliable code-correctness attribution until adjudicated.",
+  "no_imputation": "Do not turn thousands of failed P2P into 2022 distinct bugs or tasks; do not mark original task solved or claim strong false-accept experimental result before endpoint-validity audit.",
+  "original_preoracle_decisions_unchanged": true,
+  "original_ten_task_frame_unchanged": true
+}
