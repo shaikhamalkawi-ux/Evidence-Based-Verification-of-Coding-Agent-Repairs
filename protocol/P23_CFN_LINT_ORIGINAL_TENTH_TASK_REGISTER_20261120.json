@@ -1,0 +1,31 @@
+{
+  "schema": "99llm_X1_P23_original_tenth_task_prepatch_registry_v1",
+  "status": "FROZEN_TASK_REGISTER_NO_AGENT_PATCH_NO_ORIGINAL_ORACLE",
+  "task": "aws-cloudformation__cfn-lint-3779",
+  "selection_rank_in_original_fixed_frame": 10,
+  "source_repository": "aws-cloudformation/cfn-lint",
+  "historical_source_sha": "de28d1e43777e3782a06b74d9091c3471636eb70",
+  "original_problem_sha256": "fd65b9269945a817700f676159f301e5a6ee5e56c817fb94ae6dc2c51b3884da",
+  "frozen_frame": "pilot/frozen_task_frame_20261117.json",
+  "frozen_dataset_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "original_reported_cfn_lint_version": "1.18.0",
+  "original_reported_runner": "ubuntu-22.04 GitHub workflow",
+  "original_issue": "CloudFormation Lint wrongly produces E3510 for IAM Condition operators, including StringEqualsIfExists, ForAnyValue:StringEquals and ForAllValues:StringEquals in the supplied AWS ParallelCluster IAM policy example.",
+  "original_expected_outcome": "No errors for valid IAM condition operators; preserve invalid-operator detection, not simply disable E3510.",
+  "original_visible_exemplar": "Original text supplies a large CloudFormation IAM policy YAML and specific E3510 messages at lines 224, 404, 475 and 592 of policies/parallelcluster-policies.yaml.",
+  "planned_next_work": [
+    "Recover exact visible full task text without altering it, hash and audit source comments and accepted operator grammar.",
+    "Locate historical validation rule/schema used to emit E3510 and reproduce minimal valid IAM condition operator cases under pinned source.",
+    "Freeze visible positive and negative operator tests before attempting source code changes.",
+    "Record original-source setup/compatibility issues separately, not as candidate failures.",
+    "Only after exact patch/test receipt and unchanged P9 decision seal, access original hidden benchmark once in isolated evaluator."
+  ],
+  "fixed_claim_boundary": "No source fix is proven, no original hidden oracle accessed, no policy effectiveness claims, no user-supplied template rewritten, no human coder.",
+  "no_test_patch_or_gold_access": true,
+  "no_source_candidate_generated": true,
+  "original_P9_unmodified": true,
+  "original_p19_mr31_and_earlier_unchanged": true,
+  "preceding_P21": "P20 privacyIDEA original raw report has common missing fixture swe100_fixture_clock and code-correctness QC HOLD; no retrospective imputation.",
+  "preceding_P22": "Reflex source baseline fails import under unpinned modern dependencies, but original visible example runs without error under two vintage sqlmodel versions; no source/hidden outcome admitted.",
+  "original_task_count_selected": 10
+}
