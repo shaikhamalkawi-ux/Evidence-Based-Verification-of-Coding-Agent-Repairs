@@ -1,0 +1,121 @@
+{
+  "schema": "99llm_X1_P28_prior_art_collision_register_v1",
+  "date": "2026-11-20",
+  "verification": "Read externally identifiable metadata/source pages; no claim that all third-party experiments were rerun",
+  "entries": [
+    {
+      "id": "PA01",
+      "work": "Smith et al., Is the Cure Worse Than the Disease? Overfitting in Automated Program Repair",
+      "year": 2015,
+      "type": "peer_reviewed",
+      "url": "https://doi.org/10.1145/2786805.2786825",
+      "overlap": "Independent tests expose plausible but overfitting patches",
+      "novelty_veto": "test pass does not prove correct fix"
+    },
+    {
+      "id": "PA02",
+      "work": "Zemín et al., An Empirical Study on the Suitability of Test-based Patch Acceptance Criteria",
+      "year": 2025,
+      "type": "peer_reviewed",
+      "url": "https://doi.org/10.1145/3702971",
+      "overlap": "Patch acceptance by tests can admit spurious program fixes",
+      "novelty_veto": "weak local test acceptance is new"
+    },
+    {
+      "id": "PA03",
+      "work": "Wang, Pradel, Liu, Are Solved Issues in SWE-bench Really Solved Correctly",
+      "year": 2026,
+      "type": "peer_reviewed_ICSE",
+      "url": "https://doi.org/10.1145/3744916.3764576",
+      "overlap": "Independently studies plausibility and validation imperfections in SWE-bench",
+      "novelty_veto": "auditing SWE-bench repair correctness is new"
+    },
+    {
+      "id": "PA04",
+      "work": "Aleithan et al., SWE-Bench+",
+      "year": 2024,
+      "type": "preprint",
+      "url": "https://arxiv.org/abs/2410.06992",
+      "overlap": "Leaky solutions and weak tests in SWE-bench",
+      "novelty_veto": "benchmark issues were undiscovered"
+    },
+    {
+      "id": "PA05",
+      "work": "Zhang et al., SWE-bench Goes Live!",
+      "year": 2025,
+      "type": "benchmark_paper",
+      "url": "https://arxiv.org/abs/2505.23419",
+      "overlap": "Defines source benchmark under study",
+      "novelty_veto": "none"
+    },
+    {
+      "id": "PA06",
+      "work": "OpenAI, Why SWE-bench Verified no longer measures frontier coding capabilities",
+      "year": 2026,
+      "type": "industry_audit",
+      "url": "https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/",
+      "overlap": "Benchmark scoring validity and contamination; different SWE-bench version",
+      "novelty_veto": "benchmark scoring can fail"
+    },
+    {
+      "id": "PA07",
+      "work": "OpenAI, Separating Signal from Noise in Coding Evaluations",
+      "year": 2026,
+      "type": "industry_audit",
+      "url": "https://openai.com/index/separating-signal-from-noise-coding-evaluations/",
+      "overlap": "SWE-bench Pro task validity; different benchmark and methods",
+      "novelty_veto": "audit of task oracles is new"
+    },
+    {
+      "id": "PA08",
+      "work": "Junjie Chen, When Agent Evaluation Becomes Unreliable",
+      "year": 2026,
+      "type": "preprint",
+      "url": "https://arxiv.org/abs/2610.16067",
+      "overlap": "Oracle integrity checks and known-answer controls in agent benchmark",
+      "novelty_veto": "negative controls for agent evaluation are new"
+    },
+    {
+      "id": "PA09",
+      "work": "Fei Ding, What the Specification Did Not Say",
+      "year": 2026,
+      "type": "preprint",
+      "url": "https://arxiv.org/abs/2610.30635",
+      "overlap": "Specification–oracle gaps in different coding agent benchmarks",
+      "novelty_veto": "specification–oracle mismatch is new"
+    },
+    {
+      "id": "PA10",
+      "work": "SWE-bench-Live upstream issue #100, Gold-patch validity gate",
+      "year": 2026,
+      "opened": "2026-10-23",
+      "type": "public_unreviewed_issue",
+      "url": "https://github.com/microsoft/SWE-bench-Live/issues/100",
+      "overlap": "Same exact privacyidea-4251 task reported in prior issue; cfn-lint date-dependent P2P and different Kedro IDs; reported original gold-patch comparator on cfn-lint-3767",
+      "not_same": "Our candidate vs original no-op pairs are cfn-lint-3779 and Kedro-4406, not the issue's cited comparator IDs",
+      "novelty_veto": "first detection of SWE-bench-Live environment effects or privacyidea-4251 issue"
+    },
+    {
+      "id": "PA11",
+      "work": "Manski, Partial identification with missing data",
+      "year": 2005,
+      "type": "peer_reviewed",
+      "url": "https://doi.org/10.1016/j.ijar.2004.10.006",
+      "overlap": "Sharp missing-outcome bounds",
+      "novelty_veto": "P26 bound equation is new"
+    },
+    {
+      "id": "PA12",
+      "work": "Geifman and El-Yaniv, Selective Classification for Deep Neural Networks",
+      "year": 2017,
+      "type": "peer_reviewed",
+      "url": "https://papers.neurips.cc/paper_files/paper/2017/hash/4a8423d5e91fda00bb7e46540e2b0cf1-Abstract.html",
+      "overlap": "Risk–coverage / reject decision",
+      "novelty_veto": "P9 reject policy is a novel universal guarantee"
+    }
+  ],
+  "full_systematic_search_complete": false,
+  "publication_go": "HOLD_FULL_LENGTH_JOURNAL",
+  "conditional_short_note": "POSSIBLE_WITH_EXPLICIT_PRIOR_ART_AND_EXACT_SOURCE_LOCK",
+  "unchanged_baseline": "P27 head 3bf6fe98a12eb1ed98455342f89424570341eab0"
+}

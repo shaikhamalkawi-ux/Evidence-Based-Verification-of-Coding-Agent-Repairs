@@ -1,0 +1,109 @@
+{
+  "schema": "99llm_X1_P28_independent_P9_policy_source_reaggregation_v1",
+  "date": "2026-11-20",
+  "source_ref": "p27-kedro-original-null-control-recovery-20261120",
+  "original_frozen_tasks": 10,
+  "original_P9_candidates": 9,
+  "original_resolved": 2,
+  "original_unresolved": 7,
+  "original_unattempted": 1,
+  "verified_source_git_blob_shas": {
+    "P25_source_ledger": "d967e583c108470983267f71169f80b61273cc25",
+    "P26_independent_js": "1a855afbf79c6e348eccf1906829bb97e9af31dd",
+    "P27_independent_js": "ec8e87a933d083cfcf04c005a4c63ce71a345ab6",
+    "Kedro_source_control": "602e9c7d0f51c69d996de54035bd986475bb8afc",
+    "cfnlint_source_control": "688d99520db6dc44338cfbc770421af998c37293"
+  },
+  "accepted_policies": {
+    "self_report": {
+      "accepted": 5,
+      "denominator": 9,
+      "P26": {
+        "failure": 2,
+        "success": 1,
+        "unknown": 2,
+        "risk_bounds": [
+          0.4,
+          0.8
+        ]
+      },
+      "P27_alternative": {
+        "failure": 2,
+        "success": 3,
+        "unknown": 0,
+        "risk_bounds": [
+          0.4,
+          0.4
+        ]
+      }
+    },
+    "local_pass": {
+      "accepted": 8,
+      "denominator": 9,
+      "P26": {
+        "failure": 4,
+        "success": 1,
+        "unknown": 3,
+        "risk_bounds": [
+          0.5,
+          0.875
+        ]
+      },
+      "P27_alternative": {
+        "failure": 4,
+        "success": 3,
+        "unknown": 1,
+        "risk_bounds": [
+          0.5,
+          0.625
+        ]
+      }
+    },
+    "source_linked": {
+      "accepted": 0,
+      "denominator": 9,
+      "P26": {
+        "failure": 0,
+        "success": 0,
+        "unknown": 0,
+        "risk_bounds": null
+      },
+      "P27_alternative": {
+        "failure": 0,
+        "success": 0,
+        "unknown": 0,
+        "risk_bounds": null
+      }
+    }
+  },
+  "matched_original_source_diagnostics": {
+    "Kedro_4406": {
+      "candidate_F2P": "1/1",
+      "null_F2P": "0/1",
+      "shared_failed_P2P_ids": 25,
+      "candidate_only_failed_P2P_ids": 0,
+      "null_only_failed_P2P_ids": 0,
+      "official_resolved": false,
+      "postreveal": true
+    },
+    "cfn_lint_3779": {
+      "candidate_F2P": "1/1",
+      "null_F2P": "0/1",
+      "shared_failed_P2P_ids": 4,
+      "candidate_only_failed_P2P_ids": 0,
+      "null_only_failed_P2P_ids": 0,
+      "official_resolved": false,
+      "postreveal": true
+    }
+  },
+  "tests": {
+    "source_count_partition": "PASS",
+    "policy_accepted_partition": "PASS",
+    "all_P26_original_bounds": "PASS",
+    "all_P27_distinct_bounds": "PASS",
+    "control_matching_counts": "PASS"
+  },
+  "no_new_evaluator_execution": true,
+  "output_conventions": "Logical case bounds, not population probabilities or confidence intervals; P27 is a different estimand",
+  "original_scientific_results_changed": false
+}
