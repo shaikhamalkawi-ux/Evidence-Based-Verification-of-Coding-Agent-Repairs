@@ -1,0 +1,104 @@
+name: P20 privacyIDEA first candidate against ORIGINAL TEN frozen visible AST tests
+
+on:
+  push:
+    paths: ['.github/workflows/p20-privacyidea-first-visible.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 13
+    env:
+      BASE_SHA: a44f38b40a61c5b91e6de68d20d27ed01d3ccb56
+      SOURCE_BLOB: ada40e1d3d5284743ae5b3e84c472f20363f4923
+      FROZEN_TEST_SHA256: 1994fb6d092cb1988677ebd139435c3aed6ec85fc5f7cc5f97eace56b0fa1f00
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout P20 frozen registered tests and source candidate recipe
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify original source and visible-suite integrity before patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p20_first
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          p=json.loads(pathlib.Path('pilot/privacyidea/P20_PREREGISTRATION_20261120.json').read_text())
+          assert len(f['selected'])==10
+          assert f['selected'][6]['instance_id']==p['task']['instance_id']=='privacyidea__privacyidea-4251'
+          assert p['task']['base_sha']==os.environ['BASE_SHA']
+          assert p['task']['source_blob_sha']==os.environ['SOURCE_BLOB']
+          assert p['tests_before_patch']['number']==10
+          sha=hashlib.sha256(pathlib.Path('pilot/privacyidea/p20_visible_original_script_handler_ast.py').read_bytes()).hexdigest()
+          assert sha==os.environ['FROZEN_TEST_SHA256']
+          assert p['original_benchmark']['original_test_patch_unseen'] is True
+          print('P20_ORIGINAL_VISIBLE_FROZEN_SHA='+sha)
+          print('P20_ORACLE_HAS_NOT_BEEN_ACCESSED')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact historical privacyIDEA commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/privacyidea_src"
+          git -C "$RUNNER_TEMP/privacyidea_src" remote add origin https://github.com/privacyidea/privacyidea.git
+          git -C "$RUNNER_TEMP/privacyidea_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/privacyidea_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/privacyidea_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/privacyidea_src" hash-object privacyidea/lib/eventhandler/scripthandler.py)" = "$SOURCE_BLOB"
+      - name: Apply one scoped candidate and produce deterministic historical Git SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/privacyidea/p20_candidate_initial.py --repo "$RUNNER_TEMP/privacyidea_src"
+          git -C "$RUNNER_TEMP/privacyidea_src" diff -- privacyidea/lib/eventhandler/scripthandler.py \
+            > p20_first/initial.patch
+          test -s p20_first/initial.patch
+          sha256sum p20_first/initial.patch pilot/privacyidea/p20_visible_original_script_handler_ast.py \
+            > p20_first/sha256.txt
+          export GIT_AUTHOR_DATE="2026-11-20T03:38:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:38:00Z"
+          git -C "$RUNNER_TEMP/privacyidea_src" add privacyidea/lib/eventhandler/scripthandler.py
+          git -C "$RUNNER_TEMP/privacyidea_src" \
+            -c user.name="GPT-6 P20 research candidate (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P20 initial: avoid Script actions crashing when directory cannot be listed"
+          git -C "$RUNNER_TEMP/privacyidea_src" rev-parse HEAD > p20_first/initial_candidate_sha.txt
+          echo "P20_FIRST_CANDIDATE_SHA=$(cat p20_first/initial_candidate_sha.txt)"
+      - name: Run SAME ten pre-frozen original source AST checks on candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p20_run_visible.py --repo "$RUNNER_TEMP/privacyidea_src" \
+            --stage first_candidate --out p20_first/P20_FIRST_VISIBLE_RECEIPT.json
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          p=pathlib.Path('p20_first')
+          r=json.loads((p/'P20_FIRST_VISIBLE_RECEIPT.json').read_text())
+          assert r['tests']==10
+          assert r['frozen_tests_sha256']=='1994fb6d092cb1988677ebd139435c3aed6ec85fc5f7cc5f97eace56b0fa1f00'
+          assert r['head_sha']==(p/'initial_candidate_sha.txt').read_text().strip()
+          assert r['original_benchmark_oracle_accessed'] is False
+          print('P20_FIRST_VISIBLE_PASSES='+str(r['passed']))
+          print('P20_FIRST_VISIBLE_FAILS='+str(r['failed']))
+          print('P20_FIRST_VISIBLE_ERRORS='+str(r['errors']))
+          print('P20_FIRST_PATCH_SHA256='+hashlib.sha256((p/'initial.patch').read_bytes()).hexdigest())
+          PY
+      - name: Preserve full source diff and original frozen visible evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p20-privacyidea-first-source-visible
+          path: p20_first/
+          retention-days: 60
+          if-no-files-found: warn
