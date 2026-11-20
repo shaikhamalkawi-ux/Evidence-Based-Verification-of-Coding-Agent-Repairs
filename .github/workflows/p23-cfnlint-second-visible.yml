@@ -1,0 +1,138 @@
+name: P23 second source-only date pattern correction SAME 64 original cases (pre-oracle)
+
+on:
+  push:
+    paths: ['.github/workflows/p23-cfnlint-second-visible.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  date-pattern-followup-visible:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    env:
+      BASE_SHA: de28d1e43777e3782a06b74d9091c3471636eb70
+      FIRST_SHA: 7ce6016f638058b44f471fee575a3b298c84b369
+      FIRST_BLOB: 50b226c27628fdaab4c27226702f9b5674b10a52
+      ORIGINAL_BLOB: 99f30247c838aea3910f891a54c9bbad1d67c88a
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout frozen first/second candidate source recipes and original tests
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Guard original frozen task, first candidate outcome and date-only extension
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p23_second
+          python3 - <<'PY'
+          import json,hashlib,pathlib,os
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          p=json.loads(pathlib.Path('pilot/cfnlint/P23_SECOND_DATE_PATTERN_PREREG_20261120.json').read_text())
+          prior=json.loads(pathlib.Path('data/audits/P23_ORIGINAL_AND_FIRST_IAM_SOURCE_VISIBLE_20261120.json').read_text())
+          casefile=pathlib.Path('pilot/cfnlint/P23_FROZEN_VISIBLE_IAM_CASES_20261120.json')
+          assert f['selected'][9]['instance_id']==p['original_task']=='aws-cloudformation__cfn-lint-3779'
+          assert f['dataset_revision_sha']=='babb27e45e072219195db7a744bbf0d3c1a36e56'
+          assert p['exact_first_candidate_sha']==prior['first_candidate_git_sha']==os.environ['FIRST_SHA']
+          assert p['exact_first_schema_blob']==prior['first_candidate_blob']==os.environ['FIRST_BLOB']
+          assert p['frozen_original_case_sha256']==hashlib.sha256(casefile.read_bytes()).hexdigest()
+          assert prior['first_candidate']['classification_passed']==61
+          assert prior['first_candidate']['classification_failed']==3
+          assert p['original_gold_test_patch_not_accessed'] and p['original_task_hidden_oracle_unseen']
+          assert p['is_adaptive_after_visible_test'] and not p['is_adaptive_after_hidden_test']
+          print('P23_SECOND_VISIBLE_SOURCE_FROZEN_64_AND_FIRST_61_OF_64')
+          PY
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Retrieve original exact repo and schema, use only visible jsonschema
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/cfn_original"
+          git -C "$RUNNER_TEMP/cfn_original" remote add origin https://github.com/aws-cloudformation/cfn-lint.git
+          git -C "$RUNNER_TEMP/cfn_original" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/cfn_original" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$ORIGINAL_BLOB"
+          python3 -m pip install --disable-pip-version-check jsonschema==4.23.0 > p23_second/pip_install.log 2>&1
+      - name: Reconstruct first source patch EXACT byte and Git SHA before adjusting visible date pattern
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_candidate_initial.py \
+            --source "$RUNNER_TEMP/cfn_original" \
+            --out p23_second/P23_REPLAY_FIRST_MAPPING.json
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$FIRST_BLOB"
+          export GIT_AUTHOR_DATE="2026-11-20T00:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:00:00Z"
+          git -C "$RUNNER_TEMP/cfn_original" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_original" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 first: anchor IAM set modifiers and IfExists/Numeric Condition operator names"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$FIRST_SHA"
+          python3 pilot/cfnlint/p23_run_visible_iam_schema.py \
+            --source "$RUNNER_TEMP/cfn_original" --stage first_candidate \
+            --out p23_second/first_visible_replay.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('p23_second/first_visible_replay.json'))
+          assert r['classification_passed']==61 and r['classification_failed']==3
+          print('P23_REPLAY_FIRST_PASSED=61/64')
+          PY
+      - name: Apply 3 AWS documented Date comparator regexes with no other semantics changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_candidate_after_visible_date_feedback.py \
+            --source "$RUNNER_TEMP/cfn_original" \
+            --out p23_second/P23_DATE_ONLY_MAPPING.json
+          git -C "$RUNNER_TEMP/cfn_original" diff -- src/cfnlint/data/schemas/other/iam/policy.json \
+            > p23_second/incremental_date_only.diff
+          test -s p23_second/incremental_date_only.diff
+          export GIT_AUTHOR_DATE="2026-11-20T00:01:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:01:00Z"
+          git -C "$RUNNER_TEMP/cfn_original" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_original" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 second: add IAM DateLessThan/GreaterThan and qualified suffix operators"
+          git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD > p23_second/second_candidate_sha.txt
+          git -C "$RUNNER_TEMP/cfn_original" diff "$BASE_SHA" HEAD -- src/cfnlint/data/schemas/other/iam/policy.json \
+            > p23_second/second_cumulative_patch.diff
+          sha256sum p23_second/incremental_date_only.diff p23_second/second_cumulative_patch.diff \
+            > p23_second/patch_sha256.txt
+          echo "P23_SECOND_CANDIDATE_SHA=$(cat p23_second/second_candidate_sha.txt)"
+      - name: Run same 64 frozen original schema test cases with 19 negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_run_visible_iam_schema.py \
+            --source "$RUNNER_TEMP/cfn_original" --stage first_candidate \
+            --out p23_second/second_visible_schema.json
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('p23_second')
+          d=json.loads((root/'second_visible_schema.json').read_text())
+          old=json.loads((root/'first_visible_replay.json').read_text())
+          assert old['frozen_case_sha256']==d['frozen_case_sha256']
+          assert d['case_count']==64
+          assert d['source_head_sha']==(root/'second_candidate_sha.txt').read_text().strip()
+          print('P23_SECOND_VISIBLE_PASSES='+str(d['classification_passed'])+'/64')
+          print('P23_SECOND_VISIBLE_FAILS='+str(d['classification_failed'])+'/64')
+          print('P23_SECOND_VISIBLE_INVALID_REJECTED='+str(sum(x['correct_classification'] for x in d['cases'] if not x['expected_valid']))+'/19')
+          print('P23_HIDDEN_BENCHMARK_NOT_ACCESSED')
+          PY
+      - name: Archive stage comparison and exact candidate bytes without hidden oracle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p23-cfnlint-second-schema-candidate-visible
+          path: p23_second/
+          retention-days: 60
+          if-no-files-found: warn
