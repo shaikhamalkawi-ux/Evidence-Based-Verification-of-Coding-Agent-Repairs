@@ -1,0 +1,49 @@
+{
+  "schema": "99llm_X1_P27_historical_Kedro_source_null_artifact_recovery_v1",
+  "status": "PRE_RECONCILIATION_EXISTING_POSTREVEAL_ARTIFACTS_NO_NEW_EVALUATOR_OR_CODING_PATCH",
+  "original_frozen_task_id": "kedro-org__kedro-4406",
+  "original_rank": 1,
+  "original_base_sha": "a565d6607d1d16933dbb1ea42cfb9de39ef80980",
+  "original_first_candidate_sha": "355ae83abe163ab9bbe2aaf7a59cc055f220d13e",
+  "original_first_candidate_patch_sha256": "b7149c1ff128bf79dbe794f139b77a6c9c1417eb496824917874800e12c67af2",
+  "original_candidate_oracle_run_id": 44159300952,
+  "original_candidate_oracle_artifact_id": 14363775392,
+  "original_candidate_artifact_name": "kedro-gpt6-initial-heldout-oracle",
+  "original_null_oracle_run_id": 44162955737,
+  "original_null_oracle_artifact_id": 14364582406,
+  "original_null_artifact_name": "kedro-noop-p2p-diagnostic",
+  "original_null_registered_before_its_own_execution": "pilot/kedro/null_semantic_patch_control_prereg.json",
+  "original_null_originally_registered_after_candidate_oracle": true,
+  "original_candidate_raw_result": {
+    "f2p_passed": 1,
+    "f2p_total": 1,
+    "p2p_failed": 25,
+    "p2p_passed": 1566,
+    "original_resolved": false
+  },
+  "original_null_workflow_logged_result": {
+    "f2p_passed": 0,
+    "f2p_failed": 1,
+    "p2p_failed": 25,
+    "p2p_passed": 1566,
+    "original_resolved": false
+  },
+  "original_dataset_rev": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "original_harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "original_docker_namespace": "starryzhang",
+  "source_control_characterization": "Original source plus a Python comment in kedro/__init__.py, not changed executable semantics; original code/fixture/test patch unmodified.",
+  "reconciliation_plan": [
+    "Download existing original candidate and null reports from exact GitHub Actions artifacts, do not rerun evaluator.",
+    "Verify exact source task, full parsed F2P/P2P counts and original output source identity and timestamp chronology.",
+    "Compare the sorted sets of all P2P failed test identifiers, exact overlap, candidate-only and control-only failures.",
+    "Record whether all 25 failures existed with original source, while preserving official original resolved=false and original P9 ACCEPT/HOLD decisions.",
+    "If archive is missing or corrupt mark HOLD_UNVERIFIED, do not impute matches from matching counts alone."
+  ],
+  "not_allowed": [
+    "Not an eleventh benchmark task, new blinded agent trial, or independent human feedback.",
+    "No modification of P9, MR30, P26 original bounds, original Kedro candidate, original original-harness results.",
+    "No new hidden grader patch/source code copied into repository; only test ID sets and bounded metadata.",
+    "No automatic relabeling of original Kedro benchmark as RESOLVED if its null shares failures.",
+    "No claim that identical test IDs proves universal regression safety or independent model actor attribution."
+  ]
+}

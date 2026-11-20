@@ -1,0 +1,145 @@
+name: P27 reconcile EXISTING Kedro original-source null and candidate oracle artifacts
+
+on:
+  push:
+    paths: ['.github/workflows/p27-kedro-existing-null-artifact-reconcile.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  existing-artifact-reconciliation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout frozen P9, historical null preregistration and P27 source policy
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Preflight original task and already completed 17 November runs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p27_recovery
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          p=json.loads(pathlib.Path('protocol/P27_KEDRO_PRIOR_ORIGINAL_NULL_ARTIFACT_RECOVERY_20261120.json').read_text())
+          old=json.loads(pathlib.Path('pilot/kedro/null_semantic_patch_control_prereg.json').read_text())
+          first=json.loads(pathlib.Path('pilot/kedro/oracle_evaluation_preregister.json').read_text())
+          frozen=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          assert p['status']=='PRE_RECONCILIATION_EXISTING_POSTREVEAL_ARTIFACTS_NO_NEW_EVALUATOR_OR_CODING_PATCH'
+          assert frozen['selected'][0]['instance_id']==p['original_frozen_task_id']==old['instance_id']
+          assert p['original_base_sha']==first['upstream_base_sha']==old['base_commit']
+          assert p['original_candidate_oracle_run_id']==old['original_ai_oracle_run']==44159300952
+          assert p['original_null_oracle_run_id']==44162955737
+          assert p['original_first_candidate_sha']==first['target_candidate_head_sha']
+          assert old['status']=='PREREGISTERED_AFTER_DISCLOSURE_OF_FIRST_AI_ORACLE'
+          assert p['original_dataset_rev']==first['dataset_revision_sha']==old['dataset_sha']
+          assert p['original_harness_sha']==first['harness_ref']==old['harness_commit']
+          assert len(frozen['selected'])==10
+          print('P27_KEDRO_OLD_NULL_CONTROL_RETRIEVAL_ONLY_NO_NEW_ORIGINAL_TASK')
+          PY
+      - name: Download EXACT already completed candidate official report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: kedro-gpt6-initial-heldout-oracle
+          run-id: 44159300952
+          github-token: ${{ github.token }}
+          path: p27_original_candidate
+      - name: Download EXACT already completed comment-only null official report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: kedro-noop-p2p-diagnostic
+          run-id: 44162955737
+          github-token: ${{ github.token }}
+          path: p27_original_null
+      - name: Validate two original reports, exact test sets and no source behavior edits
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          original=pathlib.Path('p27_original_candidate')
+          null=pathlib.Path('p27_original_null')
+          out=pathlib.Path('p27_recovery')
+          prereg=json.loads(pathlib.Path('protocol/P27_KEDRO_PRIOR_ORIGINAL_NULL_ARTIFACT_RECOVERY_20261120.json').read_text())
+          iid='kedro-org__kedro-4406'
+          files=[original/'original_eval_report.json',null/'official_report.json',null/'control_report.json',null/'noop_patch.diff']
+          if any(not f.exists() for f in files):raise FileNotFoundError('Required original report or neutral patch artifact not recovered')
+          candidate_raw=json.loads(files[0].read_text())
+          null_raw=json.loads(files[1].read_text())
+          control=json.loads(files[2].read_text())
+          assert set(candidate_raw)=={iid} and set(null_raw)=={iid}
+          c,n=candidate_raw[iid],null_raw[iid]
+          def evidence(row):
+              t=row['tests_status']
+              f=t['FAIL_TO_PASS'];p=t['PASS_TO_PASS']
+              a,b,c,d=(f['success'],f['failure'],p['success'],p['failure'])
+              assert all(isinstance(x,list) for x in (a,b,c,d))
+              assert len(a)+len(b)>0
+              if len(set(d))!=len(d):raise ValueError('duplicate failed test IDs')
+              return {'f2p_passed':len(a),'f2p_total':len(a)+len(b),
+                      'p2p_passed':len(c),'p2p_failed':len(d),
+                      'tests_executed':sum(map(len,(a,b,c,d))),
+                      'p2p_failed_test_ids':sorted(d),'resolved':row.get('resolved')}
+          first=evidence(c)
+          baseline=evidence(n)
+          assert first['f2p_passed']==first['f2p_total']==1
+          assert baseline['f2p_passed']==0 and baseline['f2p_total']==1
+          assert first['p2p_failed']==baseline['p2p_failed']==25
+          assert first['p2p_passed']==baseline['p2p_passed']==1566
+          assert first['tests_executed']==baseline['tests_executed']==1592
+          assert c['resolved'] is False and n['resolved'] is False
+          assert control['classification']=='POST_REVEAL_DIAGNOSTIC_NOT_PROSPECTIVE'
+          assert control['source_base_sha']==prereg['original_base_sha']
+          assert control['oracle_harness_sha']==prereg['original_harness_sha']
+          assert control['source_dataset_revision']==prereg['original_dataset_rev']
+          assert control['f2p_pass']==0 and control['p2p_fail']==25
+          assert set(control['p2p_failed_test_ids'])==set(baseline['p2p_failed_test_ids'])
+          patch=files[3].read_text()
+          added=[line for line in patch.splitlines() if line.startswith('+') and not line.startswith('+++')]
+          assert added==['+','+# EVCAR_DIAGNOSTIC_COMMENT_ONLY_NO_FUNCTIONAL_CHANGE']
+          assert patch.startswith('diff --git a/kedro/__init__.py b/kedro/__init__.py')
+          # Keep hidden test source OFF the public source branch; test IDs only.
+          s1=set(first['p2p_failed_test_ids'])
+          s2=set(baseline['p2p_failed_test_ids'])
+          common=sorted(s1&s2)
+          cand_only=sorted(s1-s2)
+          null_only=sorted(s2-s1)
+          result={
+            'schema':'99llm_X1_P27_preexisting_original_kedro_null_report_set_comparison_v1',
+            'task':iid,
+            'status':'COMPLETE_SAME_FAILURE_SET' if len(common)==25 else 'COMPLETE_DIFFERENT_FAILURE_SETS',
+            'original_p9_candidate_run_id':44159300952,
+            'prior_postreveal_null_run_id':44162955737,
+            'original_candidate_source_sha':prereg['original_first_candidate_sha'],
+            'original_source_base_sha':prereg['original_base_sha'],
+            'original_candidate':{k:v for k,v in first.items() if k!='p2p_failed_test_ids'},
+            'original_source_comment_only_null':{k:v for k,v in baseline.items() if k!='p2p_failed_test_ids'},
+            'candidate_original_report_sha256':hashlib.sha256(files[0].read_bytes()).hexdigest(),
+            'null_original_report_sha256':hashlib.sha256(files[1].read_bytes()).hexdigest(),
+            'original_null_patch_sha256':hashlib.sha256(files[3].read_bytes()).hexdigest(),
+            'matched_p2p_failed_test_ids':common,
+            'candidate_only_failed_p2p_test_ids':cand_only,
+            'control_only_failed_p2p_test_ids':null_only,
+            'original_null_is_original_source_with_comment_only':True,
+            'source_original_candidate_report_changed':False,
+            'original_P9_decision_recomputed':False,
+            'hidden_test_source_released':False,
+            'new_original_task_run_executed':False,
+            'postreveal_interpretation_only':True,
+            'scientific_caution':'A shared failure name in original null and candidate is evidence the candidate is not necessary for that failure. Does not retroactively mark original task resolved, prove universal regression safety, or identify why a particular baseline failure occurred.'
+          }
+          (out/'P27_KEDRO_ORIGINAL_SOURCE_MATCHED_NULL.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print('P27_KEDRO_OLD_NULL_SET_RECONCILIATION '+json.dumps(result,sort_keys=True))
+          PY
+      - name: Archive bounded set comparison and SHA receipts ONLY
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p27-kedro-preexisting-null-original-set-reconciliation
+          path: p27_recovery/
+          retention-days: 60
+          if-no-files-found: warn

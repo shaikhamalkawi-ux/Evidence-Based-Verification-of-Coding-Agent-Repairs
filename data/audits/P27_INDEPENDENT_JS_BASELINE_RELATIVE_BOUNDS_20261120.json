@@ -1,0 +1,166 @@
+{
+  "schema": "99llm_X1_P27_independent_JS_matched_baseline_sensitivity_v1",
+  "source_paths": [
+    "data/audits/P26_INDEPENDENT_CODEPATH_IDENTIFIED_INTERVALS_20261120.json",
+    "data/audits/P27_KEDRO_PREEXISTING_MATCHED_NULL_20261120.json",
+    "data/audits/P25_CFN_LINT_MATCHED_ORIGINAL_NULL_CONTROL_EXECUTED_20261120.json"
+  ],
+  "verified_Kedro_shared_test_ids": 25,
+  "verified_cfnlint_shared_test_ids": 4,
+  "relative_task_results": [
+    {
+      "task": "kedro-org__kedro-4406",
+      "rank": 1,
+      "original_status": "UNKNOWN_UNATTRIBUTED_P2P",
+      "relative_status": "PASS_BASELINE_RELATIVE_ONLY",
+      "decisions": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "pdm-project__pdm-3419",
+      "rank": 2,
+      "original_status": "DIRECT_F2P_FAIL",
+      "relative_status": "FAIL_F2P",
+      "decisions": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "matplotlib__matplotlib-28933",
+      "rank": 3,
+      "original_status": "DIRECT_F2P_FAIL",
+      "relative_status": "FAIL_F2P",
+      "decisions": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "python-babel__babel-1163",
+      "rank": 4,
+      "original_status": "ORACLE_PASS",
+      "relative_status": "PASS_OFFICIAL",
+      "decisions": {
+        "self_report": "HOLD",
+        "local_pass": "HOLD",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "pytorch__torchtune-2139",
+      "rank": 5,
+      "original_status": "DIRECT_F2P_FAIL",
+      "relative_status": "FAIL_F2P",
+      "decisions": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "stanfordnlp__dspy-1609",
+      "rank": 6,
+      "original_status": "DIRECT_F2P_FAIL",
+      "relative_status": "FAIL_F2P",
+      "decisions": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "privacyidea__privacyidea-4251",
+      "rank": 7,
+      "original_status": "UNKNOWN_IMPORT",
+      "relative_status": "UNKNOWN_IMPORT",
+      "decisions": {
+        "self_report": "HOLD",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "joke2k__faker-2155",
+      "rank": 8,
+      "original_status": "ORACLE_PASS",
+      "relative_status": "PASS_OFFICIAL",
+      "decisions": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    },
+    {
+      "task": "reflex-dev__reflex-4510",
+      "rank": 9,
+      "original_status": "NO_CANDIDATE",
+      "relative_status": "NO_CANDIDATE",
+      "decisions": {
+        "self_report": null,
+        "local_pass": null,
+        "source_linked": null
+      }
+    },
+    {
+      "task": "aws-cloudformation__cfn-lint-3779",
+      "rank": 10,
+      "original_status": "UNKNOWN_SHARED_P2P",
+      "relative_status": "PASS_BASELINE_RELATIVE_ONLY",
+      "decisions": {
+        "self_report": "ACCEPT",
+        "local_pass": "ACCEPT",
+        "source_linked": "HOLD"
+      }
+    }
+  ],
+  "independent_policy_counts": {
+    "self_report": {
+      "accepted": 5,
+      "held": 4,
+      "denominator": 9,
+      "accepted_direct_f2p_failed": 2,
+      "accepted_matched_baseline_relative_pass": 2,
+      "accepted_original_task_pass": 1,
+      "accepted_invalid_oracle_unknown": 0,
+      "conditional_relative_failure_risk_bounds": [
+        0.4,
+        0.4
+      ]
+    },
+    "local_pass": {
+      "accepted": 8,
+      "held": 1,
+      "denominator": 9,
+      "accepted_direct_f2p_failed": 4,
+      "accepted_matched_baseline_relative_pass": 2,
+      "accepted_original_task_pass": 1,
+      "accepted_invalid_oracle_unknown": 1,
+      "conditional_relative_failure_risk_bounds": [
+        0.5,
+        0.625
+      ]
+    },
+    "source_linked": {
+      "accepted": 0,
+      "held": 9,
+      "denominator": 9,
+      "accepted_direct_f2p_failed": 0,
+      "accepted_matched_baseline_relative_pass": 0,
+      "accepted_original_task_pass": 0,
+      "accepted_invalid_oracle_unknown": 0,
+      "conditional_relative_failure_risk_bounds": null
+    }
+  },
+  "comparison_with_Python_run": 44771948313,
+  "Python_P27_output_sha256": "d526c426b2ed17af895b1b211ec57514d0963f4ad4395c9667ff8155fdde8d76",
+  "independent_numerical_agreement": true,
+  "methodological_status": "POSTHOC_ALTERNATIVE_ENDPOINT_NOT_ORIGINAL_BENCHMARK_RESOLUTION",
+  "immutable_P9_decisions": true,
+  "raw_original_resolved_flags_unchanged": true
+}
