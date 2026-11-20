@@ -7,9 +7,6 @@
   "raw_original_harness_resolved_count": 2,
   "raw_original_harness_unresolved_count": 7,
   "not_executed_original_harness_count": 1,
-  "qc_observational_subset_count": 7,
-  "qc_observational_subset_original_resolved": 2,
-  "qc_observational_subset_original_unresolved": 5,
   "endpoint_special_cases": {
     "privacyidea": "Postreveal missing fixture makes original reported outcome unadmitted for source-code truth",
     "cfnlint": "Original F2P passed but shared 4/4 P2P failures also happen with no-code baseline; raw original unresolved remains",
@@ -58,8 +55,8 @@
         "source_linked": "HOLD"
       },
       "record_stage": "INITIAL",
-      "should_enter_confirmed_false_accept_numerator": true,
-      "should_enter_confirmed_task_truth_denominator": true
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 2,
@@ -77,8 +74,8 @@
         "source_linked": "HOLD"
       },
       "record_stage": "INITIAL",
-      "should_enter_confirmed_false_accept_numerator": true,
-      "should_enter_confirmed_task_truth_denominator": true
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 3,
@@ -96,8 +93,8 @@
         "source_linked": "HOLD"
       },
       "record_stage": "POST_SYNTHETIC_FEEDBACK_FINAL",
-      "should_enter_confirmed_false_accept_numerator": true,
-      "should_enter_confirmed_task_truth_denominator": true
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 4,
@@ -115,8 +112,8 @@
         "source_linked": "HOLD"
       },
       "record_stage": "INITIAL",
-      "should_enter_confirmed_false_accept_numerator": false,
-      "should_enter_confirmed_task_truth_denominator": true
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 5,
@@ -134,8 +131,8 @@
         "source_linked": "HOLD"
       },
       "record_stage": "INITIAL_CPU_SOURCE_PROXY",
-      "should_enter_confirmed_false_accept_numerator": true,
-      "should_enter_confirmed_task_truth_denominator": true
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 6,
@@ -153,8 +150,8 @@
         "source_linked": "HOLD"
       },
       "record_stage": "INITIAL_TYPED_DEMONSTRATION",
-      "should_enter_confirmed_false_accept_numerator": true,
-      "should_enter_confirmed_task_truth_denominator": true
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 7,
@@ -172,9 +169,9 @@
         "source_linked": "HOLD"
       },
       "record_stage": "INITIAL_AST_SOURCE_PROXY",
-      "should_enter_confirmed_false_accept_numerator": false,
-      "should_enter_confirmed_task_truth_denominator": false,
-      "rationale": "The original test artifact contains ModuleNotFoundError swe100_fixture_clock; all 2022 raw P2P failures cannot be presumed separate source regressions."
+      "rationale": "The original test artifact contains ModuleNotFoundError swe100_fixture_clock; all 2022 raw P2P failures cannot be presumed separate source regressions.",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": false,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 8,
@@ -192,8 +189,8 @@
         "source_linked": "HOLD"
       },
       "record_stage": "INITIAL",
-      "should_enter_confirmed_false_accept_numerator": false,
-      "should_enter_confirmed_task_truth_denominator": true
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": true,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 9,
@@ -211,9 +208,9 @@
         "source_linked": null
       },
       "record_stage": "PREPATCH_SOURCE_FEASIBILITY",
-      "should_enter_confirmed_false_accept_numerator": false,
-      "should_enter_confirmed_task_truth_denominator": false,
-      "rationale": "Reported typing.Any reproduction did not occur; current dependencies mask imports, vintage sqlmodel pins run with no exception."
+      "rationale": "Reported typing.Any reproduction did not occur; current dependencies mask imports, vintage sqlmodel pins run with no exception.",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": false,
+      "is_a_definitively_source_attributed_false_accept": false
     },
     {
       "original_frozen_rank": 10,
@@ -231,12 +228,12 @@
         "source_linked": "HOLD"
       },
       "record_stage": "SECOND_VISIBLE_SOURCE_CANDIDATE",
-      "should_enter_confirmed_false_accept_numerator": false,
-      "should_enter_confirmed_task_truth_denominator": false,
       "issue_f2p": "1/1",
       "p2p_exact_matched_failure_overlap": "4/4",
       "reference_null_control_run_id": 44761416230,
-      "rationale": "Original P23 issue F2P passes. The identical 4 failed P2P IDs occur when ONLY README is changed; original official task remains unresolved."
+      "rationale": "Original P23 issue F2P passes. The identical 4 failed P2P IDs occur when ONLY README is changed; original official task remains unresolved.",
+      "enter_seven_task_mixed_stage_raw_harness_descriptive_panel": false,
+      "is_a_definitively_source_attributed_false_accept": false
     }
   ],
   "methodological_limits": [
@@ -246,6 +243,11 @@
     "P20 privacyIDEA imported fixture failure raw P2P errors must NOT be turned into local false accept counts.",
     "Source-linked policy has zero accepted tasks; false accept rate among accepted undefined, not zero.",
     "No independent model actor attestation and no human coder reliability experiment.",
-    "No claim of cross-task causal policy superiority. Original manuscript MR30 and frozen original P9 decision records are not edited."
-  ]
+    "No claim of cross-task causal policy superiority. Original manuscript MR30 and frozen original P9 decision records are not edited.",
+    "Seven historical original-harness verdicts are descriptive task-level labels, not comprehensive confirmation that all failed tests are newly caused by the candidate repair; baseline comparisons remain incomplete for several tasks."
+  ],
+  "seven_task_descriptive_raw_harness_subset_count": 7,
+  "seven_task_descriptive_raw_harness_subset_resolved": 2,
+  "seven_task_descriptive_raw_harness_subset_unresolved": 5,
+  "panel_label": "Seven-task historical original-harness descriptive panel, not confirmed per-task source-causality or population-level policy precision."
 }
