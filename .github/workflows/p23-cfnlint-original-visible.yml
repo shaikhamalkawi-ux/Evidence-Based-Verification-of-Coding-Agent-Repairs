@@ -1,0 +1,98 @@
+name: P23 ORIGINAL cfn-lint IAM condition schema baseline (64 FROZEN visible cases)
+
+on:
+  push:
+    paths: ['.github/workflows/p23-cfnlint-original-visible.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-source-no-patch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      BASE_SHA: de28d1e43777e3782a06b74d9091c3471636eb70
+      SCHEMA_BLOB: 99f30247c838aea3910f891a54c9bbad1d67c88a
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout preregistered original tenth task and unchanged source schema checks
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check original frozen cohort and visible grammar case registration
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p23_base
+          python3 - <<'PY'
+          import json,pathlib,hashlib,os
+          frame=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          reg=json.loads(pathlib.Path('protocol/P23_CFN_LINT_ORIGINAL_TENTH_TASK_REGISTER_20261120.json').read_text())
+          cases=json.loads(pathlib.Path('pilot/cfnlint/P23_FROZEN_VISIBLE_IAM_CASES_20261120.json').read_text())
+          assert len(frame['selected'])==10
+          assert frame['selected'][9]['instance_id']==reg['task']==cases['original_task']=='aws-cloudformation__cfn-lint-3779'
+          assert reg['historical_source_sha']==cases['original_base_sha']==os.environ['BASE_SHA']
+          assert cases['original_policy_schema_blob']==os.environ['SCHEMA_BLOB']
+          assert cases['case_count']==len(cases['cases'])==64
+          assert cases['valid_count']==45 and cases['invalid_count']==19
+          assert reg['no_test_patch_or_gold_access'] and reg['no_source_candidate_generated']
+          for f in ('pilot/cfnlint/P23_FROZEN_VISIBLE_IAM_CASES_20261120.json','pilot/cfnlint/p23_run_visible_iam_schema.py'):
+              print('P23_PREPATCH_SHA256 '+f+' '+hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest())
+          print('P23_ORIGINAL_SCHEMA_PREPATCH_64_CASES_ONLY_NO_ORACLE')
+          PY
+      - name: Setup Python 3.11 for historical source grammar validation
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Retrieve EXACT original cfn-lint historical source without gold
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/original_cfnlint"
+          git -C "$RUNNER_TEMP/original_cfnlint" remote add origin https://github.com/aws-cloudformation/cfn-lint.git
+          git -C "$RUNNER_TEMP/original_cfnlint" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/original_cfnlint" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/original_cfnlint" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/original_cfnlint" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$SCHEMA_BLOB"
+          echo "$BASE_SHA" > p23_base/source_commit.txt
+          echo "$SCHEMA_BLOB" > p23_base/original_policy_blob.txt
+      - name: Install independent JSON schema validator only, no hidden benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check jsonschema==4.23.0 \
+            > p23_base/pip_install.log 2>&1 || {
+              tail -n 100 p23_base/pip_install.log
+              exit 1
+            }
+          python3 -m pip freeze > p23_base/environment.txt
+      - name: Run 64 FROZEN operator grammar cases against original historical IAM schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_run_visible_iam_schema.py \
+            --source "$RUNNER_TEMP/original_cfnlint" \
+            --stage historical_base \
+            --out p23_base/P23_ORIGINAL_SOURCE_SCHEMA_64.json
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.loads(pathlib.Path('p23_base/P23_ORIGINAL_SOURCE_SCHEMA_64.json').read_text())
+          assert d['case_count']==64
+          assert d['source_head_sha']=='de28d1e43777e3782a06b74d9091c3471636eb70'
+          assert not d['hidden_original_task_oracle_accessed']
+          assert not d['task_resolved_claim']
+          assert d['classification_passed']+d['classification_failed']==64
+          print('P23_BASE_CLASSIFIED_CORRECT='+str(d['classification_passed']))
+          print('P23_BASE_CLASSIFIED_WRONG='+str(d['classification_failed']))
+          print('P23_ORIGINAL_BENCHMARK_NOT_ACCESSED_NO_CANDIDATE_PATCH')
+          PY
+      - name: Preserve exact original-source visible receipt and test code metadata
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p23-original-cfnlint-iam-grammar-64-frozen-visible
+          path: p23_base/
+          retention-days: 60
+          if-no-files-found: warn
