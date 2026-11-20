@@ -1,0 +1,45 @@
+{
+  "schema": "99llm_X1_P27_postreveal_baseline_relative_endpoint_sensitivity_v1",
+  "status": "POSTHOC_ALTERNATIVE_ENDPOINT_NOT_REPLACEMENT_FOR_ORIGINAL_BENCHMARK",
+  "source_P26": "scripts/p26_identified_acceptance_bounds.py",
+  "new_recovered_Kedro_source": "data/audits/P27_KEDRO_PREEXISTING_MATCHED_NULL_20261120.json",
+  "original_cfnlint_control": "data/audits/P25_CFN_LINT_MATCHED_ORIGINAL_NULL_CONTROL_EXECUTED_20261120.json",
+  "original_frozen_task_count": 10,
+  "original_attempted_policy_decision_count": 9,
+  "primary_P26_original_risk_bounds_unmodified": true,
+  "original_P9_decisions_unmodified": true,
+  "original_official_resolved_labels_unmodified": true,
+  "endpoint_definition": "A source candidate satisfies a posthoc baseline-relative test check if the unique original task oracle executed at least one F2P and all F2P passed AND either there are zero original P2P failures or the exact set of candidate-only failed P2P test names is empty under a preexisting/matched original-source no-behavior-change control. This is an ALTERNATIVE task TEST-ADEQUACY definition, not official SWE-bench-Live resolved or universal source correctness.",
+  "endpoint_failure": "A unique original task oracle has at least one failing F2P test with valid execution, no documented systemic collection/import failure. This is direct issue-specific non-resolution.",
+  "unknown_endpoint": "An original task benchmark does not admit code-level F2P/P2P attribution due to systemic import/collection issue; assign no success or failure.",
+  "expected_classes": {
+    "PASS_OFFICIAL": [
+      "python-babel__babel-1163",
+      "joke2k__faker-2155"
+    ],
+    "PASS_BASELINE_RELATIVE_ONLY": [
+      "kedro-org__kedro-4406",
+      "aws-cloudformation__cfn-lint-3779"
+    ],
+    "FAIL_F2P": [
+      "pdm-project__pdm-3419",
+      "matplotlib__matplotlib-28933",
+      "pytorch__torchtune-2139",
+      "stanfordnlp__dspy-1609"
+    ],
+    "UNKNOWN_IMPORT": [
+      "privacyidea__privacyidea-4251"
+    ],
+    "NO_CANDIDATE": [
+      "reflex-dev__reflex-4510"
+    ]
+  },
+  "p27_relative_bounds_math": "Among task candidates ACCEPT under policy p, let F have a direct F2P issue failure, S have original F2P pass and no candidate-only failed P2P (including matched baselines), and U have an unadmitted invalid test endpoint. Then relative test-adequacy failure among accepted has finite-case bounds [F/A,(F+U)/A] when A>0. If A=0 the conditional rate is undefined.",
+  "candidate_and_null_same_day_not_simultaneous": true,
+  "source_null_control_is_POSTREVEAL": true,
+  "original_seven_case_policy_mixture_unchanged": true,
+  "no_new_human_coder": true,
+  "no_new_agent_source_authorship_attestation": true,
+  "no_new_original_harness_execution": true,
+  "manuscript_scope": "Companion research-method results only, MR30 locked, no posthoc change to original first-trial P9 policy or official benchmark."
+}
