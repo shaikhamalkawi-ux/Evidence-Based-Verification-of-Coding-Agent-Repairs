@@ -1,0 +1,61 @@
+{
+  "id": "99llm-X1-P20-PRIVACYIDEA-SCRIPT-HANDLER",
+  "status": "REGISTERED_PRE_VISIBLE_CPU_TESTS_AND_BEFORE_FIRST_CANDIDATE_OR_ORIGINAL_GOLD",
+  "task": {
+    "index_one_based": 7,
+    "instance_id": "privacyidea__privacyidea-4251",
+    "repo": "privacyidea/privacyidea",
+    "base_sha": "a44f38b40a61c5b91e6de68d20d27ed01d3ccb56",
+    "visible_issue_sha256": "a8cf9db9fb03d520ad412156be3c2429f722e23ab7326f228e88a1a23d087cff",
+    "visible_issue": "Better error checking in ScriptEventHadler; setting up script event handler when configured script directory/path is broken/not existing results in HTTP 500",
+    "source_path": "privacyidea/lib/eventhandler/scripthandler.py",
+    "source_blob_sha": "ada40e1d3d5284743ae5b3e84c472f20363f4923",
+    "source_API_path": "privacyidea/api/event.py",
+    "source_API_blob": "28f860240e24787227a7ce0f0de843860f3f3ea6",
+    "source_event_tests": "tests/test_lib_events.py",
+    "source_test_blob": "ed7552f7eb55f7f3264fa927909406e7844a5541"
+  },
+  "source_hypothesis": "Property ScriptEventHandler.actions calls os.listdir(script_directory) without any OSError handling. The original /event/actions/Script HTTP route calls h_obj.actions directly. Missing directory causes FileNotFoundError and a 500 unless caught upstream. Graceful empty available-actions dictionary with warning in this property is a plausible local behavior, not a proven complete HTTP API fix.",
+  "tests_before_patch": {
+    "path": "pilot/privacyidea/p20_visible_actions_source_ast.py",
+    "runtime": "stdlib Python 3.12, original ScriptEventHandler full class AST; import-only stubs for Flask/app/base with supplied script_directory, no real production web service",
+    "number": 10,
+    "original_source_not_modified": true,
+    "checks": [
+      "missing configured directory returns empty actions rather than FileNotFoundError",
+      "file configured where directory expected returns empty actions rather than NotADirectoryError",
+      "permission failure from listdir returns empty actions, warning recorded",
+      "missing directory warning records path",
+      "valid executable script path is listed",
+      "valid directory with two script names retains each key",
+      "valid empty directory returns empty dict",
+      "script action options retain expected background/raise_error/sync_to_database and other options",
+      "listing directory never invokes subprocess.Popen",
+      "configured missing directory subsequently created can be discovered on a subsequent actions call"
+    ]
+  },
+  "candidate_scope": "Single edit in historical scripthandler.py: catch OSError raised by os.listdir when gathering available actions; log warning and return empty action mapping. Preserve regular successful path, do() execution/error behavior, and all other modules.",
+  "caveats": [
+    "Returning {} may hide a configuration problem in UI; require log warning and do not claim safe API 4xx behavior",
+    "No actual Flask HTTP /event/actions/Script request in AST test; original independent task oracle required for issue truth",
+    "No external production database or scripts executed",
+    "Do not change original P9 or earlier seven admitted task outcomes",
+    "No human coder or independently authenticated AI coding agent",
+    "This source is AGPLv3; do not redistribute bundled code without license obligations"
+  ],
+  "original_benchmark": {
+    "source": "SWE-bench-Live/SWE-bench-Live",
+    "split": "lite",
+    "sha": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+    "harness": "microsoft/SWE-bench-Live",
+    "harness_sha": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+    "original_test_patch_unseen": true
+  },
+  "original_P9": {
+    "unchanged_version": "X1-P9-alpha-1-20261116",
+    "expected_provenance": "Synthetic author not independently verified, source-linked HOLD",
+    "completion_self_report": "No complete HTTP task claim without original API testing."
+  },
+  "comparison_boundary": "P20 is an eighth originally frozen task, not chosen for ease. Do not count postreveal P18 as independently resolved. One original task is statistical unit.",
+  "feedback_rule": "If first candidate fails a frozen visible test for a code-level reason, a single scripted AI corrective instruction may be supplied and labeled synthetic; otherwise no fabricated second stage."
+}
