@@ -81,7 +81,10 @@ jobs:
           errs=collections.Counter()
           for line in lines:
               errs.update(re.findall(r'\b([A-Za-z_][A-Za-z_0-9]*(?:Error|Exception))\b',line))
+          module_tokens=sorted(set(re.findall(r"No module named ['\\\"]([^'\\\"]+)['\\\"]",raw.decode('utf8',errors='replace'))))
           result={
+            'missing_import_module_names':module_tokens,
+            'original_collected_test_cases_observed':None,
             'schema':'99llm_X1_P21_privacyidea_original_endpoint_qc_v1',
             'study':'POSTREVEAL_ENDPOINT_VALIDITY_NO_NEW_AGENT_TRIAL',
             'task':iid,
