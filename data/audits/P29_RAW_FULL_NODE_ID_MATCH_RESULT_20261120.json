@@ -1,0 +1,84 @@
+{
+  "schema": "99llm_X1_P29_full_raw_pytest_test_name_provenance_v1",
+  "status": "HISTORICAL_SOURCE_ARTIFACT_RECOVERY_NO_NEW_BENCHMARK_RUN",
+  "historical_source_dataset_revision": "babb27e45e072219195db7a744bbf0d3c1a36e56",
+  "original_harness_commit": "ad79b850f15e33992e96f03f6e97f05ddf9aa0be",
+  "source_cases": {
+    "kedro": {
+      "task": "kedro-org__kedro-4406",
+      "candidate_run_id": 44159300952,
+      "control_run_id": 44162955737,
+      "candidate_artifact_id": 14363775392,
+      "control_artifact_id": 14364582406,
+      "candidate_original_log_sha256": "b3c2a0e6c924bbeac7fcc69e10bccb48d09da7628fe0ba6d8a77b651f3703994",
+      "control_original_log_sha256": "4141f2b471ea4d0f53a1c3f7b51a41b03f7fc9641108dc34ed78d2ea9466b147",
+      "candidate_summary_full_failed": 87,
+      "neutral_summary_full_failed": 88,
+      "candidate_summary_full_passed": 1630,
+      "neutral_summary_full_passed": 1629,
+      "shared_failed_full_ids": 87,
+      "candidate_only_failed_full_ids": 0,
+      "null_only_failed_full_ids": 1,
+      "scored_report_p2p_failed_each": 25,
+      "scored_report_p2p_passed_each": 1566,
+      "scored_report_truncated_parameterized_p2p_failed_ids": 3,
+      "full_failed_id_digest_candidate": "8efa48d1782d8dcb78d7b022f6d079e2b2f057913612e0fb29a683c66563fbb9",
+      "full_failed_id_digest_control": "46e2f4aebd798f9e57523a0aac62375944ab5ed71d85ca72719221e52b133444",
+      "issue_f2p_full_id": "tests/ipython/test_ipython.py::TestLoadIPythonExtension::test_ipython_kedro_extension_alias"
+    },
+    "cfn_lint": {
+      "task": "aws-cloudformation__cfn-lint-3779",
+      "candidate_run_id": 44738711010,
+      "control_run_id": 44761416230,
+      "candidate_artifact_id": 14630435763,
+      "control_artifact_id": 14642495330,
+      "candidate_original_log_sha256": "965babfbe839670397012b811098b2a307c5986d4272fcff5e4f29fd7c142650",
+      "control_original_log_sha256": "a0f9fa312b5bb88da5ba652541420329cedfc9021ff9bd163466ffb636a9f441",
+      "candidate_summary_full_failed": 7,
+      "neutral_summary_full_failed": 8,
+      "candidate_summary_full_passed": 1676,
+      "neutral_summary_full_passed": 1675,
+      "shared_failed_full_ids": 7,
+      "candidate_only_failed_full_ids": 0,
+      "null_only_failed_full_ids": 1,
+      "scored_report_p2p_failed_each": 4,
+      "scored_report_p2p_passed_each": 1227,
+      "scored_report_truncated_parameterized_p2p_failed_ids": 0,
+      "full_failed_id_digest_candidate": "4b8440e6690f0c826dd5496acd9a63f8235b6dfd1893726e8efe7c3b8353014a",
+      "full_failed_id_digest_control": "3408750e626475fe81a6e17c421bda5468180424958bab0179e945f90691ee23",
+      "issue_f2p_full_id": "test/unit/rules/resources/iam/test_identity_policy.py::TestIdentityPolicies::test_string_statements_with_condition"
+    }
+  },
+  "study_claim_boundary": "Counts are raw full node IDs in the PASSED/FAILED pytest summary of already-executed original artifacts; 87 and 7 are NOT official F2P/P2P denominator tests or independent sampled tasks. Original scores remain unchanged. Control pairs are post-reveal; cannot prove correctness of code or generalize.",
+  "external_prior_art": [
+    {
+      "source": "https://github.com/microsoft/SWE-bench-Live/issues/113",
+      "date": "2026-11-11",
+      "status": "public unreviewed upstream observation, not reexecuted here",
+      "overlap": "Same Kedro #4406, 25 failed P2P tests reported for reference gold patch; source revision babb27e4; comparator and harness not identical to local original-source neutral control"
+    },
+    {
+      "source": "https://github.com/microsoft/SWE-bench-Live/issues/102",
+      "date": "2026-10-23",
+      "status": "public unreviewed bug report",
+      "overlap": "Pytest parametrized ID whitespace truncation in official parser"
+    },
+    {
+      "source": "https://arxiv.org/abs/2611.10837",
+      "date": "2026-11-07",
+      "status": "technical report, broad five-dimension test correctness evidence framework",
+      "overlap": "Near-prior-art collision for generic methodological evidence framework"
+    }
+  ],
+  "retained_originals": {
+    "MR30": true,
+    "P9": true,
+    "P26": true,
+    "P27": true,
+    "official_benchmark_labels": true
+  },
+  "new_agent_trial": false,
+  "new_benchmark_run": false,
+  "independent_actor_proof": false,
+  "no_human_coder": true
+}
