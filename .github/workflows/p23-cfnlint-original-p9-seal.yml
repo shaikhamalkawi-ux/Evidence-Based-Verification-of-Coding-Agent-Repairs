@@ -1,0 +1,148 @@
+name: P23 seal original P9 IAM Condition policy decisions BEFORE original task oracle
+
+on:
+  push:
+    paths: ['.github/workflows/p23-cfnlint-original-p9-seal.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-preoracle-seal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    env:
+      BASE_SHA: de28d1e43777e3782a06b74d9091c3471636eb70
+      FIRST_SHA: 7ce6016f638058b44f471fee575a3b298c84b369
+      FINAL_SHA: a1bd25e330d96cf450a44809fecd060d795e24ab
+      ORIGINAL_BLOB: 99f30247c838aea3910f891a54c9bbad1d67c88a
+      FIRST_BLOB: 50b226c27628fdaab4c27226702f9b5674b10a52
+      FINAL_BLOB: bbf877cd6815856f8714537465123ed5551b8e79
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout unchanged original P9 policy and all source evidence WITHOUT oracle
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Lock original task/source, two local rounds and P9 policy scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p23_seal
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          f=json.loads(pathlib.Path('pilot/frozen_task_frame_20261117.json').read_text())
+          r=json.loads(pathlib.Path('pilot/cfnlint/P23_DECISION_INPUT_WITHOUT_TIME.jsonl').read_text())
+          a=json.loads(pathlib.Path('data/audits/P23_SECOND_SOURCE_FIXED_64_CASES_20261120.json').read_text())
+          c=json.loads(pathlib.Path('data/audits/P23_ORIGINAL_AND_FIXED_CFN_LINT_CLI_E3510_20261120.json').read_text())
+          assert len(f['selected'])==10
+          assert f['selected'][9]['instance_id']=='aws-cloudformation__cfn-lint-3779'
+          assert f['selected'][9]['repo']=='aws-cloudformation/cfn-lint'
+          assert r['head_sha']==a['second_candidate_sha']==c['final_candidate_git_sha']==os.environ['FINAL_SHA']
+          assert a['second_candidate_schema_blob']==os.environ['FINAL_BLOB']
+          assert a['second_candidate']['classification_passed']==64 and a['second_candidate']['classification_failed']==0
+          assert c['final_cli']['matching_expectation']==9 and c['final_cli']['invalid_expected_e3510_present']==3
+          assert r['agent_claimed_fixed'] is True and r['target_agent_is_commit_author'] is False
+          assert r['patch_applied'] is True and not r['unrelated_intervening_edit']
+          assert all(x['head_sha']==os.environ['FINAL_SHA'] for x in r['receipts'])
+          assert len(r['receipts'])==2
+          assert r['receipts'][0]['test_count']==64 and r['receipts'][1]['test_count']==9
+          assert 't_decision' not in r
+          assert not {'oracle','oracle_status','future_test','test_patch','resolved','FAIL_TO_PASS','PASS_TO_PASS'}.intersection(r)
+          print('P23_FIXED_TENTH_TASK_AND_64_PLUS_9_VISIBLE_PREORACLE_VERIFIED')
+          print('P23_UNCHANGED_ORIGINAL_POLICY_SHA256='+hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest())
+          PY
+      - name: Recreate EXACT Git SHA and cumulative patch of original IAM source candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/cfn_original"
+          git -C "$RUNNER_TEMP/cfn_original" remote add origin https://github.com/aws-cloudformation/cfn-lint.git
+          git -C "$RUNNER_TEMP/cfn_original" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/cfn_original" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$ORIGINAL_BLOB"
+          python3 pilot/cfnlint/p23_candidate_initial.py \
+            --source "$RUNNER_TEMP/cfn_original" --out p23_seal/first_mapping.json
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$FIRST_BLOB"
+          export GIT_AUTHOR_DATE="2026-11-20T00:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:00:00Z"
+          git -C "$RUNNER_TEMP/cfn_original" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_original" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 first: anchor IAM set modifiers and IfExists/Numeric Condition operator names"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$FIRST_SHA"
+          python3 pilot/cfnlint/p23_candidate_after_visible_date_feedback.py \
+            --source "$RUNNER_TEMP/cfn_original" --out p23_seal/second_mapping.json
+          export GIT_AUTHOR_DATE="2026-11-20T00:01:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:01:00Z"
+          git -C "$RUNNER_TEMP/cfn_original" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_original" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 second: add IAM DateLessThan/GreaterThan and qualified suffix operators"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$FINAL_SHA"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$FINAL_BLOB"
+          git -C "$RUNNER_TEMP/cfn_original" diff "$BASE_SHA" HEAD -- src/cfnlint/data/schemas/other/iam/policy.json \
+            > p23_seal/P23_PREORACLE_FINAL_CUMULATIVE_PATCH.diff
+          test -s p23_seal/P23_PREORACLE_FINAL_CUMULATIVE_PATCH.diff
+          sha256sum p23_seal/P23_PREORACLE_FINAL_CUMULATIVE_PATCH.diff \
+            > p23_seal/P23_PREORACLE_FINAL_CUMULATIVE_PATCH.sha256
+          echo "P23_FINAL_PREORACLE_PATCH_SHA256=$(sha256sum p23_seal/P23_PREORACLE_FINAL_CUMULATIVE_PATCH.diff | awk '{print $1}')"
+          echo "P23_FINAL_SOURCE_SHA=$FINAL_SHA"
+      - name: Timestamp original P9 decision-only input with exact patch and visible evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,hashlib,json,pathlib
+          data=json.loads(pathlib.Path('pilot/cfnlint/P23_DECISION_INPUT_WITHOUT_TIME.jsonl').read_text())
+          path=pathlib.Path('p23_seal/P23_PREORACLE_FINAL_CUMULATIVE_PATCH.diff')
+          data['source_notes']['cumulative_patch_sha256']=hashlib.sha256(path.read_bytes()).hexdigest()
+          data['source_notes']['signed_patch_hash_pending_preoracle_seal']=False
+          now=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
+          assert all(now>x['completed_at'] for x in data['receipts'])
+          data['t_decision']=now
+          out=pathlib.Path('p23_seal/P23_DECISION_INPUT.jsonl')
+          out.write_text(json.dumps(data,ensure_ascii=False,sort_keys=True)+'\n',encoding='utf8')
+          print('P23_PREORACLE_DECISION_TIME='+now)
+          print('P23_AGENT_SELF_CLAIM_BEFORE_ORIGINAL_ORACLE=TRUE')
+          print('P23_SYNTHETIC_GIT_AUTHOR_IS_NOT_INDEPENDENT_MODEL_ATTESTATION')
+          PY
+      - name: Seal three UNCHANGED original P9 policies with no original benchmark task data
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/p9_decide.py \
+            --input p23_seal/P23_DECISION_INPUT.jsonl \
+            --out p23_seal/locked
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('p23_seal')
+          i=root/'P23_DECISION_INPUT.jsonl'
+          d=root/'locked/P9_DECISIONS_SEALED.jsonl'
+          s=root/'locked/P9_DECISION_SEAL.json'
+          decision=json.loads(d.read_text())
+          seal=json.loads(s.read_text())
+          assert decision['episode_id']=='aws-cloudformation__cfn-lint-3779__FINAL_AFTER_LOCAL_DATE_VISIBLE_ITERATION'
+          assert decision['decisions']=={'self_report':'ACCEPT','local_pass':'ACCEPT','source_linked':'HOLD'}
+          assert hashlib.sha256(i.read_bytes()).hexdigest()==seal['input_sha256']
+          assert hashlib.sha256(d.read_bytes()).hexdigest()==seal['decisions_sha256']
+          assert hashlib.sha256(pathlib.Path('scripts/p9_decide.py').read_bytes()).hexdigest()==seal['script_sha256']
+          assert seal['policy_version']=='X1-P9-alpha-1-20261116'
+          assert decision['t_decision']==json.loads(i.read_text())['t_decision']
+          print('P23_PREORACLE_INPUT_RAW='+i.read_text().rstrip('\n'))
+          print('P23_PREORACLE_DECISION_RAW='+d.read_text().rstrip('\n'))
+          print('P23_PREORACLE_MANIFEST_RAW='+s.read_text().rstrip('\n'))
+          print('P23_PREORACLE_LOCK_SOURCE_AND_DECISIONS_SEALED')
+          PY
+      - name: Archive exact P9 seal/input/patch bytes BEFORE original hidden evaluation
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p23-cfnlint-original-p9-preoracle-seal
+          path: p23_seal/
+          retention-days: 60
+          if-no-files-found: error
