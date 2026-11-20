@@ -73,6 +73,7 @@ jobs:
           if [ "$(cat p22c_env/pin_install_exit.txt)" = 0 ]; then
             python3 pilot/reflex/p22b_exception_chain.py > p22c_env/trace.log 2>&1
             rc=$?
+            cp p22b_diag/P22B_CHAIN.json p22c_env/P22B_CHAIN.json 2>/dev/null || true
             cat p22c_env/trace.log
           else
             rc=99
