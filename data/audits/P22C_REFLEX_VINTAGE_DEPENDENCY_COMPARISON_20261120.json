@@ -1,0 +1,42 @@
+{
+  "schema": "99llm_X1_P22C_original_reflex_dependency_admission_v1",
+  "task": "reflex-dev__reflex-4510",
+  "frozen_rank": 9,
+  "source_base_sha": "2520c51aaf4c0a4af965026ae3a3fd5b03930288",
+  "original_problem_sha256": "35b0b9b3dfa1a12bb7f400d8250d9e85039f99e12a4d75c70c01ca505d118767",
+  "python_environment": "3.13.18",
+  "comparison_run": 44673175694,
+  "historical_unpinned_run": 44672447015,
+  "source_substitution": false,
+  "benchmark_oracle_accessed": false,
+  "model_candidate_submitted": false,
+  "witnessed_unpinned": {
+    "reported_exception": "RuntimeError: generator didn't stop after throw()",
+    "original_issue_typing_any_exception_observed": false,
+    "hidden_exception": "ImportError: cannot import name 'Discriminator' from 'pydantic.v1'",
+    "source_compatibility_path": "reflex/utils/compat.py::pydantic_v1_patch",
+    "explanation": "Context manager attempts a second yield in an ImportError catch and masks an import error from sqlmodel; not the original user-reported foreach failure."
+  },
+  "controlled_vintage_dependency_experiments": [
+    {
+      "pin": "sqlmodel==0.0.22",
+      "job_id": 136078684201,
+      "source_install_success": true,
+      "pin_install_success": true,
+      "user_supplied_reproducer_exception": false,
+      "output_status": "NO_EXCEPTION"
+    },
+    {
+      "pin": "sqlmodel==0.0.14",
+      "job_id": 136078684611,
+      "source_install_success": true,
+      "pin_install_success": true,
+      "user_supplied_reproducer_exception": false,
+      "output_status": "NO_EXCEPTION"
+    }
+  ],
+  "artifact_metadata_erratum": "The original runner's JSON receipt wrote literal 'VERSION_PIN' as a field; the exact pip install command and matrix job name in each GitHub Actions log independently confirm sqlmodel==0.0.22 or sqlmodel==0.0.14. These grounded values are used here, without pretending original receipt contained them.",
+  "determination": "P22_PREPATCH_SOURCE_OUTCOME_DEPENDENCY_CONTINGENT_HOLD",
+  "claim_boundary": "The original user example reaches no exception under two vintage dependency pins, whereas unpinned modern resolved dependencies fail at import before reaching original field/foreach issue. Neither condition independently reproduces the original typing.Any bug; no coding-agent patch or original benchmark task oracle was run.",
+  "next_scientific_step": "Version-lock the complete user-reported 2024 dependency set or verify an independently source-derived reproducer of original typing.Any failure before generating a candidate; otherwise retain task on frozen frame as environment/visibility HOLD."
+}
