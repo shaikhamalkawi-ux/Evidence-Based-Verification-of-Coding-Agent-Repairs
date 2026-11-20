@@ -81,6 +81,35 @@ jobs:
           set -euo pipefail
           python3 -m unittest discover -s tests -p 'test_p29_raw_full_pytest_id_audit.py' -v
           python3 -m unittest discover -s tests -v
+      - name: Package exact working draft and reproducibility sources without original grader artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p29_export/reports p29_export/protocol p29_export/data/audits p29_export/scripts p29_export/tests
+          cp reports/P29_COMPANION_SHORT_EMPIRICAL_NOTE_WORKING_DRAFT_20261120.md p29_export/reports/
+          cp reports/P29_HISTORICAL_RAW_FULL_ID_AND_PRIOR_EVIDENCE_SCIENTIFIC_REPORT_20261120.md p29_export/reports/
+          cp reports/P29_NEW_PAGE_HANDOFF_AR_20261120.md p29_export/reports/
+          cp protocol/P29_HISTORICAL_ARTIFACT_READONLY_REPLAY_CONTRACT_20261120.json p29_export/protocol/
+          cp data/audits/P29_RAW_FULL_NODE_ID_MATCH_RESULT_20261120.json p29_export/data/audits/
+          cp p29_output/P29_ORIGINAL_RAW_FULL_PYTEST_REPLAY.json p29_export/data/audits/
+          cp scripts/p29_full_pytest_id_audit.py p29_export/scripts/
+          cp tests/test_p29_raw_full_pytest_id_audit.py p29_export/tests/
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('p29_export')
+          files=[p for p in root.rglob('*') if p.is_file()]
+          rows=[{'path':str(p.relative_to(root)),'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(files)]
+          (root/'P29_SOURCE_SNAPSHOT_SHA256_MANIFEST.json').write_text(json.dumps({'status':'WORKING_DRAFT_NOT_SUBMITTED','scientific_results_changed':False,'file_count':len(rows),'files':rows},indent=2)+'\n')
+          assert len(rows)==8
+          print('P29_WORKING_DRAFT_AND_SUPPLEMENT_SHA_MANIFEST_PASS')
+          PY
+      - name: Archive exact P29 manuscript + supplementary/verifier working sources
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p29-companion-working-draft-and-supplement-exact
+          path: p29_export/
+          retention-days: 60
+          if-no-files-found: error
       - name: Preserve bounded full-name set counts and digests, NOT hidden test source
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
