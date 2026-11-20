@@ -1,0 +1,21 @@
+{
+  "status": "POSTBASELINE_DEPENDENCY_FEASIBILITY_NOT_AN_AGENT_REPAIR",
+  "task": "reflex-dev__reflex-4510",
+  "original_base": "2520c51aaf4c0a4af965026ae3a3fd5b03930288",
+  "original_problem_sha256": "35b0b9b3dfa1a12bb7f400d8250d9e85039f99e12a4d75c70c01ca505d118767",
+  "prior_unmasked_diagnostic_run": 44672900566,
+  "observed_import_exception": "ImportError: cannot import name 'Discriminator' from 'pydantic.v1'",
+  "observed_masking_error": "RuntimeError: generator didn't stop after throw()",
+  "observed_source_context": "Reflex historical reflex/utils/compat.py pydantic_v1_patch can yield once in try and again after catching ImportError from sqlmodel import.",
+  "source_dependency_range": "Historical Reflex pyproject.toml: sqlmodel>=0.0.14,<0.1, pydantic>=1.10.2,<3",
+  "frozen_env_candidates": [
+    "sqlmodel==0.0.22",
+    "sqlmodel==0.0.14"
+  ],
+  "python_target": "3.13",
+  "rule": "Only modify dependency versions in disposable test environment. Do not change source, fix bug, claim oracle outcome or select new task.",
+  "analysis": "Test whether import masking can be bypassed and whether original user code then triggers original TypeError; not preregistered blind task evaluation.",
+  "outcome": "UNKNOWN_PRE_EXECUTION",
+  "original_p9_not_run": true,
+  "hidden_oracle_not_loaded": true
+}
