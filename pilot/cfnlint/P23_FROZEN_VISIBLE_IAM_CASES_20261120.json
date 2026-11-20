@@ -1,0 +1,442 @@
+{
+  "schema": "99llm_X1_P23_frozen_original_source_visible_iam_grammar_v1",
+  "case_source": "AWS IAM official policy Condition Operators documentation, plus original user-supplied four E3510 examples, NOT hidden benchmark test_patch",
+  "original_task": "aws-cloudformation__cfn-lint-3779",
+  "original_base_sha": "de28d1e43777e3782a06b74d9091c3471636eb70",
+  "original_policy_schema_blob": "99f30247c838aea3910f891a54c9bbad1d67c88a",
+  "original_rule_source_blob": "24a4edf0e85528a6080a58ee0c6d56571f9fc503",
+  "target_path": "src/cfnlint/data/schemas/other/iam/policy.json",
+  "visible_oracle": "Draft7Validator on the exact historical Condition JSON schema and optional cfn-lint CLI on a generated original source small IAM managed policy template",
+  "original_problem_e3510_cases": [
+    "StringEqualsIfExists",
+    "ForAnyValue:StringEquals",
+    "ForAllValues:StringEquals"
+  ],
+  "python_version": "3.11",
+  "case_count": 64,
+  "valid_count": 45,
+  "invalid_count": 19,
+  "fixed_test_values": {
+    "scalar": {
+      "aws:RequestedRegion": "us-east-1"
+    },
+    "set": {
+      "aws:TagKeys": [
+        "environment",
+        "owner"
+      ]
+    },
+    "bool": {
+      "aws:SecureTransport": true
+    },
+    "null": {
+      "aws:SourceVpc": "false"
+    },
+    "bad_list": [
+      "us-east-1"
+    ],
+    "bad_object": {
+      "aws:RequestedRegion": {
+        "unexpected": "nested-object"
+      }
+    }
+  },
+  "cases": [
+    {
+      "case_id": "P01",
+      "operator": "StringEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P02",
+      "operator": "StringNotEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P03",
+      "operator": "StringEqualsIgnoreCase",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P04",
+      "operator": "StringNotEqualsIgnoreCase",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P05",
+      "operator": "StringLike",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P06",
+      "operator": "StringNotLike",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P07",
+      "operator": "ArnEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P08",
+      "operator": "ArnNotEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P09",
+      "operator": "ArnLike",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P10",
+      "operator": "ArnNotLike",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P11",
+      "operator": "IpAddress",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P12",
+      "operator": "NotIpAddress",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P13",
+      "operator": "DateEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P14",
+      "operator": "DateNotEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P15",
+      "operator": "DateLessThanEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P16",
+      "operator": "DateGreaterThan",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P17",
+      "operator": "NumericEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P18",
+      "operator": "NumericNotEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P19",
+      "operator": "NumericLessThanEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P20",
+      "operator": "NumericGreaterThan",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P21",
+      "operator": "Bool",
+      "value_kind": "bool",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P22",
+      "operator": "BinaryEquals",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "P23",
+      "operator": "Null",
+      "value_kind": "null",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX01",
+      "operator": "StringEqualsIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX02",
+      "operator": "StringNotEqualsIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX03",
+      "operator": "StringEqualsIgnoreCaseIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX04",
+      "operator": "StringNotEqualsIgnoreCaseIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX05",
+      "operator": "StringLikeIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX06",
+      "operator": "StringNotLikeIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX07",
+      "operator": "ArnNotLikeIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX08",
+      "operator": "IpAddressIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX09",
+      "operator": "NotIpAddressIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX10",
+      "operator": "DateGreaterThanEqualsIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PX11",
+      "operator": "NumericLessThanIfExists",
+      "value_kind": "scalar",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS01",
+      "operator": "ForAllValues:StringEquals",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS02",
+      "operator": "ForAnyValue:StringEquals",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS03",
+      "operator": "ForAllValues:StringNotEquals",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS04",
+      "operator": "ForAnyValue:StringNotLike",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS05",
+      "operator": "ForAllValues:ArnEquals",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS06",
+      "operator": "ForAnyValue:ArnLike",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS07",
+      "operator": "ForAllValues:NumericLessThanEquals",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS08",
+      "operator": "ForAnyValue:DateEquals",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS09",
+      "operator": "ForAnyValue:StringEqualsIfExists",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS10",
+      "operator": "ForAllValues:StringLikeIfExists",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "PS11",
+      "operator": "ForAnyValue:IpAddress",
+      "value_kind": "set",
+      "expected_valid": true
+    },
+    {
+      "case_id": "N01",
+      "operator": "ForAnyValues:StringEquals",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N02",
+      "operator": "ForAllValue:StringEquals",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N03",
+      "operator": "ForAnyValue::StringEquals",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N04",
+      "operator": "StringEqualsIfExist",
+      "value_kind": "scalar",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N05",
+      "operator": "ForAllValues:^StringEquals",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N06",
+      "operator": "StringEqual",
+      "value_kind": "scalar",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N07",
+      "operator": "SomeUnknownOperator",
+      "value_kind": "scalar",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N08",
+      "operator": "StringEqualsIfExistsEvil",
+      "value_kind": "scalar",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N09",
+      "operator": "ForAnyValue:StringLike?",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N10",
+      "operator": "NumericLessThanEqualsIfExist",
+      "value_kind": "scalar",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N11",
+      "operator": "IfExistsStringEquals",
+      "value_kind": "scalar",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N12",
+      "operator": "ForAnyValue:Null",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N13",
+      "operator": "NullIfExists",
+      "value_kind": "scalar",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N14",
+      "operator": "ForAnyValue:StringEqualsWithTrailing",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N15",
+      "operator": "ForAllValues:StringEqualsTypo",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N16",
+      "operator": "StringLikeIfExistsInvalid",
+      "value_kind": "scalar",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N17",
+      "operator": "ForAllValues:StringEqualsString",
+      "value_kind": "set",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N_BAD_VALUE_LIST",
+      "operator": "StringEquals",
+      "value_kind": "bad_list",
+      "expected_valid": false
+    },
+    {
+      "case_id": "N_BAD_VALUE_OBJECT",
+      "operator": "StringEquals",
+      "value_kind": "bad_object",
+      "expected_valid": false
+    }
+  ],
+  "sources": [
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html",
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_grammar.html"
+  ],
+  "caveats": [
+    "These tests evaluate operator key grammar and basic existing schema value shape, not conditional AWS request-context semantic authorization.",
+    "Some real IAM operators require service-specific condition keys; the grammar layer is only syntax admission.",
+    "Set-qualified values use array-of-strings to respect the historical source ConditionSetValue schema.",
+    "Source tests are not the hidden SWE-bench-Live task oracle and are frozen before first candidate.",
+    "No original gold patch/test_patch read; no model agent independently authenticated."
+  ],
+  "prepatch_frozen": true
+}
