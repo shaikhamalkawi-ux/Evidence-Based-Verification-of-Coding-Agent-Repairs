@@ -1,0 +1,19 @@
+{
+  "schema": "99llm_X1_P22B_postbaseline_environment_diagnostic_v1",
+  "task": "reflex-dev__reflex-4510",
+  "original_commit": "2520c51aaf4c0a4af965026ae3a3fd5b03930288",
+  "status": "POSTBASELINE_DIAGNOSTIC_NO_CODE_CANDIDATE",
+  "preceding_exact_original_visible_runs": [
+    44672447015,
+    44672659540
+  ],
+  "preceding_visible_outcome": "RuntimeError: generator didn't stop after throw() on Python 3.11, 3.12, and 3.13; original typing.Any error not observed.",
+  "diagnostic_intent": "Capture __context__/__cause__ exception chain for the original import masking RuntimeError from historical reflex/utils/compat.py without altering any original code or independent benchmark verifier.",
+  "method": "Run the unmodified original user-supplied reproduction under exact historical source, inspect exception.__context__, source stack filename/line names and short exception text; do not monkeypatch or modify original code.",
+  "hidden_oracle_not_accessed": true,
+  "no_agent_candidate_patch": true,
+  "no_original_task_claim": true,
+  "original_p9_unchanged": true,
+  "next_gate": "If the import error is environment-only, identify version-locked dependency necessary to reach original visible TypeError, then rerun same reproduction; otherwise HOLD.",
+  "science": "Postbaseline diagnostic only and not the frozen initial visible outcome."
+}
