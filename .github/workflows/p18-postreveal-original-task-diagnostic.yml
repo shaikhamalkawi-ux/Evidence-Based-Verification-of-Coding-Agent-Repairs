@@ -1,0 +1,121 @@
+name: P18 POSTREVEAL inspect P17 original task failure summary (NO NEW PATCH)
+
+on:
+  push:
+    paths:
+      - .github/workflows/p18-postreveal-original-task-diagnostic.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  postreveal-interpret-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - name: Checkout frozen P17 outcome and P18 postreveal protocol
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Validate original known failure and explicit new-claim prohibition
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p18_diagnostic
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          r=json.loads(pathlib.Path('protocol/P18_POSTREVEAL_TORCHTUNE_BOUNDARIES_20261120.json').read_text())
+          p=json.loads(pathlib.Path('data/audits/P17_TORCHTUNE_ORIGINAL_ORACLE_20261120.json').read_text())
+          assert r['status']=='POSTREVEAL_DIAGNOSTIC_PRE-NEW-PATCH'
+          assert r['parent_P17_original_harness_run_id']==44613016409
+          assert r['parent_P17_artifact_id']==14574041643
+          assert r['parent_p17_candidate_sha']==p['original_harness_task_result']['head_sha']
+          assert r['parent_P17_preoracle_decisions_sha256']==p['original_preoracle_p9_sha256']
+          assert p['original_harness_task_result']['official_resolved'] is False
+          assert p['original_harness_task_result']['f2p_passed']==0
+          assert p['original_harness_task_result']['f2p_total']==1
+          print('P18_IS_POST_REVEAL_NO_NEW_POLICY_ORIGINAL_RESULT_LOCKED')
+          PY
+      - name: Download prior original SWE-bench-Live artifact from same repository
+        uses: actions/download-artifact@v4
+        with:
+          name: p17-torchtune-original-pinned-oracle
+          run-id: 44613016409
+          github-token: ${{ github.token }}
+          path: p18_prior_original_artifact
+      - name: Verify original raw test log SHA, extract bounded failure taxonomy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib,re
+          base=pathlib.Path('p18_prior_original_artifact')
+          expected='864bb5edf03e1810a348ead57862d7a057c852df95bf56f33a4b9403f5ca1282'
+          t=base/'original_test_output.txt'
+          report=base/'original_report.json'
+          if not t.is_file() or not report.is_file():
+              raise FileNotFoundError('Original complete test output/report unavailable. Not a code failure.')
+          raw=t.read_bytes()
+          observed=hashlib.sha256(raw).hexdigest()
+          assert observed==expected, 'Original task test output checksum mismatch'
+          d=json.loads(report.read_text())
+          iid='pytorch__torchtune-2139'
+          if not isinstance(d,dict) or iid not in d:raise ValueError('Missing original unique task report')
+          row=d[iid]
+          fs=row.get('tests_status',{}).get('FAIL_TO_PASS',{})
+          ps=row.get('tests_status',{}).get('PASS_TO_PASS',{})
+          assert len(fs.get('success',[]))==0 and len(fs.get('failure',[]))==1
+          assert len(ps.get('failure',[]))==0
+          lines=t.read_text(errors='replace').splitlines()
+          # Only a short error taxonomy; do not publish hidden test code or patches.
+          error_types=sorted(set(m.group(1) for line in lines
+              for m in re.finditer(r'\b(AssertionError|RuntimeError|TypeError|ValueError|NotImplementedError|ImportError|AttributeError|CUDAError|OutOfMemoryError)\b',line)))
+          failed_tests=[str(x)[:220] for x in fs.get('failure',[])]
+          indicators={
+            'cuda_or_gpu':sum(bool(re.search(r'\bCUDA\b|\bGPU\b|CUDA_HOME|no NVIDIA|cuda unavailable',line,re.I)) for line in lines),
+            'meta_device':sum(bool(re.search(r'\bmeta device\b|\bmeta tensor\b',line,re.I)) for line in lines),
+            'device_mismatch':sum(bool(re.search(r'Expected all tensors to be on the same device|device type mismatch',line,re.I)) for line in lines),
+            'assertion':sum('AssertionError' in line for line in lines),
+            'missing_dependency':sum(bool(re.search(r'No module named|ModuleNotFoundError',line)) for line in lines)
+          }
+          # First 15 bounded pytest summary/error taxonomy snippets only, no raw grader source or code.
+          snippets=[]
+          for line in lines:
+              clean=line.strip()
+              if (clean.startswith('FAILED ') or clean.startswith('E   ') or
+                  re.match(r'^[ ]*(AssertionError|RuntimeError|TypeError|ImportError|ValueError):',clean)):
+                  if len(snippets)<15:
+                      snippets.append(clean[:240])
+          result={
+            'schema':'99llm_X1_P18_postreveal_failure_summary_v1',
+            'study':'POSTREVEAL_PUBLIC_SOURCE_DIAGNOSIS_NOT_BLIND',
+            'original_evaluator_run_id':44613016409,
+            'original_test_output_sha256':observed,
+            'historical_task':iid,
+            'f2p_total':1,
+            'f2p_passed':0,
+            'p2p_failed':0,
+            'original_resolved':False,
+            'failed_f2p_test_ids':failed_tests,
+            'error_types_observed_in_original_test_output':error_types,
+            'diagnostic_keyword_occurrences':indicators,
+            'capped_error_lines_not_hidden_test_source':snippets,
+            'original_raw_test_log_lines':len(lines),
+            'source_patch_changed':False,
+            'new_model_test_decision':False,
+            'new_independent_benchmark_task':False,
+            'full_GPU_reproduction_status':'NOT_RUN_ON_THIS_RUNNER'
+          }
+          pathlib.Path('p18_diagnostic/P18_ORIGINAL_TEST_ERROR_TAXONOMY.json').write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+          print('P18_POSTREVEAL_ERROR_SUMMARY '+json.dumps(result,sort_keys=True))
+          PY
+      - name: Archive only bounded diagnostic summary, not hidden test source
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p18-torchtune-postreveal-bounded-failure-analysis
+          path: p18_diagnostic/
+          retention-days: 60
+          if-no-files-found: warn

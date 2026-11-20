@@ -1,0 +1,148 @@
+name: P18 POSTREVEAL DoRA error-message ablation on exact source, CPU only
+
+on:
+  push:
+    paths:
+      - .github/workflows/p18-postreveal-literal-cpu-ablation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  error-message-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    env:
+      BASE_SHA: f2bd4bc25b24587aef40f486087412b9da8f1d94
+      P17_SHA: 57f45fdd5552908d4b5d42cccd7359ccb4de2560
+      P17_PATCH_SHA256: c29fe9f9e1c2c97d6921bcb04f6a93f60a63858215fc5b4597f03446a1239801
+      CUDA_VISIBLE_DEVICES: '-1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout post-reveal source and former blinded task results
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Reject claim of new unseen task or prospective rule
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p18_cpu
+          python3 - <<'PY'
+          import json,hashlib,pathlib,os
+          p=json.loads(pathlib.Path('protocol/P18_POSTREVEAL_LITERAL_SENSITIVITY_REGISTER_20261120.json').read_text())
+          r=json.loads(pathlib.Path('data/audits/P17_TORCHTUNE_ORIGINAL_ORACLE_20261120.json').read_text())
+          assert p['status']=='PREREGISTERED_POSTREVEAL_NOT_BLINDED'
+          assert p['original_P17_candidate_sha']==os.environ['P17_SHA']
+          assert p['original_P17_patch_sha256']==os.environ['P17_PATCH_SHA256']
+          assert r['original_harness_task_result']['official_resolved'] is False
+          assert r['original_harness_task_result']['f2p_passed']==0
+          assert r['original_harness_task_result']['f2p_total']==1
+          assert p['old_literal']!=p['new_literal']
+          assert p['source_patch_untouched_at_registration']
+          print('P18_SOURCE_ONLY_NO_BLIND_INFERENCE_AND_NO_POLICY_RESCORING')
+          PY
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Get exact source; install CPU-only torch without original benchmark tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" remote add origin https://github.com/meta-pytorch/torchtune.git
+          git -C "$RUNNER_TEMP/torchtune_src" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/torchtune_src" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" hash-object torchtune/modules/peft/dora.py)" = "6f097da6d039738c320e8775ad61950c56fe0108"
+          python3 -m pip install --disable-pip-version-check \
+            torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu \
+            > p18_cpu/install_torch.log 2>&1 || { tail -n 70 p18_cpu/install_torch.log; exit 1; }
+          python3 -m pip check > p18_cpu/pip_check.txt
+          python3 -m pip freeze > p18_cpu/environment.txt
+      - name: Recreate exact P17 original first candidate and source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/torchtune/p17_candidate_initial.py --repo "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" diff -- torchtune/modules/peft/dora.py \
+            > p18_cpu/P17_original_patch.diff
+          test "$(sha256sum p18_cpu/P17_original_patch.diff | awk '{print $1}')" = "$P17_PATCH_SHA256"
+          export GIT_AUTHOR_DATE="2026-11-20T03:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T03:00:00Z"
+          git -C "$RUNNER_TEMP/torchtune_src" add torchtune/modules/peft/dora.py
+          git -C "$RUNNER_TEMP/torchtune_src" \
+            -c user.name="GPT-6 P17 research-generated (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P17 initial: materialize stale DoRA meta magnitude only when necessary"
+          test "$(git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD)" = "$P17_SHA"
+          echo "P18_RECONSTRUCTED_ORIGINAL_P17_SHA=$P17_SHA"
+      - name: Evaluate NEW error-string test on unaltered P17 and retain visible negative control
+        shell: bash
+        run: |
+          set +e
+          export P17_TORCHTUNE_SOURCE_ROOT="$RUNNER_TEMP/torchtune_src"
+          python3 pilot/torchtune/p18_postreveal_error_contract.py -v \
+            > p18_cpu/P17_postreveal_error_contract.log 2>&1
+          rc=$?
+          echo "$rc" > p18_cpu/P17_postreveal_error_contract_exit.txt
+          tail -n 65 p18_cpu/P17_postreveal_error_contract.log
+          echo "P18_P17_ORIGINAL_POSTREVEAL_MESSAGE_TEST_EXIT=$rc"
+          exit 0
+      - name: Apply exactly ONE postreveal string literal change (not tensor logic)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/torchtune/p18_postreveal_message_ablation.py --repo "$RUNNER_TEMP/torchtune_src"
+          git -C "$RUNNER_TEMP/torchtune_src" diff --check
+          git -C "$RUNNER_TEMP/torchtune_src" diff -- torchtune/modules/peft/dora.py \
+            > p18_cpu/P18_incremental_literal_only.diff
+          test -s p18_cpu/P18_incremental_literal_only.diff
+          export GIT_AUTHOR_DATE="2026-11-19T21:02:00Z"
+          export GIT_COMMITTER_DATE="2026-11-19T21:02:00Z"
+          git -C "$RUNNER_TEMP/torchtune_src" add torchtune/modules/peft/dora.py
+          git -C "$RUNNER_TEMP/torchtune_src" \
+            -c user.name="GPT-6 P18 POSTREVEAL (unattested)" \
+            -c user.email="ai-research@example.invalid" commit \
+            -m "P18 postreveal: clarify explicit meta magnitude RuntimeError text"
+          git -C "$RUNNER_TEMP/torchtune_src" rev-parse HEAD > p18_cpu/P18_candidate_sha.txt
+          git -C "$RUNNER_TEMP/torchtune_src" diff "$BASE_SHA" HEAD -- torchtune/modules/peft/dora.py \
+            > p18_cpu/P18_cumulative_patch.diff
+          sha256sum p18_cpu/P18_incremental_literal_only.diff p18_cpu/P18_cumulative_patch.diff \
+            > p18_cpu/P18_patch_sha256.txt
+          echo "P18_POSTREVEAL_SHA=$(cat p18_cpu/P18_candidate_sha.txt)"
+      - name: Execute NEW postreveal error-contract test, then OLD six CPU checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          export P17_TORCHTUNE_SOURCE_ROOT="$RUNNER_TEMP/torchtune_src"
+          python3 pilot/torchtune/p18_postreveal_error_contract.py -v \
+            > p18_cpu/P18_postreveal_error_contract.log 2>&1 || {
+              tail -n 70 p18_cpu/P18_postreveal_error_contract.log
+              exit 1
+            }
+          python3 scripts/p17_run_visible_cpu.py \
+            --repo "$RUNNER_TEMP/torchtune_src" \
+            --phase initial_candidate \
+            --out p18_cpu/P18_original_six_cpu_tests.json
+          python3 - <<'PY'
+          import json,pathlib
+          d=pathlib.Path('p18_cpu')
+          r=json.loads((d/'P18_original_six_cpu_tests.json').read_text())
+          assert r['passes']==r['tests_executed']==6
+          assert r['failures']==r['errors']==0
+          assert (d/'P17_postreveal_error_contract_exit.txt').read_text().strip()!='0'
+          print('P18_PUBLIC_POSTREVEAL_MESSAGE_TEST_CHANGED_FAILURE_TO_PASS')
+          print('P18_ORIGINAL_SIX_CPU_SOURCE_TESTS_REMAIN_6_OF_6')
+          print('P18_FULL_DISTRIBUTED_TRAINING_NOT_TESTED')
+          PY
+      - name: Archive source-level literal-only comparison, not gold or hidden tests
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p18-torchtune-postreveal-string-only-cpu
+          path: p18_cpu/
+          retention-days: 60
+          if-no-files-found: warn
