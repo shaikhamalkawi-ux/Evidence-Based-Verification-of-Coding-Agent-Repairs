@@ -63,9 +63,10 @@ jobs:
             }
           # Postseal infrastructure-only retry after run 44667385576: modern
           # litellm removed the historical 'disk' cache type before test collection.
-          # Restore an era-compatible package; leave BOTH source trees/tests unchanged.
+          # Official LiteLLM v1.53.1 historical source still supports CacheType.DISK.
+          # Restore that package; leave BOTH source trees and test files unchanged.
           python3 -m pip install --disable-pip-version-check \
-            'litellm==1.48.0' 'openai>=1,<2' \
+            'litellm==1.53.1' 'openai>=1,<2' \
             > p19_public/historical_litellm_pin.log 2>&1 || {
               tail -n 120 p19_public/historical_litellm_pin.log
               exit 1
