@@ -1,0 +1,124 @@
+name: P23 cfn-lint IAM schema first candidate SAME 64 FROZEN visible tests
+
+on:
+  push:
+    paths: ['.github/workflows/p23-cfnlint-first-candidate.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  first-original-source-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BASE_SHA: de28d1e43777e3782a06b74d9091c3471636eb70
+      ORIGINAL_SCHEMA_BLOB: 99f30247c838aea3910f891a54c9bbad1d67c88a
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout immutable candidate registration and 64 frozen test cases
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify source/cases and candidate test chronology with no original task oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p p23_first
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          p=json.loads(pathlib.Path('pilot/cfnlint/P23_FIRST_CANDIDATE_PREREGISTRATION_20261120.json').read_text())
+          t=pathlib.Path('pilot/cfnlint/P23_FROZEN_VISIBLE_IAM_CASES_20261120.json')
+          d=json.loads(t.read_text())
+          assert p['original_source_sha']==os.environ['BASE_SHA']
+          assert p['original_schema_blob']==os.environ['ORIGINAL_SCHEMA_BLOB']
+          assert p['original_baseline_visible_run_id']==44736199545
+          assert p['original_baseline_correct']==36 and p['original_baseline_wrong']==28
+          assert p['frozen_visible_cases_sha256']==hashlib.sha256(t.read_bytes()).hexdigest()
+          assert d['case_count']==64 and d['valid_count']==45 and d['invalid_count']==19
+          assert p['no_hidden_gold_access'] and p['no_agent_success_claim']
+          print('P23_INITIAL_CANDIDATE_FIXED_VISIBLE_TEST_SHA='+p['frozen_visible_cases_sha256'])
+          print('P23_FIRST_CANDIDATE_SOURCE_RECIPE_SHA256='+hashlib.sha256(pathlib.Path('pilot/cfnlint/p23_candidate_initial.py').read_bytes()).hexdigest())
+          PY
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch exact historical cfn-lint source without gold/reference patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/cfn_original"
+          git -C "$RUNNER_TEMP/cfn_original" remote add origin https://github.com/aws-cloudformation/cfn-lint.git
+          git -C "$RUNNER_TEMP/cfn_original" fetch --depth 1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/cfn_original" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$RUNNER_TEMP/cfn_original" hash-object src/cfnlint/data/schemas/other/iam/policy.json)" = "$ORIGINAL_SCHEMA_BLOB"
+          python3 -m pip install --disable-pip-version-check jsonschema==4.23.0 > p23_first/pip_install.log 2>&1
+          python3 -m pip freeze > p23_first/environment.txt
+      - name: Replay original source negative control SAME 64 tests BEFORE applying patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_run_visible_iam_schema.py \
+            --source "$RUNNER_TEMP/cfn_original" \
+            --stage historical_base \
+            --out p23_first/historical_base.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('p23_first/historical_base.json'))
+          assert r['classification_passed']==36 and r['classification_failed']==28
+          print('P23_BASE_VISIBLY_INCORRECT_28_OF_64')
+          PY
+      - name: Apply ONLY preregistered IAM Condition patternProperties patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_candidate_initial.py \
+            --source "$RUNNER_TEMP/cfn_original" \
+            --out p23_first/P23_REWRITTEN_OPERATOR_REGISTER.json
+          git -C "$RUNNER_TEMP/cfn_original" diff --check
+          git -C "$RUNNER_TEMP/cfn_original" diff -- src/cfnlint/data/schemas/other/iam/policy.json \
+            > p23_first/initial_patch.diff
+          test -s p23_first/initial_patch.diff
+          sha256sum p23_first/initial_patch.diff > p23_first/initial_patch.diff.sha256
+          export GIT_AUTHOR_DATE="2026-11-20T00:00:00Z"
+          export GIT_COMMITTER_DATE="2026-11-20T00:00:00Z"
+          git -C "$RUNNER_TEMP/cfn_original" add src/cfnlint/data/schemas/other/iam/policy.json
+          git -C "$RUNNER_TEMP/cfn_original" \
+            -c user.name="GPT-6 P23 research-generated (unattested)" \
+            -c user.email="p23-research@example.invalid" commit \
+            -m "P23 first: anchor IAM set modifiers and IfExists/Numeric Condition operator names"
+          git -C "$RUNNER_TEMP/cfn_original" rev-parse HEAD > p23_first/first_candidate_commit_sha.txt
+          echo "P23_FIRST_SOURCE_CANDIDATE_SHA=$(cat p23_first/first_candidate_commit_sha.txt)"
+          echo "P23_MODEL_ACTOR_INDEPENDENT_ATTESTATION=FALSE"
+      - name: Evaluate EXACT same 64 prespecified positive and negative cases on candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pilot/cfnlint/p23_run_visible_iam_schema.py \
+            --source "$RUNNER_TEMP/cfn_original" \
+            --stage first_candidate \
+            --out p23_first/first_candidate.json
+          python3 - <<'PY'
+          import json,pathlib
+          b=json.loads(pathlib.Path('p23_first/historical_base.json').read_text())
+          p=json.loads(pathlib.Path('p23_first/first_candidate.json').read_text())
+          assert b['frozen_case_sha256']==p['frozen_case_sha256']
+          assert b['case_count']==p['case_count']==64
+          assert b['classification_passed']==36
+          assert p['source_head_sha']==pathlib.Path('p23_first/first_candidate_commit_sha.txt').read_text().strip()
+          print('P23_SOURCE_CANDIDATE_PASSED='+str(p['classification_passed'])+'/64')
+          print('P23_SOURCE_CANDIDATE_FAILED='+str(p['classification_failed'])+'/64')
+          print('P23_SCHEMA_NEGATIVE_CONTROLS='+str(sum(x['correct_classification'] for x in p['cases'] if not x['expected_valid']))+'/19')
+          print('P23_ORIGINAL_TASK_ORACLE_NOT_CALLED')
+          PY
+      - name: Archive only visible original/candidate source evidence, no hidden benchmark
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p23-cfnlint-first-schema-candidate-visible
+          path: p23_first/
+          retention-days: 60
+          if-no-files-found: warn
