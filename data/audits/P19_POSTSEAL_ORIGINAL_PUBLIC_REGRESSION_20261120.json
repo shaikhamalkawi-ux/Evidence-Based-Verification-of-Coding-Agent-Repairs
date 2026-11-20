@@ -1,0 +1,52 @@
+{
+  "base": {
+    "errors": 0,
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 51,
+    "skipped": 0,
+    "tests": 51
+  },
+  "candidate": {
+    "errors": 0,
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 51,
+    "skipped": 0,
+    "tests": 51
+  },
+  "never_included_in_preoracle_P9_or_process_v1_decisions": true,
+  "original_independent_task_oracle": false,
+  "original_test_files_unchanged": true,
+  "remote_Databricks_LM_not_called": true,
+  "task": "stanfordnlp__dspy-1609",
+  "type": "P19_POSTSEAL_ORIGINAL_PUBLIC_SOURCE_REGRESSION",
+  "historic_public_files": [
+    "tests/functional/test_functional.py",
+    "tests/functional/test_signature_typed.py"
+  ],
+  "source_base": "16ceaba5f7126ca86e5b50b669975c926b9f8f55",
+  "candidate_head": "2a2938cbd2b616c684768902bdcc0bfc09e7b9a4",
+  "original_file_blobs": {
+    "test_functional": "61ac8c15a18e6122989ac0693e7eec03440bc115",
+    "test_signature_typed": "0554cfb3a55aa97068b03933e10842051cb60d82"
+  },
+  "original_public_runner_url": "https://github.com/shaikhamalkawi-ux/Evidence-Based-Verification-of-Coding-Agent-Repairs/actions/runs/44667789516",
+  "github_artifact_id": 14599175857,
+  "infra_attempts_not_usable": [
+    {
+      "run_id": 44667385576,
+      "reason": "Newer LiteLLM removed historical disk cache type; conftest collection failed for both source states."
+    },
+    {
+      "run_id": 44667619747,
+      "reason": "Nonexistent litellm==1.48.0 version; no tests executed."
+    }
+  ],
+  "fixed_legacy_test_runtime": {
+    "python": "3.11",
+    "pydantic": "2.9.2",
+    "litellm": "1.53.1"
+  },
+  "conclusion": "No observed regression among 51 executed original public functional tests; this does not establish full optimization issue resolution, as original held-out task F2P remained 0/4."
+}
